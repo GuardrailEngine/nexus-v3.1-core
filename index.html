@@ -1,402 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>NEXUS v3.1 CORE | Sovereign Security</title>
+    <style>
+        :root { --gold: #d4af37; --black: #0a0a0a; --green: #00ff9f; --red: #ff4444; }
+        body { background: var(--black); color: var(--gold); font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .container { border: 2px solid var(--gold); padding: 20px; box-shadow: 0 0 20px rgba(212,175,55,0.2); position: relative; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+        .card { background: #111; border: 1px solid #333; padding: 15px; text-align: center; border-radius: 4px; }
+        .val { display: block; font-size: 1.6rem; color: #fff; font-weight: bold; }
+        
+        /* وحدة الأمان الجديدة */
+        .security-sector { border: 1px solid var(--gold); margin-top: 20px; padding: 15px; background: rgba(212,175,55,0.05); }
+        .security-flex { display: flex; justify-content: space-between; align-items: center; }
+        .pulse { width: 12px; height: 12px; background: var(--green); border-radius: 50%; display: inline-block; margin-left: 10px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-import { useState, useEffect, useRef, useCallback } from "react";
+        .agents { display: flex; justify-content: space-around; padding: 30px; border: 1px dashed #444; margin: 20px 0; }
+        .agent { padding: 10px; border: 1px solid #444; min-width: 110px; text-align: center; transition: 0.3s; font-size: 0.9rem; }
+        .active { border-color: var(--gold); background: rgba(212,175,55,0.1); color: #fff; box-shadow: 0 0 10px var(--gold); }
+        
+        .console { background: #000; color: var(--green); padding: 10px; height: 120px; overflow-y: hidden; border: 1px solid #222; font-size: 0.75rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="text-align:center; border-bottom:1px solid var(--gold); padding-bottom:15px;">
+            <h1 style="margin:0;">🛡️ NEXUS v3.1 CORE</h1>
+            <p style="letter-spacing: 2px;">PROTOCOL: SOVEREIGN ENGINEERING v1.0</p>
+        </header>
 
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
+        <div class="grid">
+            <div class="card"><span>Performance</span><span class="val">1,247 r/s</span></div>
+            <div class="card"><span>Margin</span><span class="val" style="color:var(--green)">89.3%</span></div>
+            <div class="card"><span>Encryption</span><span class="val">AES-256</span></div>
+            <div class="card"><span>Uptime</span><span id="uptime" class="val">0s</span></div>
+        </div>
 
-const AGENTS = {
-  planner:   { id: "planner",   label: "PLANNER",   icon: "◈", color: "#7b61ff", role: "Strategic thinker"   },
-  executor:  { id: "executor",  label: "EXECUTOR",  icon: "▶", color: "#00c8ff", role: "Action runner"       },
-  critic:    { id: "critic",    label: "CRITIC",    icon: "⚠", color: "#ff6b35", role: "Failure detector"    },
-  optimizer: { id: "optimizer", label: "OPTIMIZER", icon: "⬡", color: "#00ff9f", role: "Policy updater"      },
-};
+        <div class="security-sector">
+            <div class="security-flex">
+                <div><span class="pulse"></span> <strong>حالة السيادة الأمنية:</strong> <span style="color:var(--green)">ACTIVE</span></div>
+                <div id="threat-level">مستوى التهديد: 0.01%</div>
+            </div>
+        </div>
 
-const ACTIONS = {
-  optimize: { label: "OPTIMIZE", icon: "⬡", color: "#00ff9f", desc: "Tune performance"   },
-  cleanup:  { label: "CLEANUP",  icon: "◈", color: "#ff6b35", desc: "Purge memory"       },
-  status:   { label: "STATUS",   icon: "◎", color: "#7b61ff", desc: "Run diagnostics"    },
-};
+        <h3>طوبولوجيا الوكلاء النشطة</h3>
+        <div class="agents">
+            <div class="agent" id="planner">◈ PLANNER</div>
+            <div class="agent" id="executor">▶ EXECUTOR</div>
+            <div class="agent" id="critic">⚠ CRITIC</div>
+            <div class="agent" id="optimizer">⬡ OPTIMIZER</div>
+        </div>
 
-const SCENARIOS = [
-  {
-    id: "crash",
-    label: "💥 SYSTEM CRASH",
-    desc: "Critical failure injection",
-    color: "#ff2244",
-    scoreDrop: 0.45,
-    events: [
-      { agent: "critic",    text: "CRITICAL: segfault detected in core loop" },
-      { agent: "planner",   text: "Emergency protocol initiated" },
-      { agent: "executor",  text: "Halting non-essential processes" },
-      { agent: "optimizer", text: "Switching to survival policy" },
-    ],
-  },
-  {
-    id: "memory",
-    label: "🧠 MEMORY LEAK",
-    desc: "Heap overflow simulation",
-    color: "#ff6b35",
-    scoreDrop: 0.3,
-    events: [
-      { agent: "critic",    text: "Heap usage: 98.4% — critical threshold" },
-      { agent: "planner",   text: "Forcing CLEANUP priority" },
-      { agent: "executor",  text: "Garbage collection cycle started" },
-      { agent: "optimizer", text: "CLEANUP probability boosted to 0.72" },
-    ],
-  },
-  {
-    id: "drift",
-    label: "🌀 POLICY DRIFT",
-    desc: "Agent disagreement cascade",
-    color: "#7b61ff",
-    scoreDrop: 0.2,
-    events: [
-      { agent: "planner",   text: "CONFLICT: agents disagree on next action" },
-      { agent: "critic",    text: "Score variance too high — instability" },
-      { agent: "executor",  text: "Pausing for consensus protocol" },
-      { agent: "optimizer", text: "Re-calibrating decision matrix" },
-    ],
-  },
-];
+        <div class="console" id="log-box">>> [SYSTEM] Booting Sovereign Core... Done.</div>
+        
+        <footer style="text-align:center; margin-top:20px; font-size:0.7rem; opacity:0.5;">
+            GUARDRAIL ENGINE © 2026 | "السيادة تبدأ من الكود"
+        </footer>
+    </div>
 
-const PHASES = [
-  { id: "boot",        label: "BOOT",        desc: "Initializing",    min: 0,    max: 0.25, color: "#4a4a6a" },
-  { id: "explore",     label: "EXPLORING",   desc: "High variance",   min: 0.25, max: 0.5,  color: "#7b61ff" },
-  { id: "stabilize",   label: "STABILIZING", desc: "Convergence",     min: 0.5,  max: 0.72, color: "#00c8ff" },
-  { id: "optimize",    label: "OPTIMIZING",  desc: "Peak tuning",     min: 0.72, max: 0.88, color: "#ffe066" },
-  { id: "transcend",   label: "TRANSCENDING",desc: "Beyond baseline", min: 0.88, max: 1.01, color: "#00ff9f" },
-];
+    <script>
+        const ids = ['planner', 'executor', 'critic', 'optimizer'];
+        const logBox = document.getElementById('log-box');
+        let seconds = 0;
 
-const getPhase = (score) => PHASES.find(p => score >= p.min && score < p.max) || PHASES[0];
+        // عداد الوقت
+        setInterval(() => {
+            seconds++;
+            document.getElementById('uptime').textContent = seconds + 's';
+        }, 1000);
 
-const normalize = (obj) => {
-  const total = Object.values(obj).reduce((a, b) => a + b, 0);
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v / total]));
-};
+        // محاكاة نشاط الوكلاء والأمن
+        setInterval(() => {
+            ids.forEach(id => document.getElementById(id).classList.remove('active'));
+            const active = ids[Math.floor(Math.random() * ids.length)];
+            document.getElementById(active).classList.add('active');
+            
+            const entry = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] [SEC-CORE] Analyzing packets via ${active.toUpperCase()}... No anomalies found.`;
+            logBox.prepend(entry);
 
-// ── COMPONENT ────────────────────────────────────────────────────────────────
-
-export default function NexusV2() {
-  const [score,         setScore]         = useState(0.12);
-  const [history,       setHistory]       = useState([0.12]);
-  const [prob,          setProb]          = useState({ optimize: 0.33, cleanup: 0.34, status: 0.33 });
-  const [chosenAction,  setChosenAction]  = useState(null);
-  const [activeAgents,  setActiveAgents]  = useState([]);
-  const [logs,          setLogs]          = useState([]);
-  const [events,        setEvents]        = useState([]);   // agent thought bubbles
-  const [running,       setRunning]       = useState(false);
-  const [policyFlash,   setPolicyFlash]   = useState(null); // { action, direction }
-  const [scenario,      setScenario]      = useState(null); // active scenario name
-  const [recovering,    setRecovering]    = useState(false);
-  const [stepCount,     setStepCount]     = useState(0);
-  const [dramaMoment,   setDramaMoment]   = useState(null); // overlay text
-  const [nodeActive,    setNodeActive]    = useState({});
-  const intervalRef   = useRef(null);
-  const logRef        = useRef(null);
-  const evtRef        = useRef(null);
-  const stateRef      = useRef({ score: 0.12, prob: { optimize: 0.33, cleanup: 0.34, status: 0.33 }, recovering: false });
-
-  // Keep stateRef in sync
-  useEffect(() => { stateRef.current.score      = score;     }, [score]);
-  useEffect(() => { stateRef.current.prob       = prob;      }, [prob]);
-  useEffect(() => { stateRef.current.recovering = recovering;}, [recovering]);
-
-  const addEvent = useCallback((agentId, text, isPolicy = false) => {
-    const ev = { id: Date.now() + Math.random(), agent: agentId, text, isPolicy, ts: new Date().toLocaleTimeString("en-US", { hour12: false }) };
-    setEvents(prev => [ev, ...prev].slice(0, 30));
-  }, []);
-
-  const addLog = useCallback((action, newScore, oldScore, conf) => {
-    const delta = newScore - oldScore;
-    setLogs(prev => [{
-      id: Date.now(),
-      time: new Date().toLocaleTimeString("en-US", { hour12: false }),
-      action,
-      score: newScore.toFixed(3),
-      delta: `${delta >= 0 ? "▲" : "▼"}${Math.abs(delta).toFixed(3)}`,
-      conf: (conf * 100).toFixed(0),
-      up: delta >= 0,
-    }, ...prev].slice(0, 60));
-  }, []);
-
-  const simulateStep = useCallback((injectedScore = null, forceProb = null) => {
-    const cur = stateRef.current;
-    const oldScore = cur.score;
-
-    // Score evolution
-    let newScore;
-    if (injectedScore !== null) {
-      newScore = injectedScore;
-    } else if (cur.recovering) {
-      newScore = Math.min(1, oldScore + (Math.random() * 0.07 + 0.02));
-    } else {
-      newScore = Math.min(1, Math.max(0, oldScore + (Math.random() - 0.28) * 0.15));
-    }
-
-    // Probabilities
-    let rawProb = forceProb || { optimize: Math.random(), cleanup: Math.random(), status: Math.random() };
-    const newProb = normalize(rawProb);
-    const best = Object.keys(newProb).reduce((a, b) => newProb[a] > newProb[b] ? a : b);
-
-    setScore(newScore);
-    setProb(newProb);
-    setChosenAction(best);
-    setHistory(h => [...h.slice(-59), newScore]);
-    setStepCount(n => n + 1);
-    addLog(best, newScore, oldScore, newProb[best]);
-
-    // Agent parade
-    const agentSeq = ["planner", "executor", "critic", "optimizer"];
-    const shuffle = agentSeq.sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 3));
-    setActiveAgents(shuffle);
-
-    const thoughts = {
-      planner:   [`Evaluating ${best} strategy`, `Policy vector updated`, `Next action: ${best.toUpperCase()}`],
-      executor:  [`Dispatching ${best} routine`, `Running ${ACTIONS[best].desc}`, `Execution lock acquired`],
-      critic:    [newScore > oldScore ? "Score improved ✓" : "Score regressed — adjusting", `Delta: ${(newScore - oldScore).toFixed(3)}`, "Feedback sent to optimizer"],
-      optimizer: [newScore > oldScore ? `Boosting ${best} probability` : "Reducing failed strategy weight", `Confidence: ${(newProb[best] * 100).toFixed(0)}%`, "Policy converging"],
-    };
-
-    shuffle.forEach((agId, i) => {
-      setTimeout(() => {
-        const t = thoughts[agId][Math.floor(Math.random() * thoughts[agId].length)];
-        addEvent(agId, t);
-        setNodeActive(prev => ({ ...prev, [agId]: true }));
-        setTimeout(() => setNodeActive(prev => ({ ...prev, [agId]: false })), 600);
-      }, i * 220);
-    });
-
-    // Policy flash
-    if (newScore > oldScore + 0.04) {
-      setPolicyFlash({ action: best, direction: "up" });
-      setTimeout(() => setPolicyFlash(null), 2000);
-    }
-
-    // Drama: learning moment
-    if (!cur.recovering && newScore > 0.85 && oldScore < 0.85) {
-      setDramaMoment("⚡ BREAKTHROUGH — POLICY LOCKED");
-      setTimeout(() => setDramaMoment(null), 2200);
-    }
-    if (!cur.recovering && newScore < 0.25) {
-      setDramaMoment("💀 CRITICAL FAILURE");
-      setTimeout(() => setDramaMoment(null), 2200);
-    }
-  }, [addEvent, addLog]);
-
-  const injectScenario = useCallback((sc) => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    setScenario(sc.id);
-    setRecovering(false);
-
-    setDramaMoment(`⚠ ${sc.label}`);
-    setTimeout(() => setDramaMoment(null), 2500);
-
-    // Inject drop
-    const dropScore = Math.max(0.08, stateRef.current.score - sc.scoreDrop);
-    setTimeout(() => {
-      setScore(dropScore);
-      stateRef.current.score = dropScore;
-      setHistory(h => [...h, dropScore]);
-
-      // Inject agent events
-      sc.events.forEach((ev, i) => {
-        setTimeout(() => {
-          addEvent(ev.agent, ev.text, ev.agent === "optimizer");
-          setNodeActive(prev => ({ ...prev, [ev.agent]: true }));
-          setTimeout(() => setNodeActive(prev => ({ ...prev, [ev.agent]: false })), 500);
-        }, i * 400);
-      });
-
-      // Auto-recovery after drama
-      setTimeout(() => {
-        setRecovering(true);
-        stateRef.current.recovering = true;
-        addEvent("optimizer", "Recovery protocol engaged — rebuilding policy");
-        addEvent("planner",   "Entering stabilization phase");
-        setScenario(null);
-
-        intervalRef.current = setInterval(() => simulateStep(), 700);
-        setRunning(true);
-
-        // Stop recovery flag once score recovers
-        const checkRecovery = setInterval(() => {
-          if (stateRef.current.score > 0.65) {
-            setRecovering(false);
-            stateRef.current.recovering = false;
-            clearInterval(checkRecovery);
-            setDramaMoment("✅ SYSTEM RECOVERED");
-            setTimeout(() => setDramaMoment(null), 2000);
-          }
-        }, 300);
-      }, sc.events.length * 400 + 800);
-
-    }, 500);
-  }, [addEvent, simulateStep]);
-
-  const toggleAuto = () => {
-    if (running) {
-      clearInterval(intervalRef.current);
-      setRunning(false);
-    } else {
-      setRunning(true);
-      intervalRef.current = setInterval(() => simulateStep(), 800);
-    }
-  };
-
-  useEffect(() => () => clearInterval(intervalRef.current), []);
-
-  // ── Derived state ──────────────────────────────────────────────────────────
-  const phase     = getPhase(score);
-  const scoreColor = phase.color;
-  const W = 340, H = 64;
-  const pts = history.map((v, i) => {
-    const x = (i / Math.max(history.length - 1, 1)) * W;
-    const y = H - v * (H - 4) - 2;
-    return [x, y];
-  });
-  const polyPts = pts.map(p => p.join(",")).join(" ");
-  const areaD   = `M ${pts[0]?.[0]},${H} ${pts.map(p => `L${p[0]},${p[1]}`).join(" ")} L${pts[pts.length-1]?.[0]},${H} Z`;
-
-  // ── Render ─────────────────────────────────────────────────────────────────
-  return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-          --bg:      #030912;
-          --bg1:     #060f1e;
-          --bg2:     #0a1628;
-          --border:  rgba(0,200,255,.10);
-          --border2: rgba(0,200,255,.22);
-          --dim:     #1a3a55;
-          --text:    #a8c8e8;
-          --g:       #00ff9f;
-          --b:       #00c8ff;
-          --o:       #ff6b35;
-          --p:       #7b61ff;
-          --y:       #ffe066;
-          --r:       #ff2244;
-        }
-
-        body { background: var(--bg); }
-
-        .nx { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; position: relative; overflow-x: hidden; }
-
-        /* Grid background */
-        .nx-bg {
-          position: fixed; inset: 0; z-index: 0; pointer-events: none;
-          background-image:
-            linear-gradient(rgba(0,200,255,.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,200,255,.025) 1px, transparent 1px);
-          background-size: 40px 40px;
-        }
-        .nx-bg::after {
-          content: ''; position: absolute; inset: 0;
-          background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,100,200,.08) 0%, transparent 70%);
-        }
-
-        /* Scanlines */
-        .nx-scan {
-          position: fixed; inset: 0; z-index: 200; pointer-events: none;
-          background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
-        }
-
-        .nx-wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 24px 20px; display: grid; gap: 14px; }
-
-        /* ── HEADER ── */
-        .nx-hdr { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border2); }
-        .nx-logo { display: flex; align-items: baseline; gap: 14px; }
-        .nx-logo-text { font-family: 'Oxanium', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: 8px; color: var(--b); text-shadow: 0 0 30px rgba(0,200,255,.5), 0 0 80px rgba(0,200,255,.15); }
-        .nx-logo-version { font-size: 10px; letter-spacing: 2px; color: var(--dim); }
-        .nx-hdr-right { display: flex; align-items: center; gap: 12px; }
-        .nx-badge { font-size: 9px; letter-spacing: 2px; padding: 4px 10px; border: 1px solid; border-radius: 2px; }
-        .nx-badge-online { color: var(--g); border-color: rgba(0,255,159,.3); animation: blk 1.6s step-end infinite; }
-        .nx-badge-recover { color: var(--y); border-color: rgba(255,224,102,.5); animation: blk .6s step-end infinite; }
-        .nx-badge-crisis  { color: var(--r); border-color: rgba(255,34,68,.5);   animation: blk .3s step-end infinite; }
-        @keyframes blk { 50%{ opacity:.25; } }
-        .nx-step-ctr { font-size: 10px; color: var(--dim); }
-
-        /* ── MAIN GRID ── */
-        .nx-main { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
-
-        /* ── PANELS ── */
-        .nx-panel {
-          background: var(--bg1); border: 1px solid var(--border); border-radius: 4px; padding: 18px; position: relative; overflow: hidden;
-          transition: border-color .3s;
-        }
-        .nx-panel:hover { border-color: var(--border2); }
-        .nx-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,200,255,.35), transparent); }
-        .nx-pt { font-family: 'Oxanium', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 3px; color: var(--dim); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .nx-pt-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--b); box-shadow: 0 0 6px var(--b); }
-
-        /* ── SCORE ── */
-        .nx-score-row { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 10px; }
-        .nx-score-big { font-family: 'Oxanium', sans-serif; font-size: 72px; font-weight: 800; line-height: 1; letter-spacing: -3px; transition: color .5s, text-shadow .5s; }
-        .nx-score-meta { padding-bottom: 8px; }
-        .nx-phase-label { font-family: 'Oxanium', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 3px; transition: color .5s; }
-        .nx-phase-desc { font-size: 10px; color: var(--dim); margin-top: 2px; }
-        .nx-phase-bar-track { width: 100%; height: 3px; background: rgba(255,255,255,.05); border-radius: 2px; margin-top: 10px; overflow: hidden; }
-        .nx-phase-bar-fill { height: 100%; border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1), background .5s; }
-
-        /* Sparkline */
-        .nx-spark { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
-        .nx-spark-label { font-size: 9px; letter-spacing: 2px; color: var(--dim); margin-bottom: 6px; }
-
-        /* Metric chips */
-        .nx-chips { display: flex; gap: 8px; margin-top: 12px; }
-        .nx-chip { flex: 1; padding: 8px; background: var(--bg2); border: 1px solid var(--border); border-radius: 3px; }
-        .nx-chip-lbl { font-size: 8px; letter-spacing: 2px; color: var(--dim); }
-        .nx-chip-val { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 3px; }
-
-        /* ── DECISION MATRIX ── */
-        .nx-act-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.03); }
-        .nx-act-row:last-child { border: none; }
-        .nx-act-row.nx-active { background: rgba(0,200,255,.03); border-radius: 3px; padding-left: 6px; margin-left: -6px; }
-        .nx-act-icon { font-size: 14px; width: 20px; text-align: center; }
-        .nx-act-name { font-family: 'Oxanium', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 2px; width: 72px; }
-        .nx-act-bar { flex: 1; height: 5px; background: rgba(255,255,255,.05); border-radius: 3px; overflow: hidden; }
-        .nx-act-fill { height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.4,0,.2,1); }
-        .nx-act-pct { font-size: 11px; width: 40px; text-align: right; opacity: .7; }
-
-        /* ── POLICY FLASH ── */
-        .nx-policy-flash {
-          position: absolute; bottom: 14px; right: 14px;
-          font-family: 'Oxanium', sans-serif; font-size: 9px; letter-spacing: 2px; font-weight: 600;
-          padding: 5px 10px; border-radius: 2px; border: 1px solid;
-          animation: pfade 2s forwards;
-        }
-        @keyframes pfade { 0%{opacity:0;transform:translateY(4px)} 20%{opacity:1;transform:translateY(0)} 80%{opacity:1} 100%{opacity:0} }
-
-        /* ── AGENTS PANEL ── */
-        .nx-agents { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .nx-agent {
-          padding: 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 3px;
-          transition: border-color .3s, box-shadow .3s; position: relative; overflow: hidden;
-        }
-        .nx-agent.nx-agent-active { box-shadow: 0 0 16px rgba(0,200,255,.15); }
-        .nx-agent::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px 2px 0 0; transition: opacity .3s; opacity: 0; }
-        .nx-agent.nx-agent-active::before { opacity: 1; }
-        .nx-agent-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-        .nx-agent-icon { font-size: 16px; }
-        .nx-agent-name { font-family: 'Oxanium', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 2px; }
-        .nx-agent-role { font-size: 9px; color: var(--dim); }
-        .nx-agent-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); margin-left: auto; transition: background .3s, box-shadow .3s; }
-        .nx-agent.nx-agent-active .nx-agent-dot { background: var(--g); box-shadow: 0 0 8px var(--g); }
-        .nx-agent-thought { font-size: 9px; color: var(--dim); min-height: 13px; transition: color .3s; }
-        .nx-agent.nx-agent-active .nx-agent-thought { color: var(--text); }
-
-        /* ── EVENT STREAM ── */
-        .nx-events { height: 130px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,200,255,.1) transparent; }
-        .nx-events::-webkit-scrollbar { width: 3px; }
-        .nx-events::-webkit-scrollbar-thumb { background: rgba(0,200,255,.15); border-radius: 2px; }
-        .nx-ev { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.025); font-size: 10px; animation: fadeSlide .25s ease-out; }
-        @keyframes fadeSlide { from { opacity:0; transform: translateX(-6px); } to { opacity:1; transform: none; } }
-        .nx-ev-agent { font-family: 'Oxanium', sans-serif; font-size: 8px; font-weight: 600; letter-spacing: 1px; padding: 1px 5px; border-radius: 2px; border: 1px solid; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
-        .nx-ev-text { color: var(--text); flex: 1; }
-        .nx-ev-policy { color: var(--g) !important; }
-        .nx-ev-time { font-size: 8px; color: var(--dim); white-space: nowrap; margin-left: auto; }
-
-        /* ── LOG ── */
-        .nx-log { height: 150px; overflow-y: auto; s
+            // محاكاة تغيير مستوى التهديد
+            const threat = (Math.random() * 0.05).toFixed(3);
+            document.getElementById('threat-level').textContent = `مستوى التهديد: ${threat}%`;
+        }, 2000);
+    </script>
+</body>
+</html>
