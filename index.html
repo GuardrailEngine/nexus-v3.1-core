@@ -3,46 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.3 | THE SOVEREIGN ORACLE</title>
+    <title>NEXUS v3.3.1 | FIXED_FEED</title>
     <style>
         :root { --g: #d4af37; --bg: #050505; --s: #00ff9f; --a: #00d4ff; --e: #ff4444; }
         body { background: var(--bg); color: var(--g); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
         ._0x_frame { border: 2px solid var(--g); padding: 15px; max-width: 1300px; margin: auto; min-height: 95vh; transition: 0.3s; position: relative; }
-        
-        .bullish { box-shadow: inset 0 0 40px rgba(0, 255, 159, 0.15); border-color: var(--s) !important; }
-        .bearish { box-shadow: inset 0 0 40px rgba(255, 68, 68, 0.15); border-color: var(--e) !important; }
-        .anomaly_flash { animation: flash_red 0.5s infinite; }
-        @keyframes flash_red { 0% { background: transparent; } 50% { background: rgba(255, 68, 68, 0.1); } 100% { background: transparent; } }
-
         header { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; }
         ._grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
         @media (min-width: 768px) { ._grid { grid-template-columns: repeat(4, 1fr); } }
-        
         ._card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; }
         ._val { display: block; font-size: 1.1rem; color: #fff; text-shadow: 0 0 5px var(--g); margin: 5px 0; }
-
         ._view { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { ._view { grid-template-columns: 1fr 2.2fr; } }
-        
-        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 380px; position: relative; overflow-y: auto; }
+        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 380px; overflow-y: auto; }
         .btn { background: #111; border: 1px solid var(--g); color: var(--g); padding: 5px 10px; cursor: pointer; font-size: 0.7rem; margin: 2px; }
-        
         #_feed { font-size: 0.65rem; color: var(--a); line-height: 1.6; }
         .label { color: #555; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 1px; }
-        
         input { background: #000; color: var(--a); border: 1px solid #333; font-size: 0.75rem; text-align: center; width: 85%; padding: 4px; margin-top: 5px; }
-        
-        /* سجل الانتصارات */
         .win-row { display: flex; justify-content: space-between; font-size: 0.6rem; border-bottom: 1px solid #111; padding: 4px 0; }
         .win-tag { color: var(--s); font-weight: bold; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
 <div class="_0x_frame" id="nx_core">
     <header>
         <div>
-            <h2 style="margin:0; font-size: 1.1rem;">⚔️ NEXUS v3.3 | THE ORACLE</h2>
+            <h2 style="margin:0; font-size: 1.1rem;">⚔️ NEXUS v3.3.1 | LIVE</h2>
             <div style="margin-top:5px;">
                 <button class="btn" onclick="svc('BTCUSDT')">BTC</button>
                 <button class="btn" onclick="svc('ETHUSDT')">ETH</button>
@@ -51,38 +38,35 @@
         </div>
         <div style="text-align:left; font-size: 0.6rem;">
             <div>ARCHITECT: <span style="color:var(--g)">CHAKIR</span></div>
-            <div>SHIELD: <span style="color:var(--s)">REINFORCED</span></div>
+            <div>STATUS: <span id="conn_status" style="color:var(--s)">ONLINE</span></div>
         </div>
     </header>
 
     <div class="_grid">
         <div class="_card">
-            <span class="label">Confidence</span>
+            <span class="label">Confidence Score</span>
             <span class="_val" id="cv">0%</span>
-            <div id="strat_advice" style="font-size:0.5rem; color:var(--s)">[INITIALIZING]</div>
+            <div id="strat_advice" style="font-size:0.5rem; color:var(--s)">[STABLE]</div>
         </div>
         
         <div class="_card" style="border-color: var(--a);">
             <span class="label">Risk Manager</span>
             <input type="number" id="balance" placeholder="Capital $" oninput="runRisk()">
-            <div id="risk_result" style="font-size:0.5rem; color:var(--g); margin-top:3px;">Set Balance</div>
+            <div id="risk_result" style="font-size:0.5rem; color:var(--g); margin-top:3px;">Set Capital</div>
         </div>
 
-        <div class="_card"><span class="label">Live Price</span><span class="_val" id="cp" style="font-size:1rem;">0.00</span><small id="an">BTC/USD</small></div>
+        <div class="_card"><span class="label">Live Market Price</span><span class="_val" id="cp" style="font-size:1rem;">---</span><small id="an">BTC/USD</small></div>
         <div class="_card"><span class="label">AI Target</span><span class="_val" id="pt" style="color:var(--a); font-size:1rem;">---</span><small>SMA_PRO</small></div>
     </div>
 
     <div class="_view">
         <div class="_panel">
             <div class="label" style="margin-bottom:10px;">🏆 Win History (Proven Logic)</div>
-            <div id="win_ledger">
-                </div>
-            <button class="btn" style="width:100%; margin-top:15px; font-size:0.55rem;" onclick="exp()">DOWNLOAD ARCHIVE</button>
+            <div id="win_ledger"></div>
         </div>
-
         <div class="_panel">
             <div class="label" style="margin-bottom:10px;">Sovereign Intelligence Feed</div>
-            <div id="_feed">>> [SYS] Oracle Core Handshake Complete...</div>
+            <div id="_feed">>> [SYS] Establishing Secure Data Link...</div>
         </div>
     </div>
 </div>
@@ -90,41 +74,23 @@
 <script>
     (function(){
         let cas = 'BTCUSDT', hist = [], logs = [], lp = 0, lastSignal = '';
-        const thr = 0.15;
         
-        // --- الخيار 1: نظام التنبيه الصوتي ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playPulse(freq, type) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-        }
+        // تصحيح رابط البيانات (API Fix)
+        const getUrl = (symbol) => `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`;
 
-        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Oracle focus shifted: ${a}`, '#d4af37'); };
+        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Data Stream Shifted to: ${a}`, '#d4af37'); };
 
         async function engine() {
             try {
-                const res = await fetch(`https://api.binance.com/api/fetch_ticker_price?symbol=${cas}`); // تم تصحيح الرابط للعمل المباشر
+                const res = await fetch(getUrl(cas));
+                if (!res.ok) throw new Error('API_OFFLINE');
                 const data = await res.json();
                 const p = parseFloat(data.price);
                 lp = p;
                 
-                if (hist.length > 5) {
-                    let avg = hist.reduce((a, b) => a + b) / hist.length;
-                    let dev = Math.abs(p - avg) / avg;
-                    if (dev > thr) {
-                        document.getElementById('nx_core').classList.add('anomaly_flash');
-                        playPulse(150, 'sawtooth'); // صوت إنذار للخطر
-                        log(`[CRITIC] SHIELD: Blocked Anomaly at ${p}`, '#ff4444');
-                        return;
-                    }
-                }
+                document.getElementById('conn_status').textContent = 'ONLINE';
+                document.getElementById('conn_status').style.color = 'var(--s)';
 
-                document.getElementById('nx_core').classList.remove('anomaly_flash');
                 hist.push(p); if(hist.length > 20) hist.shift();
                 
                 let ch = hist.length > 1 ? p - hist[0] : 0;
@@ -134,38 +100,34 @@
                 upd(p, tar, vol, ch);
                 runRisk();
 
-            } catch (e) { log(`[!] Nexus Shielding Network...`, '#ff4444'); }
+            } catch (e) { 
+                document.getElementById('conn_status').textContent = 'RECONNECTING';
+                document.getElementById('conn_status').style.color = 'var(--e)';
+                log(`[!] Data Feed Error: Retrying Connection...`, '#ff4444'); 
+            }
         }
 
         function upd(p, t, v, ch) {
-            document.getElementById('cp').textContent = p.toLocaleString();
-            document.getElementById('pt').textContent = t.toLocaleString(undefined, {maximumFractionDigits: 2});
+            document.getElementById('cp').textContent = p.toFixed(2).toLocaleString();
+            document.getElementById('pt').textContent = t.toFixed(2).toLocaleString();
             
             let conf = Math.max(5, Math.min(99, 100 - (v / 10)));
             document.getElementById('cv').textContent = conf.toFixed(0) + '%';
             
             const ad = document.getElementById('strat_advice');
-            const core = document.getElementById('nx_core');
-
             if(conf > 85 && ch > 0.02 && lastSignal !== 'UP') {
-                playPulse(880, 'sine'); // صوت نجاح صاعد
                 addWin('Bullish Pivot', p);
                 lastSignal = 'UP';
             }
-
-            if(ch > 0.01) { core.className = '_0x_frame bullish'; ad.textContent = '[HIGH_CONFIDENCE_BUY]'; }
-            else if(ch < -0.01) { core.className = '_0x_frame bearish'; ad.textContent = '[MARKET_PRESSURE]'; }
         }
 
-        // --- الخيار 2: سجل الانتصارات ---
         function addWin(type, price) {
             const ledger = document.getElementById('win_ledger');
             const row = document.createElement('div');
             row.className = 'win-row';
-            row.innerHTML = `<span class="win-tag">🏆 ${type}</span> <span>@ ${price.toFixed(2)}</span> <span>${new Date().toLocaleTimeString()}</span>`;
+            row.innerHTML = `<span class="win-tag">🏆 ${type}</span> <span>@ ${price.toFixed(2)}</span>`;
             ledger.prepend(row);
-            if(ledger.childNodes.length > 8) ledger.lastChild.remove();
-            log(`[WIN_ENGINE] New prediction verified and archived.`, '#00ff9f');
+            if(ledger.childNodes.length > 5) ledger.lastChild.remove();
         }
 
         window.runRisk = () => {
@@ -179,10 +141,11 @@
         function log(m, c) {
             let d = document.createElement('div'); d.style.color = c; d.textContent = `>> [${new Date().toLocaleTimeString()}] ${m}`;
             const f = document.getElementById('_feed'); f.prepend(d);
-            if(f.childNodes.length > 20) f.lastChild.remove();
+            if(f.childNodes.length > 15) f.lastChild.remove();
         }
 
         setInterval(engine, 4000);
+        engine(); // تشغيل فوري عند التحميل
     })();
 </script>
 </body>
