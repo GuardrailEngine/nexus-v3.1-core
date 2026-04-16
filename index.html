@@ -1,85 +1,63 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>NEXUS v3.1 CORE | السيادة الهندسية</title>
+    <style>
+        :root { --gold: #d4af37; --black: #0a0a0a; --green: #00ff9f; }
+        body { background: var(--black); color: var(--gold); font-family: monospace; margin: 0; padding: 20px; }
+        .container { border: 2px solid var(--gold); padding: 20px; box-shadow: 0 0 20px rgba(212,175,55,0.2); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #111; border: 1px solid #333; padding: 15px; text-align: center; }
+        .stat-value { display: block; font-size: 1.5rem; color: #fff; }
+        .agents { display: flex; justify-content: space-around; padding: 40px; border: 1px dashed var(--gold); }
+        .agent { padding: 10px; border: 1px solid #444; min-width: 100px; text-align: center; transition: 0.3s; }
+        .active { border-color: var(--green); box-shadow: 0 0 10px var(--green); color: #fff; }
+        .console { background: #000; color: var(--green); padding: 10px; height: 100px; overflow-y: hidden; border: 1px solid #222; margin-top: 20px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="text-align:center; border-bottom:1px solid var(--gold); padding-bottom:10px;">
+            <h1>⚔️ NEXUS v3.1 CORE</h1>
+            <p>نظام ملفات أحادي عالي الأداء | السيادة الهندسية</p>
+        </header>
 
-/** * NEXUS v3.1 - Sovereign Engineering Dashboard
- * -------------------------------------------
- * الأداء: 1,247 طلب/ثانية | السيادة: 100% | التبعيات: 0
- */
-
-const AGENTS = {
-  planner:   { id: "planner",   label: "PLANNER",   icon: "◈", color: "#d4af37", role: "Strategic thinker",  x: 50,  y: 20 }, // Gold
-  executor:  { id: "executor",  label: "EXECUTOR",  icon: "▶", color: "#d4af37", role: "Action runner",      x: 80,  y: 55 },
-  critic:    { id: "critic",    label: "CRITIC",    icon: "⚠", color: "#ff4444", role: "Failure detector",   x: 20,  y: 55 },
-  optimizer: { id: "optimizer", label: "OPTIMIZER", icon: "⬡", color: "#00ff9f", role: "Policy updater",     x: 50,  y: 85 },
-};
-
-// ... (إعدادات الروابط والسيناريوهات من الكود الأصلي مع تحسين الألوان لتناسب الهوية الذهبية)
-
-export default function NexusDashboard() {
-  const [score, setScore] = useState(0.893); // يبدأ من هامش الربح المحدد 89.3%
-  const [history, setHistory] = useState([0.893]);
-  const [running, setRunning] = useState(true);
-  
-  // دمج منطق الـ Performance من ملف README
-  const performanceStats = {
-    reqPerSec: 1247,
-    margin: "89.3%",
-    lines: 398,
-    sovereignty: "⚔️ السيادة الهندسية"
-  };
-
-  // ... (بقية منطق المحاكاة من NexusV3)
-
-  return (
-    <div style={{ backgroundColor: "#0a0a0a", color: "#d4af37", minHeight: "100vh", padding: "20px", fontFamily: "monospace" }}>
-      {/* Header السيادي */}
-      <header style={{ borderBottom: "1px solid #d4af37", paddingBottom: "10px", marginBottom: "30px" }}>
-        <h1 style={{ margin: 0, fontSize: "2rem", letterSpacing: "4px" }}>NEXUS v3.1 CORE</h1>
-        <p style={{ color: "#888" }}>{performanceStats.sovereignty} | نظام ملفات أحادي عالي الأداء</p>
-      </header>
-
-      {/* Stats Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "40px" }}>
-        <StatCard label="طلبات/ثانية" value={performanceStats.reqPerSec} color="#d4af37" />
-        <StatCard label="هامش الربح" value={performanceStats.margin} color="#00ff9f" />
-        <StatCard label="حجم الكود" value={`${performanceStats.lines} سطر`} color="#888" />
-        <StatCard label="التبعيات" value="0" color="#d4af37" />
-      </div>
-
-      <main style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "30px" }}>
-        {/* Topology Visualization */}
-        <div style={{ background: "#111", border: "1px solid #333", borderRadius: "8px", padding: "20px", position: "relative" }}>
-           <h3 style={{ color: "#d4af37" }}>خريطة طوبولوجيا الوكلاء</h3>
-           {/* هنا يتم استدعاء TopologyMap من ملفك الأصلي */}
-           <div style={{ height: "300px", display: "flex", justifyContent: "center" }}>
-              <p style={{ color: "#555" }}>[محاكاة نشاط الوكلاء اللحظي...]</p>
-           </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span>طلبات/ثانية</span><span class="stat-value">1,247</span></div>
+            <div class="stat-box stat-card"><span>هامش الربح</span><span class="stat-value" style="color:var(--green)">89.3%</span></div>
+            <div class="stat-card"><span>حجم الكود</span><span class="stat-value">398 سطر</span></div>
+            <div class="stat-card"><span>التبعية</span><span class="stat-value">0</span></div>
         </div>
 
-        {/* System Logs */}
-        <div style={{ background: "#000", border: "1px solid #d4af37", padding: "15px", height: "400px", overflowY: "auto" }}>
-          <h3 style={{ fontSize: "0.9rem", borderBottom: "1px solid #333" }}>سجل العمليات الأمني</h3>
-          <div style={{ fontSize: "0.75rem", color: "#00ff00" }}>
-             <p>[OK] NEXUS v3.1 Core Initialized.</p>
-             <p>[INFO] Monitoring 1,247 req/sec stability...</p>
-             <p>[SECURITY] Sovereign protocols engaged.</p>
-          </div>
+        <h3>خريطة طوبولوجيا الوكلاء</h3>
+        <div class="agents" id="agents-map">
+            <div class="agent" id="planner">◈ PLANNER</div>
+            <div class="agent" id="executor">▶ EXECUTOR</div>
+            <div class="agent" id="critic">⚠ CRITIC</div>
+            <div class="agent" id="optimizer">⬡ OPTIMIZER</div>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer style={{ marginTop: "40px", fontSize: "0.7rem", color: "#444", textAlign: "center" }}>
-        © 2026 Guardrail Engine | السيادة الهندسية: كتابة أكواد أقل ← قوة أكبر
-      </footer>
+        <div class="console" id="log-box">>> [OK] NEXUS v3.1 Core Initialized...</div>
+        
+        <footer style="text-align:center; margin-top:20px; font-size:0.7rem; opacity:0.6;">
+            © 2026 Guardrail Engine | السيادة الهندسية: كتابة أكواد أقل ← قوة أكبر
+        </footer>
     </div>
-  );
-}
 
-function StatCard({ label, value, color }) {
-  return (
-    <div style={{ border: "1px solid #333", padding: "15px", borderRadius: "4px", background: "#111" }}>
-      <div style={{ fontSize: "0.7rem", color: "#888" }}>{label}</div>
-      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: color }}>{value}</div>
-    </div>
-  );
-}
-          
+    <script>
+        const ids = ['planner', 'executor', 'critic', 'optimizer'];
+        const logBox = document.getElementById('log-box');
+        
+        setInterval(() => {
+            ids.forEach(id => document.getElementById(id).classList.remove('active'));
+            const active = ids[Math.floor(Math.random() * ids.length)];
+            document.getElementById(active).classList.add('active');
+            
+            const entry = document.createElement('div');
+            entry.textContent = `>> [INFO] Monitoring 1,247 req/sec stability - Agent: ${active.toUpperCase()}`;
+            logBox.prepend(entry);
+        }, 1500);
+    </script>
+</body>
+</html>
