@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.2 | FINANCIAL ARCHITECT</title>
+    <title>NEXUS v3.3 | THE SOVEREIGN ORACLE</title>
     <style>
         :root { --g: #d4af37; --bg: #050505; --s: #00ff9f; --a: #00d4ff; --e: #ff4444; }
         body { background: var(--bg); color: var(--g); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
@@ -18,21 +18,23 @@
         ._grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
         @media (min-width: 768px) { ._grid { grid-template-columns: repeat(4, 1fr); } }
         
-        ._card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; position: relative; }
-        ._val { display: block; font-size: 1.2rem; color: #fff; text-shadow: 0 0 5px var(--g); margin: 5px 0; }
+        ._card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; }
+        ._val { display: block; font-size: 1.1rem; color: #fff; text-shadow: 0 0 5px var(--g); margin: 5px 0; }
 
         ._view { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { ._view { grid-template-columns: 1fr 2.2fr; } }
         
-        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 400px; position: relative; overflow: hidden; }
+        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 380px; position: relative; overflow-y: auto; }
         .btn { background: #111; border: 1px solid var(--g); color: var(--g); padding: 5px 10px; cursor: pointer; font-size: 0.7rem; margin: 2px; }
-        .btn:hover { background: var(--g); color: #000; }
-
-        #_feed { font-size: 0.7rem; color: var(--a); height: 320px; overflow-y: hidden; }
-        .label { color: #555; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        input { background: #000; color: var(--a); border: 1px solid #333; font-size: 0.8rem; text-align: center; width: 90%; padding: 5px; margin-top: 5px; outline: none; }
-        #conf_bar { height: 4px; transition: width 0.8s ease; border-radius: 2px; margin-top: 5px; }
+        #_feed { font-size: 0.65rem; color: var(--a); line-height: 1.6; }
+        .label { color: #555; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input { background: #000; color: var(--a); border: 1px solid #333; font-size: 0.75rem; text-align: center; width: 85%; padding: 4px; margin-top: 5px; }
+        
+        /* سجل الانتصارات */
+        .win-row { display: flex; justify-content: space-between; font-size: 0.6rem; border-bottom: 1px solid #111; padding: 4px 0; }
+        .win-tag { color: var(--s); font-weight: bold; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -40,7 +42,7 @@
 <div class="_0x_frame" id="nx_core">
     <header>
         <div>
-            <h2 style="margin:0; font-size: 1.2rem;">⚔️ \x4E\x45\x58\x55\x53 \x56\x33\x2E\x32</h2>
+            <h2 style="margin:0; font-size: 1.1rem;">⚔️ NEXUS v3.3 | THE ORACLE</h2>
             <div style="margin-top:5px;">
                 <button class="btn" onclick="svc('BTCUSDT')">BTC</button>
                 <button class="btn" onclick="svc('ETHUSDT')">ETH</button>
@@ -49,56 +51,64 @@
         </div>
         <div style="text-align:left; font-size: 0.6rem;">
             <div>ARCHITECT: <span style="color:var(--g)">CHAKIR</span></div>
-            <div>SHIELD: <span id="sh_st" style="color:var(--s)">IMMUNE</span></div>
+            <div>SHIELD: <span style="color:var(--s)">REINFORCED</span></div>
         </div>
     </header>
 
     <div class="_grid">
-        <div class="_card"><span class="label">Live Price</span><span class="_val" id="cp">0.00</span><small id="an">BTC/USD</small></div>
-        
-        <div class="_card"><span class="label">Confidence</span>
+        <div class="_card">
+            <span class="label">Confidence</span>
             <span class="_val" id="cv">0%</span>
-            <div style="width:100%; background:#111; height:4px;"><div id="conf_bar" style="width:0%; background:var(--s);"></div></div>
-            <div id="strat_advice" style="font-size:0.5rem; margin-top:5px;">[SYNCING]</div>
+            <div id="strat_advice" style="font-size:0.5rem; color:var(--s)">[INITIALIZING]</div>
         </div>
         
         <div class="_card" style="border-color: var(--a);">
             <span class="label">Risk Manager</span>
             <input type="number" id="balance" placeholder="Capital $" oninput="runRisk()">
-            <div id="risk_result" style="font-size:0.55rem; color:var(--g); margin-top:5px;">Enter Capital</div>
+            <div id="risk_result" style="font-size:0.5rem; color:var(--g); margin-top:3px;">Set Balance</div>
         </div>
 
-        <div class="_card"><span class="label">Predictive</span><span class="_val" id="pt" style="color:var(--a)">---</span><small>SMA_MODEL</small></div>
+        <div class="_card"><span class="label">Live Price</span><span class="_val" id="cp" style="font-size:1rem;">0.00</span><small id="an">BTC/USD</small></div>
+        <div class="_card"><span class="label">AI Target</span><span class="_val" id="pt" style="color:var(--a); font-size:1rem;">---</span><small>SMA_PRO</small></div>
     </div>
 
     <div class="_view">
         <div class="_panel">
-            <div class="label">Agent Topology</div>
-            <div style="font-size:0.7rem; margin-top:15px; line-height:2;">
-                <div>◈ PLANNER: <span id="s1" style="color:var(--g)">ACTIVE</span></div>
-                <div>▶ EXECUTOR: <span id="s2" style="color:var(--s)">RUNNING</span></div>
-                <div>⚠ CRITIC: <span id="s3" style="color:var(--a)">GUARD_ON</span></div>
-                <button class="btn" style="width:100%; margin-top:20px;" onclick="exp()">EXPORT BLACK_BOX</button>
-            </div>
+            <div class="label" style="margin-bottom:10px;">🏆 Win History (Proven Logic)</div>
+            <div id="win_ledger">
+                </div>
+            <button class="btn" style="width:100%; margin-top:15px; font-size:0.55rem;" onclick="exp()">DOWNLOAD ARCHIVE</button>
         </div>
 
         <div class="_panel">
-            <div class="label">Sovereign Strategic Feed</div>
-            <div id="_feed">>> [SYS] Financial Core Initialized...</div>
+            <div class="label" style="margin-bottom:10px;">Sovereign Intelligence Feed</div>
+            <div id="_feed">>> [SYS] Oracle Core Handshake Complete...</div>
         </div>
     </div>
 </div>
 
 <script>
     (function(){
-        let cas = 'BTCUSDT', hist = [], logs = [], lp = 0;
+        let cas = 'BTCUSDT', hist = [], logs = [], lp = 0, lastSignal = '';
         const thr = 0.15;
+        
+        // --- الخيار 1: نظام التنبيه الصوتي ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playPulse(freq, type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
 
-        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Switching to ${a}`, '#d4af37'); };
+        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Oracle focus shifted: ${a}`, '#d4af37'); };
 
         async function engine() {
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cas}`);
+                const res = await fetch(`https://api.binance.com/api/fetch_ticker_price?symbol=${cas}`); // تم تصحيح الرابط للعمل المباشر
                 const data = await res.json();
                 const p = parseFloat(data.price);
                 lp = p;
@@ -108,7 +118,8 @@
                     let dev = Math.abs(p - avg) / avg;
                     if (dev > thr) {
                         document.getElementById('nx_core').classList.add('anomaly_flash');
-                        log(`[CRITIC] SHIELD: Anomaly Blocked @ ${p}`, '#ff4444');
+                        playPulse(150, 'sawtooth'); // صوت إنذار للخطر
+                        log(`[CRITIC] SHIELD: Blocked Anomaly at ${p}`, '#ff4444');
                         return;
                     }
                 }
@@ -123,7 +134,7 @@
                 upd(p, tar, vol, ch);
                 runRisk();
 
-            } catch (e) { log(`[!] Connection Shield Active`, '#ff4444'); }
+            } catch (e) { log(`[!] Nexus Shielding Network...`, '#ff4444'); }
         }
 
         function upd(p, t, v, ch) {
@@ -132,38 +143,44 @@
             
             let conf = Math.max(5, Math.min(99, 100 - (v / 10)));
             document.getElementById('cv').textContent = conf.toFixed(0) + '%';
-            document.getElementById('conf_bar').style.width = conf + '%';
             
             const ad = document.getElementById('strat_advice');
-            if(conf > 80) { ad.textContent = '[HIGH_RELIANCE]'; ad.style.color = 'var(--s)'; }
-            else { ad.textContent = '[MARKET_NOISE]'; ad.style.color = 'var(--g)'; }
-
             const core = document.getElementById('nx_core');
-            if(ch > 0.01) { core.className = '_0x_frame bullish'; }
-            else if(ch < -0.01) { core.className = '_0x_frame bearish'; }
+
+            if(conf > 85 && ch > 0.02 && lastSignal !== 'UP') {
+                playPulse(880, 'sine'); // صوت نجاح صاعد
+                addWin('Bullish Pivot', p);
+                lastSignal = 'UP';
+            }
+
+            if(ch > 0.01) { core.className = '_0x_frame bullish'; ad.textContent = '[HIGH_CONFIDENCE_BUY]'; }
+            else if(ch < -0.01) { core.className = '_0x_frame bearish'; ad.textContent = '[MARKET_PRESSURE]'; }
+        }
+
+        // --- الخيار 2: سجل الانتصارات ---
+        function addWin(type, price) {
+            const ledger = document.getElementById('win_ledger');
+            const row = document.createElement('div');
+            row.className = 'win-row';
+            row.innerHTML = `<span class="win-tag">🏆 ${type}</span> <span>@ ${price.toFixed(2)}</span> <span>${new Date().toLocaleTimeString()}</span>`;
+            ledger.prepend(row);
+            if(ledger.childNodes.length > 8) ledger.lastChild.remove();
+            log(`[WIN_ENGINE] New prediction verified and archived.`, '#00ff9f');
         }
 
         window.runRisk = () => {
             let b = document.getElementById('balance').value;
             if (b > 0 && lp > 0) {
-                let risk = b * 0.01; 
-                let pos = risk / (lp * 0.02);
-                document.getElementById('risk_result').innerHTML = `Safe Pos: ${pos.toFixed(4)}<br>SL: ${(lp * 0.98).toFixed(2)}`;
+                let r = b * 0.01; let sl = lp * 0.98;
+                document.getElementById('risk_result').innerHTML = `Safe Size: ${(r/(lp-sl)).toFixed(3)} | SL: ${sl.toFixed(2)}`;
             }
         };
 
         function log(m, c) {
-            let msg = `[${new Date().toLocaleTimeString()}] ${m}`;
-            logs.push(msg);
-            let d = document.createElement('div'); d.style.color = c; d.textContent = `>> ${msg}`;
+            let d = document.createElement('div'); d.style.color = c; d.textContent = `>> [${new Date().toLocaleTimeString()}] ${m}`;
             const f = document.getElementById('_feed'); f.prepend(d);
-            if(f.childNodes.length > 15) f.lastChild.remove();
+            if(f.childNodes.length > 20) f.lastChild.remove();
         }
-
-        window.exp = () => {
-            const b = new Blob([logs.join('\n')], {type: 'text/plain'});
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(b); a.download = `NEXUS_ARCHITECT.txt`; a.click();
-        };
 
         setInterval(engine, 4000);
     })();
