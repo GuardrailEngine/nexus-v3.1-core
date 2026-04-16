@@ -2,271 +2,138 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS v3.1 | Sovereign Command Center</title>
-
+    <title>NEXUS v3.1 | TOTAL INTEGRATION</title>
     <style>
-        :root {
-            --gold: #d4af37;
-            --black: #050505;
-            --green: #00ff9f;
-            --dim-gold: rgba(212, 175, 55, 0.3);
-        }
+        :root { --gold: #d4af37; --black: #050505; --green: #00ff9f; --dim-gold: rgba(212, 175, 55, 0.3); --blue: #00d4ff; }
+        body { background: var(--black); color: var(--gold); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
+        
+        .main-frame { border: 2px solid var(--gold); padding: 20px; box-shadow: inset 0 0 15px var(--dim-gold), 0 0 30px var(--dim-gold); position: relative; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 15px; margin-bottom: 25px; }
+        .sys-status { font-size: 0.85rem; text-align: left; color: var(--green); text-shadow: 0 0 5px var(--green); }
 
-        body {
-            background: var(--black);
-            color: var(--gold);
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-        }
+        /* مصفوفة البيانات المتكاملة */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; padding: 18px; position: relative; transition: 0.3s; }
+        .stat-card:hover { border-color: var(--gold); background: rgba(20, 20, 20, 1); }
+        .stat-card::before { content: "DATA_NODE"; position: absolute; top: 2px; right: 5px; font-size: 0.5rem; opacity: 0.5; }
+        .val { display: block; font-size: 1.9rem; color: #fff; text-shadow: 0 0 8px var(--gold); margin-top: 5px; }
 
-        .main-frame {
-            border: 2px solid var(--gold);
-            padding: 20px;
-            box-shadow: inset 0 0 15px var(--dim-gold), 0 0 20px var(--dim-gold);
-            position: relative;
-        }
+        /* رادار السيادة والوكلاء */
+        .core-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .radar-box { border: 1px solid var(--gold); padding: 20px; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); position: relative; }
+        
+        .agents-cluster { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .agent { border: 1px solid #444; padding: 15px; text-align: center; position: relative; background: rgba(0,0,0,0.8); }
+        .agent.active { border-color: var(--blue); box-shadow: 0 0 15px var(--blue); color: var(--blue); transform: translateY(-2px); }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--gold);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
+        /* مراقب النبض الحيوي للبيانات */
+        .live-monitor { background: #0a0a0a; border: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .pulse-line { height: 40px; border-bottom: 1px solid #222; position: relative; overflow: hidden; }
+        .wave { position: absolute; width: 100%; height: 100%; stroke: var(--gold); fill: none; }
 
-        .sys-status {
-            font-size: 0.8rem;
-            text-align: left;
-            color: var(--green);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #333;
-            padding: 15px;
-            position: relative;
-        }
-
-        .val {
-            display: block;
-            font-size: 1.8rem;
-            color: #fff;
-            text-shadow: 0 0 5px var(--gold);
-        }
-
-        .core-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
-        .topology-box {
-            border: 1px solid var(--gold);
-            padding: 20px;
-            background: rgba(10, 10, 10, 0.9);
-        }
-
-        .agents-cluster {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .agent {
-            border: 1px solid #444;
-            padding: 15px;
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        .agent.active {
-            border-color: var(--green);
-            background: rgba(0, 255, 159, 0.05);
-            box-shadow: 0 0 15px rgba(0, 255, 159, 0.2);
-            color: #fff;
-        }
-
-        .resource-monitor {
-            background: #111;
-            border: 1px solid #333;
-            padding: 15px;
-        }
-
-        .bar-container {
-            background: #222;
-            height: 10px;
-            margin: 10px 0;
-        }
-
-        .bar-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.4s;
-        }
-
-        .terminal {
-            background: #000;
-            border: 1px solid #222;
-            color: var(--green);
-            padding: 10px;
-            height: 150px;
-            overflow-y: auto;
-            font-size: 0.75rem;
-            margin-top: 20px;
-            line-height: 1.6;
-        }
-
-        .sovereign-mark {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            font-size: 0.6rem;
-            opacity: 0.4;
-        }
+        .terminal { background: #000; border: 1px solid #222; color: var(--green); padding: 12px; height: 160px; overflow-y: hidden; font-size: 0.8rem; margin-top: 25px; border-right: 3px solid var(--gold); }
+        
+        .footer-tag { margin-top: 20px; text-align: center; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.6; }
     </style>
 </head>
-
 <body>
 
 <div class="main-frame">
-
     <header>
         <div>
-            <h1 style="margin:0;">⚔️ NEXUS v3.1 CORE</h1>
-            <span style="font-size: 0.7rem;">ENGINEERING SOVEREIGNTY ARCHITECTURE</span>
+            <h1 style="margin:0; font-size: 1.7rem; letter-spacing: 1px;">⚔️ NEXUS v3.1 INTEGRATED</h1>
+            <span style="font-size: 0.75rem; color: var(--gold);">CORE ENGINE: SOVEREIGN_ARCH_PRO</span>
         </div>
-
         <div class="sys-status">
-            <div>STATUS: ENCRYPTED</div>
-            <div>SIGNAL: STABLE [AES-256]</div>
+            <div>NETWORK: ENCRYPTED_TUNNEL</div>
+            <div>NODE_ID: CHAKIR_01</div>
+            <div>STATUS: <span id="sync-status">SYNCHRONIZING...</span></div>
         </div>
     </header>
 
     <div class="stats-grid">
-        <div class="stat-card"><span>Network Load</span><span class="val" id="net">1,247 r/s</span></div>
-        <div class="stat-card"><span>Yield Margin</span><span class="val" style="color:var(--green)">89.3%</span></div>
-        <div class="stat-card"><span>Thread Count</span><span class="val">398 L</span></div>
-        <div class="stat-card"><span>Sovereignty</span><span class="val">100%</span></div>
+        <div class="stat-card"><span>Real-time RPS</span><span class="val" id="rps-val">1,247</span></div>
+        <div class="stat-card"><span>Yield Index</span><span class="val" style="color:var(--green)">89.3%</span></div>
+        <div class="stat-card"><span>Active Threads</span><span class="val" id="thread-val">398</span></div>
+        <div class="stat-card"><span>Integrity</span><span class="val">99.9%</span></div>
     </div>
 
-    <div class="core-section">
-
-        <div class="topology-box">
-            <h3>خريطة الوكلاء</h3>
-
+    <div class="core-grid">
+        <div class="radar-box">
+            <h3 style="margin-top:0; color: var(--blue);">📡 رادار طوبولوجيا الوكلاء</h3>
             <div class="agents-cluster">
-                <div class="agent" id="planner">◈ PLANNER</div>
-                <div class="agent" id="executor">▶ EXECUTOR</div>
-                <div class="agent" id="critic">⚠ CRITIC</div>
-                <div class="agent" id="optimizer">⬡ OPTIMIZER</div>
+                <div class="agent" id="planner">◈ PLANNER<br><small>Strategic Core</small></div>
+                <div class="agent" id="executor">▶ EXECUTOR<br><small>Logic Runner</small></div>
+                <div class="agent" id="critic">⚠ CRITIC<br><small>Security Audit</small></div>
+                <div class="agent" id="optimizer">⬡ OPTIMIZER<br><small>Self-Learning</small></div>
             </div>
         </div>
 
-        <div class="resource-monitor">
-            <h3>مراقب الموارد</h3>
+        <div class="live-monitor">
+            <h3 style="margin-top:0;">مراقب التدفق السيادي</h3>
+            <div>CPU SPREAD: <span id="cpu-num">12%</span></div>
+            <div style="background:#222; height:6px;"><div id="cpu-bar" style="height:100%; background:var(--gold); width:12%"></div></div>
+            
+            <div>MEM SYNC: <span id="mem-num">44%</span></div>
+            <div style="background:#222; height:6px;"><div id="mem-bar" style="height:100%; background:var(--green); width:44%"></div></div>
 
-            CPU: <span id="cpu-val">0%</span>
-            <div class="bar-container">
-                <div id="cpu-bar" class="bar-fill" style="background:var(--gold)"></div>
-            </div>
-
-            MEM: <span id="mem-val">0%</span>
-            <div class="bar-container">
-                <div id="mem-bar" class="bar-fill" style="background:var(--green)"></div>
-            </div>
-
-            <div style="margin-top:10px;">
-                Uptime: <span id="uptime">00:00:00</span>
+            <div style="margin-top:20px; border:1px solid #333; padding:10px; font-size:0.8rem;">
+                <strong>UPTIME:</strong> <span id="clock">00:00:00</span><br>
+                <strong>PACKETS:</strong> <span id="packet-count">0</span>
             </div>
         </div>
-
     </div>
 
     <div class="terminal" id="term">
-        <div>> SYSTEM INIT...</div>
+        <div>>> [SYS] Establishing Sovereign Handshake...</div>
     </div>
 
-    <div class="sovereign-mark">BUILD v3.1.0-STABLE</div>
+    <div class="footer-tag">GUARDRAIL ENGINE | NEXUS CORE v3.1 | 2026 SOVEREIGNTY PROJECT</div>
 </div>
 
 <script>
-const agents = ["planner","executor","critic","optimizer"];
-const term = document.getElementById("term");
+    const agents = ['planner', 'executor', 'critic', 'optimizer'];
+    const term = document.getElementById('term');
+    let packets = 0;
+    let startTime = Date.now();
 
-let startTime = Date.now();
-let currentActive = null;
+    // محاكاة الاتصال والبيانات الحقيقية
+    setInterval(() => {
+        // تحديث الوقت
+        let diff = Math.floor((Date.now() - startTime) / 1000);
+        let h = Math.floor(diff / 3600).toString().padStart(2, '0');
+        let m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
+        let s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('clock').textContent = `${h}:${m}:${s}`;
 
-/* =========================
-   LOG SYSTEM (FIXED)
-========================= */
-function log(message) {
-    const div = document.createElement("div");
-    div.textContent = message;
+        // تحديث أرقام الأداء بشكل طفيف للإيهام بالحيوية
+        let rps = (1247 + (Math.random() * 10 - 5)).toFixed(0);
+        document.getElementById('rps-val').textContent = rps;
+        
+        // تحديث الموارد
+        let cpu = Math.floor(Math.random() * 20) + 10;
+        document.getElementById('cpu-num').textContent = cpu + '%';
+        document.getElementById('cpu-bar').style.width = cpu + '%';
 
-    term.prepend(div);
+        packets += Math.floor(Math.random() * 50);
+        document.getElementById('packet-count').textContent = packets;
+        document.getElementById('sync-status').textContent = "STABLE";
 
-    // prevent memory leak
-    if (term.children.length > 50) {
-        term.removeChild(term.lastChild);
-    }
-}
+    }, 1000);
 
-/* =========================
-   RESOURCE LOOP
-========================= */
-function updateResources() {
-    const cpu = Math.floor(Math.random() * 15) + 5;
-    const mem = Math.floor(Math.random() * 10) + 40;
+    // محاكاة نشاط الوكلاء والسجلات
+    setInterval(() => {
+        agents.forEach(a => document.getElementById(a).classList.remove('active'));
+        let active = agents[Math.floor(Math.random() * agents.length)];
+        document.getElementById(active).classList.add('active');
 
-    document.getElementById("cpu-val").textContent = cpu + "%";
-    document.getElementById("cpu-bar").style.width = cpu + "%";
-
-    document.getElementById("mem-val").textContent = mem + "%";
-    document.getElementById("mem-bar").style.width = mem + "%";
-
-    let diff = Math.floor((Date.now() - startTime) / 1000);
-
-    let h = String(Math.floor(diff / 3600)).padStart(2,'0');
-    let m = String(Math.floor((diff % 3600) / 60)).padStart(2,'0');
-    let s = String(diff % 60).padStart(2,'0');
-
-    document.getElementById("uptime").textContent = `${h}:${m}:${s}`;
-}
-
-/* =========================
-   AGENT SYSTEM
-========================= */
-function updateAgents() {
-    agents.forEach(a =>
-        document.getElementById(a).classList.remove("active")
-    );
-
-    const next = agents[Math.floor(Math.random() * agents.length)];
-
-    if (currentActive !== next) {
-        currentActive = next;
-        document.getElementById(next).classList.add("active");
-
-        log(`[${new Date().toLocaleTimeString()}] AGENT_${next.toUpperCase()} active`);
-    }
-}
-
-/* =========================
-   LOOPS (CONTROLLED)
-========================= */
-setInterval(updateResources, 1000);
-setInterval(updateAgents, 2000);
+        let log = document.createElement('div');
+        log.style.color = active === 'critic' ? '#ff4444' : '#00ff9f';
+        log.textContent = `>> [${new Date().toLocaleTimeString()}] [${active.toUpperCase()}] Packet verified. Integrity confirmed.`;
+        term.prepend(log);
+        if(term.childNodes.length > 8) term.lastChild.remove();
+    }, 1800);
 </script>
 
 </body>
