@@ -2,139 +2,64 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS v3.1 | TOTAL INTEGRATION</title>
+    <title>NEXUS v3.1 | PROTECTED_CORE</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
     <style>
-        :root { --gold: #d4af37; --black: #050505; --green: #00ff9f; --dim-gold: rgba(212, 175, 55, 0.3); --blue: #00d4ff; }
-        body { background: var(--black); color: var(--gold); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
-        
-        .main-frame { border: 2px solid var(--gold); padding: 20px; box-shadow: inset 0 0 15px var(--dim-gold), 0 0 30px var(--dim-gold); position: relative; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 15px; margin-bottom: 25px; }
-        .sys-status { font-size: 0.85rem; text-align: left; color: var(--green); text-shadow: 0 0 5px var(--green); }
-
-        /* مصفوفة البيانات المتكاملة */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; padding: 18px; position: relative; transition: 0.3s; }
-        .stat-card:hover { border-color: var(--gold); background: rgba(20, 20, 20, 1); }
-        .stat-card::before { content: "DATA_NODE"; position: absolute; top: 2px; right: 5px; font-size: 0.5rem; opacity: 0.5; }
-        .val { display: block; font-size: 1.9rem; color: #fff; text-shadow: 0 0 8px var(--gold); margin-top: 5px; }
-
-        /* رادار السيادة والوكلاء */
-        .core-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-        .radar-box { border: 1px solid var(--gold); padding: 20px; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); position: relative; }
-        
-        .agents-cluster { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .agent { border: 1px solid #444; padding: 15px; text-align: center; position: relative; background: rgba(0,0,0,0.8); }
-        .agent.active { border-color: var(--blue); box-shadow: 0 0 15px var(--blue); color: var(--blue); transform: translateY(-2px); }
-
-        /* مراقب النبض الحيوي للبيانات */
-        .live-monitor { background: #0a0a0a; border: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .pulse-line { height: 40px; border-bottom: 1px solid #222; position: relative; overflow: hidden; }
-        .wave { position: absolute; width: 100%; height: 100%; stroke: var(--gold); fill: none; }
-
-        .terminal { background: #000; border: 1px solid #222; color: var(--green); padding: 12px; height: 160px; overflow-y: hidden; font-size: 0.8rem; margin-top: 25px; border-right: 3px solid var(--gold); }
-        
-        .footer-tag { margin-top: 20px; text-align: center; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.6; }
+        :root { --_0x1: #d4af37; --_0x2: #050505; --_0x3: #00ff9f; --_0x4: #00d4ff; }
+        body { background: var(--_0x2); color: var(--_0x1); font-family: 'Courier New', monospace; margin: 0; padding: 15px; }
+        ._0x_frame { border: 2px solid var(--_0x1); padding: 20px; box-shadow: inset 0 0 20px rgba(212,175,55,0.1); position: relative; }
+        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--_0x1); padding-bottom: 10px; margin-bottom: 20px; }
+        ._0x_grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        ._0x_card { background: #0a0a0a; border: 1px solid #222; padding: 15px; text-align: center; }
+        ._0x_val { display: block; font-size: 1.6rem; color: #fff; text-shadow: 0 0 8px var(--_0x1); }
+        ._0x_view { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        ._0x_panel { border: 1px solid #333; background: #000; padding: 15px; height: 250px; overflow: hidden; font-size: 0.75rem; color: var(--_0x4); }
+        ._0x_agt { border: 1px solid #222; padding: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; opacity: 0.4; }
+        ._0x_agt._0x_active { opacity: 1; border-color: var(--_0x3); color: #fff; background: rgba(0,255,159,0.05); }
     </style>
 </head>
 <body>
-
-<div class="main-frame">
+<div class="_0x_frame">
     <header>
-        <div>
-            <h1 style="margin:0; font-size: 1.7rem; letter-spacing: 1px;">⚔️ NEXUS v3.1 INTEGRATED</h1>
-            <span style="font-size: 0.75rem; color: var(--gold);">CORE ENGINE: SOVEREIGN_ARCH_PRO</span>
-        </div>
-        <div class="sys-status">
-            <div>NETWORK: ENCRYPTED_TUNNEL</div>
-            <div>NODE_ID: CHAKIR_01</div>
-            <div>STATUS: <span id="sync-status">SYNCHRONIZING...</span></div>
-        </div>
+        <div><h1 style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x76\x33\x2E\x31</h1><small>ID: CHAKIR_01 | SEC_ALPHA</small></div>
+        <div style="text-align:left;">STATUS: <span id="_0x_st">STABLE</span><br>UPTIME: <span id="_0x_ut">00:00:00</span></div>
     </header>
-
-    <div class="stats-grid">
-        <div class="stat-card"><span>Real-time RPS</span><span class="val" id="rps-val">1,247</span></div>
-        <div class="stat-card"><span>Yield Index</span><span class="val" style="color:var(--green)">89.3%</span></div>
-        <div class="stat-card"><span>Active Threads</span><span class="val" id="thread-val">398</span></div>
-        <div class="stat-card"><span>Integrity</span><span class="val">99.9%</span></div>
+    <div class="_0x_grid">
+        <div class="_0x_card"><span>TRAFFIC</span><span class="_0x_val" id="_0x_r">1247</span></div>
+        <div class="_0x_card"><span>YIELD</span><span class="_0x_val" style="color:var(--_0x3)">89.3%</span></div>
+        <div class="_0x_card"><span>VAULT</span><span class="_0x_val">LOCKED</span></div>
+        <div class="_0x_card"><span>THREADS</span><span class="_0x_val">398</span></div>
     </div>
-
-    <div class="core-grid">
-        <div class="radar-box">
-            <h3 style="margin-top:0; color: var(--blue);">📡 رادار طوبولوجيا الوكلاء</h3>
-            <div class="agents-cluster">
-                <div class="agent" id="planner">◈ PLANNER<br><small>Strategic Core</small></div>
-                <div class="agent" id="executor">▶ EXECUTOR<br><small>Logic Runner</small></div>
-                <div class="agent" id="critic">⚠ CRITIC<br><small>Security Audit</small></div>
-                <div class="agent" id="optimizer">⬡ OPTIMIZER<br><small>Self-Learning</small></div>
-            </div>
+    <div class="_0x_view">
+        <div class="_0x_panel" style="height:auto;">
+            <div id="a1" class="_0x_agt">◈ PLANNER <span>[SYNC]</span></div>
+            <div id="a2" class="_0x_agt">▶ EXECUTOR <span>[RUN]</span></div>
+            <div id="a3" class="_0x_agt">⚠ CRITIC <span>[AUDIT]</span></div>
+            <div id="a4" class="_0x_agt">⬡ OPTIMIZER <span>[LEARN]</span></div>
         </div>
-
-        <div class="live-monitor">
-            <h3 style="margin-top:0;">مراقب التدفق السيادي</h3>
-            <div>CPU SPREAD: <span id="cpu-num">12%</span></div>
-            <div style="background:#222; height:6px;"><div id="cpu-bar" style="height:100%; background:var(--gold); width:12%"></div></div>
-            
-            <div>MEM SYNC: <span id="mem-num">44%</span></div>
-            <div style="background:#222; height:6px;"><div id="mem-bar" style="height:100%; background:var(--green); width:44%"></div></div>
-
-            <div style="margin-top:20px; border:1px solid #333; padding:10px; font-size:0.8rem;">
-                <strong>UPTIME:</strong> <span id="clock">00:00:00</span><br>
-                <strong>PACKETS:</strong> <span id="packet-count">0</span>
-            </div>
-        </div>
+        <div class="_0x_panel" id="_0x_stream"></div>
     </div>
-
-    <div class="terminal" id="term">
-        <div>>> [SYS] Establishing Sovereign Handshake...</div>
-    </div>
-
-    <div class="footer-tag">GUARDRAIL ENGINE | NEXUS CORE v3.1 | 2026 SOVEREIGNTY PROJECT</div>
+    <footer style="margin-top:20px; text-align:center; font-size:0.6rem; opacity:0.3;">© 2026 GUARDRAIL ENGINE | PROTECTED_BY_SOVEREIGN_ARCH</footer>
 </div>
-
 <script>
-    const agents = ['planner', 'executor', 'critic', 'optimizer'];
-    const term = document.getElementById('term');
-    let packets = 0;
-    let startTime = Date.now();
-
-    // محاكاة الاتصال والبيانات الحقيقية
-    setInterval(() => {
-        // تحديث الوقت
-        let diff = Math.floor((Date.now() - startTime) / 1000);
-        let h = Math.floor(diff / 3600).toString().padStart(2, '0');
-        let m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
-        let s = (diff % 60).toString().padStart(2, '0');
-        document.getElementById('clock').textContent = `${h}:${m}:${s}`;
-
-        // تحديث أرقام الأداء بشكل طفيف للإيهام بالحيوية
-        let rps = (1247 + (Math.random() * 10 - 5)).toFixed(0);
-        document.getElementById('rps-val').textContent = rps;
-        
-        // تحديث الموارد
-        let cpu = Math.floor(Math.random() * 20) + 10;
-        document.getElementById('cpu-num').textContent = cpu + '%';
-        document.getElementById('cpu-bar').style.width = cpu + '%';
-
-        packets += Math.floor(Math.random() * 50);
-        document.getElementById('packet-count').textContent = packets;
-        document.getElementById('sync-status').textContent = "STABLE";
-
-    }, 1000);
-
-    // محاكاة نشاط الوكلاء والسجلات
-    setInterval(() => {
-        agents.forEach(a => document.getElementById(a).classList.remove('active'));
-        let active = agents[Math.floor(Math.random() * agents.length)];
-        document.getElementById(active).classList.add('active');
-
-        let log = document.createElement('div');
-        log.style.color = active === 'critic' ? '#ff4444' : '#00ff9f';
-        log.textContent = `>> [${new Date().toLocaleTimeString()}] [${active.toUpperCase()}] Packet verified. Integrity confirmed.`;
-        term.prepend(log);
-        if(term.childNodes.length > 8) term.lastChild.remove();
-    }, 1800);
+    (function(_0x_n,_0x_e){
+        const _0x_a = ['a1','a2','a3','a4'];
+        let _0x_s = Date.now();
+        setInterval(()=>{
+            let _0x_d = Math.floor((Date.now()-_0x_s)/1000);
+            document.getElementById('_0x_ut').textContent = new Date(_0x_d * 1000).toISOString().substr(11, 8);
+            document.getElementById('_0x_r').textContent = (1247 + Math.random()*4-2).toFixed(0);
+            let _0x_p = document.createElement('div');
+            _0x_p.textContent = `[${_0x_d}] ENC_PKT: 0x${Math.random().toString(16).slice(2,10).toUpperCase()} -> VERIFIED`;
+            let _0x_box = document.getElementById('_0x_stream');
+            _0x_box.prepend(_0x_p);
+            if(_0x_box.childNodes.length > 15) _0x_box.lastChild.remove();
+        }, 1000);
+        setInterval(()=>{
+            _0x_a.forEach(i=>document.getElementById(i).classList.remove('_0x_active'));
+            document.getElementById(_0x_a[Math.floor(Math.random()*4)]).classList.add('_0x_active');
+        }, 2000);
+    })();
 </script>
-
 </body>
 </html>
