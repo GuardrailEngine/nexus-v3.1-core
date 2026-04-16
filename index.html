@@ -5,9 +5,13 @@
     <title>NEXUS v3.1 | PROTECTED_CORE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
     <style>
-        :root { --_0x1: #d4af37; --_0x2: #050505; --_0x3: #00ff9f; --_0x4: #00d4ff; }
-        body { background: var(--_0x2); color: var(--_0x1); font-family: 'Courier New', monospace; margin: 0; padding: 15px; }
+        :root { --_0x1: #d4af37; --_0x2: #050505; --_0x3: #00ff9f; --_0x4: #00d4ff; --_0x5: #ff4444; }
+        body { background: var(--_0x2); color: var(--_0x1); font-family: 'Courier New', monospace; margin: 0; padding: 15px; transition: 0.3s; }
         ._0x_frame { border: 2px solid var(--_0x1); padding: 20px; box-shadow: inset 0 0 20px rgba(212,175,55,0.1); position: relative; }
+        
+        /* رسالة التحذير السيادية */
+        #_0x_warn { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.95); color: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: sans-serif; }
+        
         header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--_0x1); padding-bottom: 10px; margin-bottom: 20px; }
         ._0x_grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         ._0x_card { background: #0a0a0a; border: 1px solid #222; padding: 15px; text-align: center; }
@@ -18,7 +22,13 @@
         ._0x_agt._0x_active { opacity: 1; border-color: var(--_0x3); color: #fff; background: rgba(0,255,159,0.05); }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <div id="_0x_warn">
+    <h1>⚠ كشف محاولة اختراق السيادة ⚠</h1>
+    <p>لقد تم رصد محاولة غير مصرح بها للوصول إلى كود NEXUS v3.1 CORE.</p>
+    <p>عنوانك الرقمي (IP) قيد المراقبة الآن من قبل بروتوكول GUARDRAIL.</p>
+    <button onclick="location.reload()" style="padding:10px 20px; background:#fff; border:none; cursor:pointer;">العودة للنظام</button>
+</div>
+
 <div class="_0x_frame">
     <header>
         <div><h1 style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x76\x33\x2E\x31</h1><small>ID: CHAKIR_01 | SEC_ALPHA</small></div>
@@ -39,10 +49,19 @@
         </div>
         <div class="_0x_panel" id="_0x_stream"></div>
     </div>
-    <footer style="margin-top:20px; text-align:center; font-size:0.6rem; opacity:0.3;">© 2026 GUARDRAIL ENGINE | PROTECTED_BY_SOVEREIGN_ARCH</footer>
+    <footer style="margin-top:20px; text-align:center; font-size:0.6rem; opacity:0.3;">© 2026 GUARDRAIL ENGINE | CHAKIR SOVEREIGN ARCH</footer>
 </div>
+
 <script>
-    (function(_0x_n,_0x_e){
+    (function(){
+        // منع F12 و Ctrl+Shift+I
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
+                document.getElementById('_0x_warn').style.display = 'flex';
+                return false;
+            }
+        };
+
         const _0x_a = ['a1','a2','a3','a4'];
         let _0x_s = Date.now();
         setInterval(()=>{
@@ -55,6 +74,7 @@
             _0x_box.prepend(_0x_p);
             if(_0x_box.childNodes.length > 15) _0x_box.lastChild.remove();
         }, 1000);
+        
         setInterval(()=>{
             _0x_a.forEach(i=>document.getElementById(i).classList.remove('_0x_active'));
             document.getElementById(_0x_a[Math.floor(Math.random()*4)]).classList.add('_0x_active');
