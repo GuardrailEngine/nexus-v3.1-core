@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.1 | OMNI_SHIELD</title>
+    <title>NEXUS v3.2 | FINANCIAL ARCHITECT</title>
     <style>
         :root { --g: #d4af37; --bg: #050505; --s: #00ff9f; --a: #00d4ff; --e: #ff4444; }
         body { background: var(--bg); color: var(--g); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
         ._0x_frame { border: 2px solid var(--g); padding: 15px; max-width: 1300px; margin: auto; min-height: 95vh; transition: 0.3s; position: relative; }
         
-        /* التنبيهات البصرية */
         .bullish { box-shadow: inset 0 0 40px rgba(0, 255, 159, 0.15); border-color: var(--s) !important; }
         .bearish { box-shadow: inset 0 0 40px rgba(255, 68, 68, 0.15); border-color: var(--e) !important; }
         .anomaly_flash { animation: flash_red 0.5s infinite; }
         @keyframes flash_red { 0% { background: transparent; } 50% { background: rgba(255, 68, 68, 0.1); } 100% { background: transparent; } }
 
         header { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; }
-        ._grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        ._card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; position: relative; }
-        ._val { display: block; font-size: 1.3rem; color: #fff; text-shadow: 0 0 5px var(--g); }
-
-        ._view { display: grid; grid-template-columns: 1fr 2.2fr; gap: 15px; }
-        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 420px; position: relative; overflow: hidden; }
+        ._grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        @media (min-width: 768px) { ._grid { grid-template-columns: repeat(4, 1fr); } }
         
-        .btn { background: #111; border: 1px solid var(--g); color: var(--g); padding: 4px 8px; cursor: pointer; font-size: 0.65rem; margin-left: 4px; }
+        ._card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; position: relative; }
+        ._val { display: block; font-size: 1.2rem; color: #fff; text-shadow: 0 0 5px var(--g); margin: 5px 0; }
+
+        ._view { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { ._view { grid-template-columns: 1fr 2.2fr; } }
+        
+        ._panel { border: 1px solid #222; background: #000; padding: 12px; height: 400px; position: relative; overflow: hidden; }
+        .btn { background: #111; border: 1px solid var(--g); color: var(--g); padding: 5px 10px; cursor: pointer; font-size: 0.7rem; margin: 2px; }
         .btn:hover { background: var(--g); color: #000; }
 
-        #_feed { font-size: 0.7rem; color: var(--a); height: 360px; overflow-y: hidden; }
-        .label { color: #555; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 1px; }
+        #_feed { font-size: 0.7rem; color: var(--a); height: 320px; overflow-y: hidden; }
+        .label { color: #555; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* مؤشر الثقة */
-        #conf_bar { height: 100%; transition: width 0.8s ease; border-radius: 2px; }
-        #strat_advice { font-size: 0.6rem; margin-top: 5px; font-weight: bold; }
+        input { background: #000; color: var(--a); border: 1px solid #333; font-size: 0.8rem; text-align: center; width: 90%; padding: 5px; margin-top: 5px; outline: none; }
+        #conf_bar { height: 4px; transition: width 0.8s ease; border-radius: 2px; margin-top: 5px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -39,84 +40,75 @@
 <div class="_0x_frame" id="nx_core">
     <header>
         <div>
-            <h2 style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x4F\x4D\x4E\x49 \x53\x48\x49\x45\x4C\x44</h2>
+            <h2 style="margin:0; font-size: 1.2rem;">⚔️ \x4E\x45\x58\x55\x53 \x56\x33\x2E\x32</h2>
             <div style="margin-top:5px;">
-                <button class="btn" onclick="svc('BTCUSDT')">BTC/USD</button>
-                <button class="btn" onclick="svc('ETHUSDT')">ETH/USD</button>
-                <button class="btn" onclick="svc('PAXGUSDT')">GOLD/USD</button>
+                <button class="btn" onclick="svc('BTCUSDT')">BTC</button>
+                <button class="btn" onclick="svc('ETHUSDT')">ETH</button>
+                <button class="btn" onclick="svc('PAXGUSDT')">GOLD</button>
             </div>
         </div>
-        <div style="text-align:left; font-size: 0.7rem;">
-            <div>SHIELD_V3: <span id="sh_st" style="color:var(--s)">REINFORCED</span></div>
-            <div>UPTIME: <span id="timer">00:00:00</span></div>
+        <div style="text-align:left; font-size: 0.6rem;">
+            <div>ARCHITECT: <span style="color:var(--g)">CHAKIR</span></div>
+            <div>SHIELD: <span id="sh_st" style="color:var(--s)">IMMUNE</span></div>
         </div>
     </header>
 
     <div class="_grid">
-        <div class="_card"><span class="label">Market Pulse</span><span class="_val" id="cp">0.00</span><small id="an">BTC/USD</small></div>
+        <div class="_card"><span class="label">Live Price</span><span class="_val" id="cp">0.00</span><small id="an">BTC/USD</small></div>
         
-        <div class="_card"><span class="label">Predictive Target</span><span class="_val" id="pt" style="color:var(--a)">---</span><small>SMA_AI_MODEL</small></div>
-        
-        <div class="_card">
-            <span class="label">Digital Confidence</span>
+        <div class="_card"><span class="label">Confidence</span>
             <span class="_val" id="cv">0%</span>
-            <div style="width:100%; background:#111; height:4px; margin-top:5px; border-radius:2px;">
-                <div id="conf_bar" style="width:0%; background:var(--s);"></div>
-            </div>
-            <div id="strat_advice" style="color:var(--g)">[BOOTING_LOGIC]</div>
+            <div style="width:100%; background:#111; height:4px;"><div id="conf_bar" style="width:0%; background:var(--s);"></div></div>
+            <div id="strat_advice" style="font-size:0.5rem; margin-top:5px;">[SYNCING]</div>
+        </div>
+        
+        <div class="_card" style="border-color: var(--a);">
+            <span class="label">Risk Manager</span>
+            <input type="number" id="balance" placeholder="Capital $" oninput="runRisk()">
+            <div id="risk_result" style="font-size:0.55rem; color:var(--g); margin-top:5px;">Enter Capital</div>
         </div>
 
-        <div class="_card"><span class="label">Sovereign Vault</span><span class="_val" style="font-size:0.9rem;">ENCRYPTED</span><button class="btn" style="font-size:0.5rem;margin-top:5px;" onclick="exp()">EXPORT LEDGER</button></div>
+        <div class="_card"><span class="label">Predictive</span><span class="_val" id="pt" style="color:var(--a)">---</span><small>SMA_MODEL</small></div>
     </div>
 
     <div class="_view">
         <div class="_panel">
-            <div class="label">Agent Topology & Status</div>
-            <div style="font-size:0.7rem; margin-top:15px; line-height:2.2;">
-                <div>◈ PLANNER: <span id="s1" style="color:#555">ANALYZING</span></div>
-                <div>▶ EXECUTOR: <span id="s2" style="color:#555">STREAMING</span></div>
-                <div>⚠ CRITIC: <span id="s3" style="color:var(--s)">SHIELD_ACTIVE</span></div>
-                <div>⬡ OPTIMIZER: <span id="s4" style="color:#555">CALCULATING</span></div>
-            </div>
-            <div style="margin-top:30px; padding:10px; border:1px solid #111; border-radius:5px;">
-                <div class="label">Engineering Log</div>
-                <div style="font-size:0.6rem; color:#444; margin-top:5px;">
-                    - AES-256-GCM Vault Active<br>
-                    - Anomaly Threshold: 15%<br>
-                    - Dynamic SMA Integration
-                </div>
+            <div class="label">Agent Topology</div>
+            <div style="font-size:0.7rem; margin-top:15px; line-height:2;">
+                <div>◈ PLANNER: <span id="s1" style="color:var(--g)">ACTIVE</span></div>
+                <div>▶ EXECUTOR: <span id="s2" style="color:var(--s)">RUNNING</span></div>
+                <div>⚠ CRITIC: <span id="s3" style="color:var(--a)">GUARD_ON</span></div>
+                <button class="btn" style="width:100%; margin-top:20px;" onclick="exp()">EXPORT BLACK_BOX</button>
             </div>
         </div>
 
         <div class="_panel">
-            <div class="label">Strategic Analytic Feed</div>
-            <div id="_feed">>> [SYS] Nexus Omni-Shield Handshake...</div>
+            <div class="label">Sovereign Strategic Feed</div>
+            <div id="_feed">>> [SYS] Financial Core Initialized...</div>
         </div>
     </div>
 </div>
 
 <script>
     (function(){
-        let cas = 'BTCUSDT', hist = [], logs = [], st = Date.now();
+        let cas = 'BTCUSDT', hist = [], logs = [], lp = 0;
         const thr = 0.15;
 
-        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Switching Target: ${a}`, '#d4af37'); };
+        window.svc = (a) => { cas = a; document.getElementById('an').textContent = a; hist = []; log(`[SYS] Switching to ${a}`, '#d4af37'); };
 
         async function engine() {
             try {
                 const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cas}`);
                 const data = await res.json();
                 const p = parseFloat(data.price);
+                lp = p;
                 
-                // --- نظام الحصانة (Immunity Shield) ---
-                let dev = 0;
                 if (hist.length > 5) {
                     let avg = hist.reduce((a, b) => a + b) / hist.length;
-                    dev = Math.abs(p - avg) / avg;
+                    let dev = Math.abs(p - avg) / avg;
                     if (dev > thr) {
                         document.getElementById('nx_core').classList.add('anomaly_flash');
-                        log(`[CRITIC] ANOMALY DETECTED: Data Intercepted and Blocked.`, '#ff4444');
-                        updateConfidence(0, dev);
+                        log(`[CRITIC] SHIELD: Anomaly Blocked @ ${p}`, '#ff4444');
                         return;
                     }
                 }
@@ -125,74 +117,54 @@
                 hist.push(p); if(hist.length > 20) hist.shift();
                 
                 let ch = hist.length > 1 ? p - hist[0] : 0;
-                let tar = p + (ch * 0.3);
+                let tar = p + (ch * 0.4);
                 let vol = hist.length > 1 ? Math.max(...hist) - Math.min(...hist) : 0;
 
-                updateUI(p, tar, vol, ch, dev);
+                upd(p, tar, vol, ch);
+                runRisk();
 
-            } catch (e) { log(`[SYS] Network Shield Active.`, '#ff4444'); }
+            } catch (e) { log(`[!] Connection Shield Active`, '#ff4444'); }
         }
 
-        function updateUI(p, t, v, ch, dev) {
-            const core = document.getElementById('nx_core');
+        function upd(p, t, v, ch) {
             document.getElementById('cp').textContent = p.toLocaleString();
             document.getElementById('pt').textContent = t.toLocaleString(undefined, {maximumFractionDigits: 2});
             
-            updateConfidence(v, dev);
-
-            if(ch > 0.05) {
-                core.className = '_0x_frame bullish';
-                log(`[PLANNER] Signal: Bullish Trend. Target: ${t.toFixed(2)}`, '#00ff9f');
-            } else if(ch < -0.05) {
-                core.className = '_0x_frame bearish';
-                log(`[PLANNER] Signal: Bearish Pressure. Target: ${t.toFixed(2)}`, '#ff4444');
-            } else { core.className = '_0x_frame'; }
-        }
-
-        function updateConfidence(vol, dev) {
-            let conf = 100 - (vol / 5) - (dev * 200);
-            conf = Math.max(5, Math.min(99, conf));
+            let conf = Math.max(5, Math.min(99, 100 - (v / 10)));
+            document.getElementById('cv').textContent = conf.toFixed(0) + '%';
+            document.getElementById('conf_bar').style.width = conf + '%';
             
-            const cv = document.getElementById('cv');
-            const cb = document.getElementById('conf_bar');
             const ad = document.getElementById('strat_advice');
+            if(conf > 80) { ad.textContent = '[HIGH_RELIANCE]'; ad.style.color = 'var(--s)'; }
+            else { ad.textContent = '[MARKET_NOISE]'; ad.style.color = 'var(--g)'; }
 
-            cv.textContent = conf.toFixed(0) + '%';
-            cb.style.width = conf + '%';
-            
-            if(conf > 75) {
-                cb.style.background = 'var(--s)';
-                ad.textContent = '[STRATEGY: HIGH_RELIANCE]';
-                ad.style.color = 'var(--s)';
-            } else if(conf > 45) {
-                cb.style.background = 'var(--g)';
-                ad.textContent = '[STRATEGY: VOLATILE_WATCH]';
-                ad.style.color = 'var(--g)';
-            } else {
-                cb.style.background = 'var(--e)';
-                ad.textContent = '[STRATEGY: MARKET_NOISE]';
-                ad.style.color = 'var(--e)';
-            }
+            const core = document.getElementById('nx_core');
+            if(ch > 0.01) { core.className = '_0x_frame bullish'; }
+            else if(ch < -0.01) { core.className = '_0x_frame bearish'; }
         }
+
+        window.runRisk = () => {
+            let b = document.getElementById('balance').value;
+            if (b > 0 && lp > 0) {
+                let risk = b * 0.01; 
+                let pos = risk / (lp * 0.02);
+                document.getElementById('risk_result').innerHTML = `Safe Pos: ${pos.toFixed(4)}<br>SL: ${(lp * 0.98).toFixed(2)}`;
+            }
+        };
 
         function log(m, c) {
             let msg = `[${new Date().toLocaleTimeString()}] ${m}`;
             logs.push(msg);
             let d = document.createElement('div'); d.style.color = c; d.textContent = `>> ${msg}`;
             const f = document.getElementById('_feed'); f.prepend(d);
-            if(f.childNodes.length > 20) f.lastChild.remove();
+            if(f.childNodes.length > 15) f.lastChild.remove();
         }
 
         window.exp = () => {
             const b = new Blob([logs.join('\n')], {type: 'text/plain'});
-            const u = window.URL.createObjectURL(b);
-            const a = document.createElement('a'); a.href = u; a.download = `NEXUS_OMNI_LEDGER.txt`; a.click();
+            const a = document.createElement('a'); a.href = window.URL.createObjectURL(b); a.download = `NEXUS_ARCHITECT.txt`; a.click();
         };
 
-        setInterval(() => {
-            let d = Math.floor((Date.now()-st)/1000);
-            document.getElementById('timer').textContent = new Date(d * 1000).toISOString().substr(11, 8);
-        }, 1000);
         setInterval(engine, 4000);
     })();
 </script>
