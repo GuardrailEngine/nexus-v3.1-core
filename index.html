@@ -3,138 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.1 | ANALYTIC_SOVEREIGN</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+    <title>NEXUS v3.1 | OMNI-SOVEREIGN</title>
     <style>
-        :root { --_0x1: #d4af37; --_0x2: #050505; --_0x3: #00ff9f; --_0x4: #00d4ff; --_0x5: #ff4444; }
-        body { background: var(--_0x2); color: var(--_0x1); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
-        ._0x_frame { border: 2px solid var(--_0x1); padding: 15px; position: relative; max-width: 1300px; margin: auto; min-height: 95vh; }
+        :root { --gold: #d4af37; --bg: #050505; --green: #00ff9f; --blue: #00d4ff; --red: #ff4444; }
+        body { background: var(--bg); color: var(--gold); font-family: 'Courier New', monospace; margin: 0; padding: 10px; transition: background 0.5s; }
+        ._0x_frame { border: 2px solid var(--gold); padding: 15px; max-width: 1300px; margin: auto; min-height: 95vh; transition: box-shadow 0.3s; }
         
-        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--_0x1); padding-bottom: 10px; margin-bottom: 15px; }
+        /* تأثير الوميض الحسي */
+        .bullish-glow { box-shadow: inset 0 0 30px rgba(0, 255, 159, 0.2); border-color: var(--green) !important; }
+        .bearish-glow { box-shadow: inset 0 0 30px rgba(255, 68, 68, 0.2); border-color: var(--red) !important; }
+
+        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
         ._0x_grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         ._0x_card { background: #0a0a0a; border: 1px solid #222; padding: 10px; text-align: center; }
-        ._0x_val { display: block; font-size: 1.4rem; color: #fff; text-shadow: 0 0 8px var(--_0x1); }
+        ._0x_val { display: block; font-size: 1.4rem; color: #fff; }
 
-        /* مساحة التحليل الاستراتيجي */
-        ._0x_analysis_zone { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 10px; }
-        ._0x_panel { border: 1px solid #333; background: #000; padding: 12px; height: 350px; overflow-y: hidden; position: relative; }
+        ._0x_analysis_zone { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+        ._0x_panel { border: 1px solid #333; background: #000; padding: 12px; height: 380px; position: relative; }
         
-        ._0x_agt { border: 1px solid #222; padding: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.5; transition: 0.3s; }
-        ._0x_agt._0x_active { opacity: 1; border-color: var(--_0x3); background: rgba(0,255,159,0.05); box-shadow: 0 0 10px var(--_0x3); }
+        /* أزرار التحكم في الأصول */
+        .asset-btn { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 5px 10px; cursor: pointer; font-size: 0.7rem; margin-left: 5px; }
+        .asset-btn:hover { background: var(--gold); color: #000; }
 
-        /* تسميات الحملات */
-        ._campaign_tag { font-size: 0.65rem; padding: 2px 6px; background: #1a1a1a; color: var(--_0x4); border: 1px solid #333; margin-top: 5px; display: inline-block; }
+        #_0x_stream { font-size: 0.7rem; color: var(--blue); height: 300px; overflow-y: hidden; }
+        .stat_label { color: #555; font-size: 0.6rem; text-transform: uppercase; }
         
-        #_0x_stream { font-size: 0.7rem; color: var(--_0x4); height: 280px; overflow-y: hidden; }
-        .stat_label { color: #555; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; }
+        /* زر الصندوق الأسود */
+        .export-btn { position: absolute; bottom: 10px; right: 10px; background: transparent; border: 1px solid #333; color: #555; font-size: 0.6rem; cursor: pointer; padding: 5px; }
+        .export-btn:hover { border-color: var(--blue); color: var(--blue); }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div class="_0x_frame">
+<div class="_0x_frame" id="main_frame">
     <header>
         <div>
-            <h2 style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x76\x33\x2E\x31 \x43\x4F\x52\x45</h2>
-            <div style="font-size: 0.7rem; opacity: 0.7;">ACTIVE_CAMPAIGNS: <span style="color:var(--_0x3)">ALPHA_TREND, VOL_SHIELD</span></div>
+            <h2 style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x4F\x4D\x4E\x49</h2>
+            <div id="asset_selectors">
+                <button class="asset-btn" onclick="setAsset('BTCUSDT')">BTC/USD</button>
+                <button class="asset-btn" onclick="setAsset('ETHUSDT')">ETH/USD</button>
+                <button class="asset-btn" onclick="setAsset('PAXGUSDT')">GOLD/USD</button>
+            </div>
         </div>
         <div style="text-align:left; font-size: 0.7rem;">
-            <div>STATUS: <span id="_0x_st" style="color:var(--_0x3)">STABLE</span></div>
+            <div>STATUS: <span id="_0x_st" style="color:var(--green)">OMNI_ACTIVE</span></div>
             <div>UPTIME: <span id="_0x_ut">00:00:00</span></div>
         </div>
     </header>
 
     <div class="_0x_grid">
-        <div class="_0x_card"><span class="stat_label">Current Market</span><span class="_0x_val" id="_0x_r">0000</span><small>USD/BTC</small></div>
-        <div class="_0x_card"><span class="stat_label">Trend Momentum</span><span class="_0x_val" id="_0x_mom" style="color:var(--_0x4)">0.00%</span><small id="_0x_dir">NEUTRAL</small></div>
-        <div class="_0x_card"><span class="stat_label">Risk Index</span><span class="_0x_val" id="_0x_vol">LOW</span><small id="_0x_risk">SECURE</small></div>
-        <div class="_0x_card"><span class="stat_label">Vault Status</span><span class="_0x_val">LOCKED</span><small>AES-256-GCM</small></div>
+        <div class="_0x_card"><span class="stat_label">Live Price</span><span class="_0x_val" id="_price">0000</span><small id="asset_name">BTC/USD</small></div>
+        <div class="_0x_card"><span class="stat_label">Predictive Target</span><span class="_0x_val" id="_target" style="color:var(--blue)">---</span><small>NEXT_10M</small></div>
+        <div class="_0x_card"><span class="stat_label">Market Sentiment</span><span class="_0x_val" id="_sent">NEUTRAL</span><small id="_vol_val">VOL: 0.00</small></div>
+        <div class="_0x_card"><span class="stat_label">Sovereign Vault</span><span class="_0x_val">SECURE</span><small>BLACK_BOX_ACTIVE</small></div>
     </div>
 
     <div class="_0x_analysis_zone">
         <div class="_0x_panel">
-            <div class="stat_label" style="margin-bottom:10px;">Agent Topology & Campaigns</div>
-            <div id="a1" class="_0x_agt">◈ PLANNER <span id="p_stat">[IDLE]</span></div>
-            <div class="_campaign_tag">CAMPAIGN: MARKET_WATCH</div>
-            
-            <div id="a2" class="_0x_agt">▶ EXECUTOR <span id="e_stat">[WAIT]</span></div>
-            <div class="_campaign_tag">CAMPAIGN: BINANCE_STREAM</div>
-            
-            <div id="a3" class="_0x_agt">⚠ CRITIC <span id="c_stat">[SCAN]</span></div>
-            <div class="_campaign_tag">CAMPAIGN: DATA_INTEGRITY</div>
-            
-            <div id="a4" class="_0x_agt">⬡ OPTIMIZER <span id="o_stat">[SYNC]</span></div>
-            <div class="_campaign_tag">CAMPAIGN: VOLATILITY_LOCK</div>
+            <div class="stat_label">Autonomous Agents</div>
+            <div style="font-size:0.7rem; margin-top:10px;">
+                <p>◈ PLANNER: <span id="s1">IDLE</span></p>
+                <p>▶ EXECUTOR: <span id="s2">IDLE</span></p>
+                <p>⚠ CRITIC: <span id="s3">IDLE</span></p>
+                <p>⬡ OPTIMIZER: <span id="s4">IDLE</span></p>
+            </div>
+            <button class="export-btn" onclick="exportLogs()">EXPORT BLACK_BOX_LEDGER</button>
         </div>
 
         <div class="_0x_panel">
-            <div class="stat_label" style="margin-bottom:10px;">Real-Time Strategic Analysis Feed</div>
-            <div id="_0x_stream">>> [SYS] Nexus Sovereign Core initialized...</div>
+            <div class="stat_label">Strategic Analytic Feed</div>
+            <div id="_0x_stream">>> [SYS] OMNI-Protocol Engaged...</div>
         </div>
     </div>
-
-    <footer style="margin-top:15px; text-align:center; font-size:0.6rem; opacity:0.3; letter-spacing: 3px;">
-        ENGINEERED BY MOHAMED CHAKIR | SOVEREIGN SYSTEMS 2026
-    </footer>
 </div>
 
 <script>
     (function(){
-        let _p_hist = [];
-        let _last_p = 0;
-        let _0x_s = Date.now();
+        let current_asset = 'BTCUSDT';
+        let price_history = [];
+        let logs = [];
+        let start_time = Date.now();
 
-        async function _0x_engine() {
+        window.setAsset = (a) => {
+            current_asset = a;
+            document.getElementById('asset_name').textContent = a;
+            _log(`[SYS] Switching Asset to ${a}`, '#d4af37');
+            price_history = [];
+        };
+
+        async function engine() {
             try {
-                // 1. Executor & Critic
-                _tog('a2', true);
-                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                // 1. EXECUTOR
+                const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${current_asset}`);
                 const data = await res.json();
                 const p = parseFloat(data.price);
-                _tog('a3', true);
+                
+                // 2. CRITIC & OPTIMIZER
+                price_history.push(p);
+                if(price_history.length > 15) price_history.shift();
+                
+                // حساب التنبؤ (التنبؤ الاستباقي)
+                let change = price_history.length > 1 ? p - price_history[0] : 0;
+                let target = p + (change * 0.5);
+                
+                // حساب التذبذب
+                let vol = price_history.length > 1 ? Math.max(...price_history) - Math.min(...price_history) : 0;
 
-                if(p) {
-                    // 2. Optimizer (تحليل التذبذب والزخم)
-                    _tog('a4', true);
-                    _p_hist.push(p); if(_p_hist.length > 10) _p_hist.shift();
-                    
-                    let mom = _last_p ? ((p - _last_p) / _last_p * 100).toFixed(3) : 0;
-                    let vol = _p_hist.length > 1 ? (Math.max(..._p_hist) - Math.min(..._p_hist)) : 0;
+                // تحديث الواجهة (الاستجابة الحسية)
+                updateUI(p, target, vol, change);
 
-                    document.getElementById('_0x_r').textContent = p.toFixed(0);
-                    document.getElementById('_0x_mom').textContent = (mom > 0 ? '+' : '') + mom + '%';
-                    document.getElementById('_0x_mom').style.color = mom >= 0 ? 'var(--_0x3)' : 'var(--_0x5)';
-                    
-                    let risk = vol > 50 ? 'HIGH' : 'LOW';
-                    document.getElementById('_0x_vol').textContent = risk;
-                    document.getElementById('_0x_vol').style.color = risk === 'HIGH' ? 'var(--_0x5)' : 'var(--_0x3)';
+            } catch (e) { console.error(e); }
+        }
 
-                    // 3. Planner (القرار الاستراتيجي)
-                    _tog('a1', true);
-                    let sig = mom > 0.01 ? 'BULLISH_TREND' : (mom < -0.01 ? 'BEARISH_TREND' : 'CONSOLIDATING');
-                    _log(`[PLANNER] Action: ${sig} | Volatility: ${vol.toFixed(2)}`, mom >= 0 ? '#00ff9f' : '#ff4444');
-                    
-                    _last_p = p;
-                }
-            } catch (e) {
-                _log(`[SYS] Shield Active: Connection Reset`, '#ff4444');
-            } finally {
-                setTimeout(() => { _tog('a1',false); _tog('a2',false); _tog('a3',false); _tog('a4',false); }, 1500);
+        function updateUI(p, t, v, c) {
+            const frame = document.getElementById('main_frame');
+            document.getElementById('_price').textContent = p.toFixed(2);
+            document.getElementById('_target').textContent = t.toFixed(2);
+            document.getElementById('_vol_val').textContent = `VOL: ${v.toFixed(2)}`;
+
+            // منطق الوميض والتحليل
+            if(c > 0.1) {
+                frame.className = '_0x_frame bullish-glow';
+                document.getElementById('_sent').textContent = 'BULLISH';
+                document.getElementById('_sent').style.color = 'var(--green)';
+                _log(`[PLANNER] Predictive Trend: UPward Shift. Target: ${t.toFixed(2)}`, '#00ff9f');
+            } else if(c < -0.1) {
+                frame.className = '_0x_frame bearish-glow';
+                document.getElementById('_sent').textContent = 'BEARISH';
+                document.getElementById('_sent').style.color = 'var(--red)';
+                _log(`[PLANNER] Warning: Downward Momentum. Target: ${t.toFixed(2)}`, '#ff4444');
+            } else {
+                frame.className = '_0x_frame';
+                document.getElementById('_sent').textContent = 'STABLE';
+                document.getElementById('_sent').style.color = 'var(--gold)';
             }
         }
 
-        function _tog(i, a) { document.getElementById(i).classList[a?'add':'remove']('_0x_active'); }
         function _log(m, c) {
-            let d = document.createElement('div'); d.style.color = c;
-            d.textContent = `>> [${new Date().toLocaleTimeString()}] ${m}`;
-            const b = document.getElementById('_0x_stream');
-            b.prepend(d); if(b.childNodes.length > 14) b.lastChild.remove();
+            let msg = `[${new Date().toLocaleTimeString()}] ${m}`;
+            logs.push(msg);
+            let div = document.createElement('div');
+            div.style.color = c;
+            div.textContent = `>> ${msg}`;
+            const stream = document.getElementById('_0x_stream');
+            stream.prepend(div);
+            if(stream.childNodes.length > 15) stream.lastChild.remove();
         }
 
+        window.exportLogs = () => {
+            const blob = new Blob([logs.join('\n')], {type: 'text/plain'});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NEXUS_BLACKBOX_${Date.now()}.txt`;
+            a.click();
+        };
+
         setInterval(() => {
-            let d = Math.floor((Date.now()-_0x_s)/1000);
+            let d = Math.floor((Date.now()-start_time)/1000);
             document.getElementById('_0x_ut').textContent = new Date(d * 1000).toISOString().substr(11, 8);
         }, 1000);
-        setInterval(_0x_engine, 4000);
+
+        setInterval(engine, 4000);
     })();
 </script>
 </body>
