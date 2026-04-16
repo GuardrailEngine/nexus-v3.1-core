@@ -3,29 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.1 | SOVEREIGN CORE</title>
+    <title>NEXUS v3.1 | STRATEGIC CORE</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
     <style>
         :root { --_0x1: #d4af37; --_0x2: #050505; --_0x3: #00ff9f; --_0x4: #00d4ff; --_0x5: #ff4444; }
         body { background: var(--_0x2); color: var(--_0x1); font-family: 'Courier New', monospace; margin: 0; padding: 15px; overflow-x: hidden; transition: 0.3s; }
         ._0x_frame { border: 2px solid var(--_0x1); padding: 20px; box-shadow: inset 0 0 20px rgba(212,175,55,0.1); position: relative; max-width: 1200px; margin: auto; }
-        
-        /* نظام التحذير */
         #_0x_warn { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(180,0,0,0.98); color: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-
         header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--_0x1); padding-bottom: 10px; margin-bottom: 20px; }
         ._0x_grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         ._0x_card { background: #0a0a0a; border: 1px solid #222; padding: 15px; text-align: center; position: relative; }
         ._0x_val { display: block; font-size: 1.6rem; color: #fff; text-shadow: 0 0 8px var(--_0x1); }
-        
         ._0x_view { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
-        ._0x_panel { border: 1px solid #333; background: #000; padding: 15px; height: 280px; overflow: hidden; position: relative; }
-        
-        /* الوكلاء */
+        ._0x_panel { border: 1px solid #333; background: #000; padding: 15px; height: 300px; overflow: hidden; position: relative; }
         ._0x_agt { border: 1px solid #222; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; opacity: 0.4; transition: 0.3s; }
         ._0x_agt._0x_active { opacity: 1; border-color: var(--_0x3); color: #fff; background: rgba(0,255,159,0.05); box-shadow: 0 0 10px var(--_0x3); }
-        
-        /* سجل البيانات */
         #_0x_stream { font-size: 0.75rem; color: var(--_0x4); line-height: 1.5; }
         .glitch { animation: g 4s infinite; }
         @keyframes g { 0%,100% {opacity:1} 50% {opacity:0.7} }
@@ -35,15 +27,15 @@
 
 <div id="_0x_warn">
     <h1 style="font-size: 3rem;">⚠ تـنـبـيـه أمني ⚠</h1>
-    <p style="font-size: 1.2rem;">رصد محاولة اختراق أو فحص غير مصرح به لكود \x4E\x45\x58\x55\x53</p>
-    <button onclick="location.reload()" style="padding:10px 30px; cursor:pointer; background:var(--_0x1); border:none; color:#000; font-weight:bold;">إعادة تشغيل النظام</button>
+    <p>رصد محاولة اختراق سيادي لكود \x4E\x45\x58\x55\x53</p>
+    <button onclick="location.reload()" style="padding:10px 30px; cursor:pointer; background:var(--_0x1); border:none; color:#000; font-weight:bold;">إعادة التشغيل</button>
 </div>
 
 <div class="_0x_frame">
     <header>
         <div>
             <h1 class="glitch" style="margin:0;">⚔️ \x4E\x45\x58\x55\x53 \x76\x33\x2E\x31 \x43\x4F\x52\x45</h1>
-            <small>NODE_ID: CHAKIR_01 | SECURITY_LEVEL: ALPHA</small>
+            <small>NODE_ID: CHAKIR_01 | MODE: STRATEGIC_ANALYSIS</small>
         </div>
         <div style="text-align:left; font-size: 0.8rem;">
             <div>STATUS: <span id="_0x_st" style="color:var(--_0x3)">STABLE</span></div>
@@ -52,88 +44,89 @@
     </header>
 
     <div class="_0x_grid">
-        <div class="_0x_card"><span>MARKET_VAL</span><span class="_0x_val" id="_0x_r">0000</span><small>USD/BTC</small></div>
-        <div class="_0x_card"><span>YIELD_IDX</span><span class="_0x_val" style="color:var(--_0x3)">89.3%</span><small>LIVE</small></div>
-        <div class="_0x_card"><span>VAULT</span><span class="_0x_val">LOCKED</span><small>AES-256</small></div>
+        <div class="_0x_card"><span>CURRENT_VAL</span><span class="_0x_val" id="_0x_r">0000</span><small>USD/BTC</small></div>
+        <div class="_0x_card"><span>STRAT_SIGNAL</span><span class="_0x_val" id="_0x_signal" style="color:var(--_0x4)">WAIT</span><small>PLANNER</small></div>
+        <div class="_0x_card"><span>VAULT</span><span class="_0x_val">LOCKED</span><small>SECURE</small></div>
         <div class="_0x_card"><span>THREADS</span><span class="_0x_val">398</span><small>ACTIVE</small></div>
     </div>
 
     <div class="_0x_view">
         <div class="_0x_panel" style="height:auto;">
-            <div style="font-size:0.7rem; color:#555; margin-bottom:10px;">AGENT_TOPOLOGY</div>
-            <div id="a1" class="_0x_agt">◈ PLANNER <span>[IDLE]</span></div>
-            <div id="a2" class="_0x_agt">▶ EXECUTOR <span>[WAIT]</span></div>
-            <div id="a3" class="_0x_agt">⚠ CRITIC <span>[SCAN]</span></div>
-            <div id="a4" class="_0x_agt">⬡ OPTIMIZER <span>[SYNC]</span></div>
+            <div id="a1" class="_0x_agt">◈ PLANNER <span id="p_stat">[IDLE]</span></div>
+            <div id="a2" class="_0x_agt">▶ EXECUTOR <span id="e_stat">[WAIT]</span></div>
+            <div id="a3" class="_0x_agt">⚠ CRITIC <span id="c_stat">[SCAN]</span></div>
+            <div id="a4" class="_0x_agt">⬡ OPTIMIZER <span id="o_stat">[SYNC]</span></div>
         </div>
         <div class="_0x_panel">
-            <div style="font-size:0.7rem; color:#555; margin-bottom:10px;">ENCRYPTED_DATA_FEED</div>
-            <div id="_0x_stream">>> [SYS] Initiating handshake...</div>
+            <div id="_0x_stream">>> [SYS] Initiating strategic handshake...</div>
         </div>
     </div>
 
-    <footer style="margin-top:20px; text-align:center; font-size:0.6rem; opacity:0.3; letter-spacing: 2px;">
-        GUARDRAIL ENGINE | SOVEREIGN ARCHITECTURE | 2026
+    <footer style="margin-top:20px; text-align:center; font-size:0.6rem; opacity:0.3;">
+        GUARDRAIL ENGINE | CHAKIR SOVEREIGN ARCH | 2026
     </footer>
 </div>
 
 <script>
     (function(){
-        // حماية المفاتيح ومنع الفحص
-        document.onkeydown = function(e) {
-            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
-                document.getElementById('_0x_warn').style.display = 'flex';
-                return false;
-            }
-        };
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) { document.getElementById('_0x_warn').style.display = 'flex'; return false; } };
 
-        const _0x_a = ['a1','a2','a3','a4'];
+        let _last_p = 0;
         let _0x_s = Date.now();
 
-        // المحرك المدمج (منفذ + ناقد)
-        async function _0x_run_engine() {
+        async function _0x_run_loop() {
             try {
-                // 1. الوكيل المنفذ (جلب البيانات)
-                document.getElementById('a2').classList.add('_0x_active');
+                // 1. EXECUTOR (جلب البيانات)
+                _toggle('a2', true);
                 const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
                 const data = await res.json();
+                const current_p = parseFloat(data.price);
                 
-                // 2. الوكيل الناقد (فحص البيانات)
-                document.getElementById('a3').classList.add('_0x_active');
+                // 2. CRITIC (فحص النزاهة)
+                _toggle('a3', true);
+                if(!current_p) throw 'ERR';
+                _log(`[CRITIC] Integrity Pass: ${current_p}`, '#00ff9f');
+
+                // 3. PLANNER (التحليل والقرار)
+                _toggle('a1', true);
+                document.getElementById('p_stat').textContent = '[ANALYZING]';
                 
-                if(data && data.price) {
-                    document.getElementById('_0x_r').textContent = parseFloat(data.price).toFixed(0);
-                    _0x_log(`[CRITIC] Integrity Pass: BTC @ ${data.price}`, '#00ff9f');
-                } else {
-                    _0x_log(`[CRITIC] FAIL: Data Corrupted`, '#ff4444');
+                let signal = "HOLD";
+                let color = var(--_0x4);
+
+                if(_last_p > 0) {
+                    if(current_p > _last_p) { signal = "BULLISH"; color = "#00ff9f"; }
+                    else if(current_p < _last_p) { signal = "BEARISH"; color = "#ff4444"; }
                 }
+                
+                document.getElementById('_0x_signal').textContent = signal;
+                document.getElementById('_0x_signal').style.color = color;
+                document.getElementById('_0x_r').textContent = current_p.toFixed(0);
+                _log(`[PLANNER] Trend: ${signal}`, color);
+                
+                _last_p = current_p;
+
             } catch (e) {
-                _0x_log(`[SYS] Network Shield Active - Retrying...`, '#ff4444');
+                _log(`[SYS] Shield Active: Connection Reset`, '#ff4444');
             } finally {
-                setTimeout(() => {
-                    document.getElementById('a2').classList.remove('_0x_active');
-                    document.getElementById('a3').classList.remove('_0x_active');
-                }, 1200);
+                setTimeout(() => { _toggle('a1', false); _toggle('a2', false); _toggle('a3', false); document.getElementById('p_stat').textContent = '[IDLE]'; }, 1500);
             }
         }
 
-        function _0x_log(m, c) {
-            let p = document.createElement('div');
-            p.style.color = c;
+        function _toggle(id, act) { document.getElementById(id).classList[act?'add':'remove']('_0x_active'); }
+        function _log(m, c) {
+            let p = document.createElement('div'); p.style.color = c;
             p.textContent = `>> [${new Date().toLocaleTimeString()}] ${m}`;
             const box = document.getElementById('_0x_stream');
-            box.prepend(p);
-            if(box.childNodes.length > 12) box.lastChild.remove();
+            box.prepend(p); if(box.childNodes.length > 12) box.lastChild.remove();
         }
 
-        // تحديث الوقت والنبض
         setInterval(() => {
             let d = Math.floor((Date.now()-_0x_s)/1000);
             document.getElementById('_0x_ut').textContent = new Date(d * 1000).toISOString().substr(11, 8);
         }, 1000);
 
-        // تشغيل الدورة كل 4 ثوانٍ
-        setInterval(_0x_run_engine, 4000);
+        setInterval(_0x_run_loop, 5000);
     })();
 </script>
 </body>
