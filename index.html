@@ -732,4 +732,198 @@ function analyze(price, hist) {
   } else if (change < 0) {
     frame.className = 'wrapper frame-bear';
     badge.innerHTML = '<span class="strat-badge badge-bear">▼ BEARISH_PRESSURE</span>';
-    if (conf >= CONF_THRESH) add
+    if (conf >= CONF_THRESH) adddSignal('Bearish Alert', price, false, conf);
+  } else {
+    frame.className = 'wrapper';
+    badge.innerHTML = '<span class="strat-badge badge-neut">◈ NEUTRAL_ZONE</span>';
+  }
+
+  sysLog(`[PLANNER] Price:${price.toFixed(2)} Target:${target.toFixed(2)} Conf:${conf}%`, '#00d4ff');
+}
+
+/* ===== إضافة إشارة ===== */
+function addSignal(type, price, isBull, conf) {
+  stats.total++;
+  if (isBull) stats.bull++; else stats.bear++;
+  document.getElementById('stat_signals').textContent = stats.total;
+  document.getElementById('stat_bull').textContent    = stats.bull;
+  document.getElementById('stat_bear').textContent    = stats.bear;
+
+  const ledger = document.getElementById('signal_ledger');
+  const row = document.createElement('div');
+  row.className = 'signal-row';
+  row.innerHTML = `
+    <span class="sig-type ${isBull?'sig-bull':'sig-bear'}">${isBull?'▲':'▼'} ${type}</span>
+    <span class="sig-price">${price.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+    <span class="sig-time">${nowTime()} · ${conf}%</span>
+  `;
+  ledger.prepend(row);
+  while (ledger.children.length > 10) ledger.lastChild.remove();
+}
+
+/* ===== إدارة المخاطر ===== */
+window.calcRisk = () => {
+  const b  = parseFloat(document.getElementById('balance_input').value);
+  const lp = ASSETS[cur].lp;
+  if (b > 0 && lp > 0) {
+    const risk = b * 0.01;
+    const sl   = lp * 0.98;
+    const diff = lp - sl;
+    if (diff <= 0) return;
+    const size = risk / diff;
+    const tp   = lp + diff * 2; // نسبة مكافأة/مخاطرة 2:1
+    document.getElementById('risk_out').innerHTML =
+      `Size: ${size.toFixed(4)}<br>SL: ${sl.toFixed(0)} · TP: ${tp.toFixed(0)}`;
+  }
+};
+
+/* ===== الرسم البياني ===== */
+function drawSparkline(hist) {
+  const canvas = document.getElementById('sparkline');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width  = canvas.offsetWidth;
+  const H = canvas.height = 70;
+
+  if (hist.length < 2) return;
+
+  const mn = Math.min(...hist);
+  const mx = Math.max(...hist);
+  const range = mx - mn || 1;
+  const pad = 6;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // خط الشبكة
+  ctx.strokeStyle = 'rgba(10,26,42,0.8)';
+  ctx.lineWidth = 1;
+  for (let i=0; i<=4; i++) {
+    const y = pad + (H-pad*2) * (i/4);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+
+  const pts = hist.map((v,i) => ({
+    x: pad + (i / (hist.length-1)) * (W - pad*2),
+    y: H - pad - ((v - mn) / range) * (H - pad*2)
+  }));
+
+  // تدرج تحت المنحنى
+  const trend = hist[hist.length-1] >= hist[0];
+  const grad  = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, trend ? 'rgba(0,255,159,0.18)' : 'rgba(255,68,85,0.18)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, H);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // الخط الرئيسي
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i=1; i<pts.length; i++) {
+    const mx2 = (pts[i-1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(mx2, pts[i-1].y, mx2, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle = trend ? '#00ff9f' : '#ff4455';
+  ctx.lineWidth   = 2;
+  ctx.shadowColor = trend ? 'rgba(0,255,159,0.5)' : 'rgba(255,68,85,0.5)';
+  ctx.shadowBlur  = 6;
+  ctx.stroke();
+  ctx.shadowBlur  = 0;
+
+  // نقطة الوقت الحالي
+  const last = pts[pts.length-1];
+  ctx.beginPath();
+  ctx.arc(last.x, last.y, 4, 0, Math.PI*2);
+  ctx.fillStyle   = trend ? '#00ff9f' : '#ff4455';
+  ctx.shadowColor = trend ? 'rgba(0,255,159,0.8)' : 'rgba(255,68,85,0.8)';
+  ctx.shadowBlur  = 10;
+  ctx.fill();
+  ctx.shadowBlur  = 0;
+}
+
+/* ===== تبديل الأصل ===== */
+window.switchAsset = (sym, label, style) => {
+  cur      = sym;
+  curStyle = style;
+
+  document.querySelectorAll('.abtn').forEach(b => b.className = 'abtn');
+  document.getElementById(`btn_${style}`).classList.add(`active-${style}`);
+
+  document.getElementById('cv_pair').textContent   = label;
+  document.getElementById('cv_price').textContent  = 'LOADING';
+  document.getElementById('cv_target').textContent = '---';
+  document.getElementById('cv_conf').textContent   = '---';
+  document.getElementById('risk_out').textContent  = 'Balance Required';
+  document.getElementById('balance_input').value   = '';
+  document.getElementById('main_frame').className  = 'wrapper';
+  document.getElementById('strat_badge').innerHTML = '<span class="strat-badge badge-neut">[SWITCHING]</span>';
+
+  const ctx = document.getElementById('sparkline').getContext('2d');
+  ctx.clearRect(0,0,9999,9999);
+
+  sysLog(`[EXECUTOR] Asset → ${sym}`, '#d4af37');
+  tick();
+};
+
+/* ===== حالة الاتصال ===== */
+function setOnline(on) {
+  const dot = document.getElementById('status_dot');
+  const txt = document.getElementById('status_txt');
+  const ldot= document.getElementById('live_dot');
+  const lbl = document.getElementById('live_label');
+
+  if (on) {
+    dot.className = 'status-dot online';
+    txt.textContent = 'SECURE'; txt.style.color = 'var(--green)';
+    ldot.style.background = 'var(--green)';
+    lbl.textContent = 'LIVE';
+  } else {
+    dot.className = 'status-dot offline';
+    txt.textContent = 'OFFLINE'; txt.style.color = 'var(--red)';
+    ldot.style.background = 'var(--red)';
+    lbl.textContent = 'OFFLINE';
+  }
+}
+
+/* ===== الوقت ===== */
+function nowTime() {
+  return new Date().toLocaleTimeString('en-GB');
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live_time').textContent =
+    now.toLocaleTimeString('en-GB') + ' | ' +
+    now.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+}
+
+/* ===== سجل الأحداث ===== */
+function sysLog(msg, color) {
+  const log = document.getElementById('feed_log');
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = `<span class="log-time">${nowTime()}</span><span class="log-msg" style="color:${color||'#00d4ff'}">${msg}</span>`;
+  log.prepend(div);
+  while (log.children.length > 60) log.lastChild.remove();
+}
+
+/* ===== التشغيل ===== */
+sysLog('[NEXUS] Diamond Edition Initialized ✓', '#d4af37');
+sysLog('[CRITIC] Sovereign validation layer: ACTIVE', '#00ff9f');
+sysLog('[PLANNER] Connecting to Binance data feed...', '#00d4ff');
+
+setOnline(false);
+updateClock();
+setInterval(updateClock, 1000);
+
+tick();
+timer = setInterval(tick, TICK_MS);
+
+})();
+</script>
+</body>
+</html>
