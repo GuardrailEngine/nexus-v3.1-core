@@ -3,121 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS v4.0 | DIAMOND EDITION</title>
+<title>NEXUS v4.0 | CANDLESTICK EDITION</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold:    #d4af37; --gold2:   #f5d76e; --diamond: #a8d8f0; --cyan:    #00d4ff;
-  --green:   #00ff9f; --red:     #ff4455; --bg:      #020408; --panel:   #060c12;
-  --border:  #0a1a2a; --text:    #c8d8e8;
+  --gold: #d4af37; --cyan: #00d4ff; --green: #00ff9f; --red: #ff4455; --bg: #020408; --panel: #060c12; --border: #0a1a2a; --text: #c8d8e8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; min-height: 100vh; overflow-x: hidden; }
-body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,180,255,0.07) 0%, transparent 60%); pointer-events: none; z-index: 0; }
-.wrapper { position: relative; z-index: 1; max-width: 1400px; margin: auto; padding: 12px; }
-.nx-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; margin-bottom: 14px; background: rgba(6,12,18,0.95); border: 1px solid rgba(212,175,55,0.3); border-top: 2px solid var(--gold); }
-.nx-title { font-family: 'Orbitron', sans-serif; font-size: clamp(0.9rem, 3vw, 1.3rem); font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--gold2), var(--diamond)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.abtn { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; padding: 5px 12px; cursor: pointer; border: 1px solid #1a2a3a; background: #060c12; color: #445566; margin-left: 5px; }
-.abtn.active { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.08); }
-.cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
-@media (min-width: 700px) { .cards-grid { grid-template-columns: repeat(4, 1fr); } }
-.nx-card { background: var(--panel); border: 1px solid var(--border); padding: 14px 12px; text-align: center; }
-.card-label { font-size: 0.48rem; color: #334455; text-transform: uppercase; margin-bottom: 8px; }
-.card-value { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 700; color: #eee; }
-.risk-input { background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.2); color: var(--cyan); width: 90%; padding: 6px; text-align: center; outline: none; }
-.chart-section { background: var(--panel); border: 1px solid var(--border); padding: 12px; margin-bottom: 14px; }
-.bottom-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 700px) { .bottom-grid { grid-template-columns: 1fr 1.8fr; } }
-.nx-panel { background: var(--panel); border: 1px solid var(--border); padding: 14px; height: 320px; overflow-y: auto; }
-.signal-row { display: flex; justify-content: space-between; padding: 7px 6px; border-bottom: 1px solid #0a1a2a; font-size: 0.55rem; }
+body { background: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; }
+.wrapper { max-width: 1400px; margin: auto; padding: 12px; position: relative; z-index: 1; }
+.nx-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--gold); margin-bottom: 10px; }
+.nx-title { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; background: linear-gradient(135deg, var(--gold), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+@media (min-width: 768px) { .cards-grid { grid-template-columns: repeat(4, 1fr); } }
+.nx-card { background: var(--panel); border: 1px solid var(--border); padding: 12px; text-align: center; }
+.card-label { font-size: 0.5rem; color: #334455; text-transform: uppercase; margin-bottom: 5px; }
+.card-value { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #eee; }
+/* تصميم حاوية الشموع اليابانية */
+.chart-container { background: #000; border: 1px solid var(--border); padding: 10px; margin-bottom: 15px; position: relative; height: 200px; }
+#candleCanvas { width: 100%; height: 100%; display: block; }
+.nx-panel { background: var(--panel); border: 1px solid var(--border); padding: 10px; height: 250px; overflow-y: auto; font-size: 0.6rem; }
 .sig-bull { color: var(--green); } .sig-bear { color: var(--red); }
-.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
-.stat-box { background: var(--panel); border: 1px solid var(--border); padding: 8px; text-align: center; }
-.stat-num { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; }
-.stat-lbl { font-size: 0.45rem; color: #334455; }
-.frame-bull { border-color: rgba(0,255,159,0.3) !important; } .frame-bear { border-color: rgba(255,68,85,0.3) !important; }
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
+.stat-box { background: var(--panel); border: 1px solid var(--border); padding: 5px; text-align: center; font-size: 0.7rem; }
+.abtn { background: #000; border: 1px solid var(--border); color: #445566; padding: 4px 10px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.6rem; }
+.abtn.active { border-color: var(--gold); color: var(--gold); }
 </style>
 </head>
 <body>
 
-<div class="wrapper" id="main_frame">
+<div class="wrapper">
   <div class="stats-bar">
-    <div class="stat-box"><span class="stat-num" id="stat_signals" style="color:var(--gold);">0</span><span class="stat-lbl">Total</span></div>
-    <div class="stat-box"><span class="stat-num" id="stat_bull" style="color:var(--green);">0</span><span class="stat-lbl">Bullish</span></div>
-    <div class="stat-box"><span class="stat-num" id="stat_bear" style="color:var(--red);">0</span><span class="stat-lbl">Bearish</span></div>
-    <div class="stat-box"><span class="stat-num" id="stat_acc" style="color:var(--cyan);">--</span><span class="stat-lbl">Avg Conf</span></div>
+    <div class="stat-box"><div style="color:var(--gold)" id="stat_signals">0</div><div>Signals</div></div>
+    <div class="stat-box"><div style="color:var(--green)" id="stat_bull">0</div><div>Bull</div></div>
+    <div class="stat-box"><div style="color:var(--red)" id="stat_bear">0</div><div>Bear</div></div>
+    <div class="stat-box"><div style="color:var(--cyan)" id="stat_acc">--</div><div>Conf</div></div>
   </div>
 
   <div class="nx-header">
+    <div class="nx-title">NEXUS v4.0 | CANDLESTICK ENGINE</div>
     <div>
-      <div class="nx-title">⬡ NEXUS v4.0 | DIAMOND</div>
-      <div class="asset-btns"><button class="abtn active" id="btn_btc" onclick="switchAsset('BTCUSDT','BTC/USD')">BTC</button>
-      <button class="abtn" id="btn_eth" onclick="switchAsset('ETHUSDT','ETH/USD')">ETH</button>
-      <button class="abtn" id="btn_gold" onclick="switchAsset('PAXGUSDT','GOLD/USD')">GOLD</button></div>
+      <button class="abtn active" onclick="switchAsset('BTCUSDT')">BTC</button>
+      <button class="abtn" onclick="switchAsset('ETHUSDT')">ETH</button>
     </div>
-    <div style="text-align:right; font-size:0.6rem; direction:ltr;"><div style="color:var(--gold)">CHAKIR</div><div id="status_txt" style="color:var(--green)">SECURE</div></div>
   </div>
 
   <div class="cards-grid">
-    <div class="nx-card"><div class="card-label">AI Target</div><span class="card-value" id="cv_target" style="color:var(--cyan);">---</span></div>
-    <div class="nx-card"><div class="card-label">Market Pulse</div><span class="card-value" id="cv_price">LOADING</span></div>
-    <div class="nx-card"><div class="card-label">Risk Manager</div><input type="number" class="risk-input" id="balance_input" placeholder="$ Capital" oninput="calcRisk()"><div id="risk_out" style="font-size:0.5rem; color:var(--gold)">---</div></div>
-    <div class="nx-card"><div class="card-label">Confidence</div><span class="card-value" id="cv_conf">---</span></div>
+    <div class="nx-card"><div class="card-label">AI Target</div><div class="card-value" id="v_target">---</div></div>
+    <div class="nx-card"><div class="card-label">Market Pulse</div><div class="card-value" id="v_price">LOADING</div></div>
+    <div class="nx-card"><div class="card-label">Confidence</div><div class="card-value" id="v_conf" style="color:var(--green)">---</div></div>
+    <div class="nx-card"><div class="card-label">Architect</div><div class="card-value" style="color:var(--gold)">CHAKIR</div></div>
   </div>
 
-  <div class="chart-section"><canvas id="sparkline" height="70"></canvas></div>
+  <div class="chart-container">
+    <canvas id="candleCanvas"></canvas>
+  </div>
 
-  <div class="bottom-grid">
-    <div class="nx-panel"><div>Proven Signals</div><div id="signal_ledger"></div></div>
-    <div class="nx-panel"><div>System Logic Feed</div><div id="feed_log" style="font-size:0.6rem; direction:ltr;"></div></div>
+  <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:10px;">
+    <div class="nx-panel"><div>PROVEN SIGNALS</div><div id="sig_list"></div></div>
+    <div class="nx-panel"><div>LOG FEED</div><div id="log_list" style="direction:ltr"></div></div>
   </div>
 </div>
 
 <script>
 (function(){
-'use strict';
-const ASSETS = { BTCUSDT: {hist:[], lp:0, min:10000, max:500000}, ETHUSDT: {hist:[], lp:0, min:100, max:50000}, PAXGUSDT: {hist:[], lp:0, min:1000, max:10000} };
-let cur = 'BTCUSDT', stats = {total:0, bull:0, bear:0, confSum:0, confCnt:0}, busy = false;
+  'use strict';
+  let cur = 'BTCUSDT', candles = [], stats = {t:0, bu:0, be:0, cS:0, cC:0}, busy = false;
+  const canvas = document.getElementById('candleCanvas');
+  const ctx = canvas.getContext('2d');
 
-function sysLog(m, c) {
-    const l = document.getElementById('feed_log'), d = document.createElement('div');
-    d.style.color = c || '#00d4ff'; d.textContent = `>> ${m} [${new Date().toLocaleTimeString()}]`;
-    l.prepend(d); if(l.childNodes.length > 30) l.lastChild.remove();
-}
+  function sysLog(m, c) {
+    const l = document.getElementById('log_list'), d = document.createElement('div');
+    d.style.color = c || '#00d4ff'; d.textContent = `> ${m}`;
+    l.prepend(d); if(l.childNodes.length > 20) l.lastChild.remove();
+  }
 
-function addSignal(type, price, isBull, conf) {
-    const l = document.getElementById('signal_ledger'), r = document.createElement('div');
-    r.className = 'signal-row';
-    r.innerHTML = `<span class="${isBull?'sig-bull':'sig-bear'}">${isBull?'▲':'▼'} ${type}</span><span>$${price.toLocaleString()}</span><span>${conf}%</span>`;
-    l.prepend(r); if(l.childNodes.length > 10) l.lastChild.remove();
-    stats.total++; if(isBull) stats.bull++; else stats.bear++;
-    stats.confSum += conf; stats.confCnt++;
-    document.getElementById('stat_signals').textContent = stats.total;
-    document.getElementById('stat_bull').textContent = stats.bull;
-    document.getElementById('stat_bear').textContent = stats.bear;
-    document.getElementById('stat_acc').textContent = Math.round(stats.confSum/stats.confCnt) + '%';
-}
+  function addSignal(type, price, isBull, conf) {
+    const l = document.getElementById('sig_list'), r = document.createElement('div');
+    r.style.padding = '5px 0'; r.style.borderBottom = '1px solid #0a1a2a';
+    r.innerHTML = `<span class="${isBull?'sig-bull':'sig-bear'}">${isBull?'▲':'▼'} ${type}</span> | $${price.toLocaleString()} | ${conf}%`;
+    l.prepend(r);
+    stats.t++; if(isBull) stats.bu++; else stats.be++;
+    stats.cS += conf; stats.cC++;
+    document.getElementById('stat_signals').textContent = stats.t;
+    document.getElementById('stat_bull').textContent = stats.bu;
+    document.getElementById('stat_bear').textContent = stats.be;
+    document.getElementById('stat_acc').textContent = Math.round(stats.cS/stats.cC)+'%';
+  }
 
-async function tick() {
+  function drawCandles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (candles.length < 2) return;
+    const w = canvas.width, h = canvas.height;
+    const maxP = Math.max(...candles.map(c => c.h)), minP = Math.min(...candles.map(c => c.l));
+    const range = maxP - minP, candleW = (w / candles.length) * 0.8;
+
+    candles.forEach((c, i) => {
+      const x = (i * (w / candles.length)) + (candleW * 0.1);
+      const getY = (p) => h - ((p - minP) / range) * h;
+      const openY = getY(c.o), closeY = getY(c.c), highY = getY(c.h), lowY = getY(c.l);
+      
+      ctx.strokeStyle = c.c >= c.o ? '#00ff9f' : '#ff4455';
+      ctx.beginPath(); ctx.moveTo(x + candleW/2, highY); ctx.lineTo(x + candleW/2, lowY); ctx.stroke();
+      ctx.fillStyle = c.c >= c.o ? '#00ff9f' : '#ff4455';
+      ctx.fillRect(x, Math.min(openY, closeY), candleW, Math.abs(openY - closeY) || 1);
+    });
+  }
+
+  async function tick() {
     if(busy) return; busy = true;
     try {
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cur}`);
-        const data = await res.json(); const p = parseFloat(data.price);
-        const a = ASSETS[cur]; if(p < a.min || p > a.max) { sysLog("Anomaly Blocked", "#ff4455"); busy=false; return; }
-        const prev = a.lp; a.lp = p; a.hist.push(p); if(a.hist.length > 20) a.hist.shift();
-        document.getElementById('cv_price').textContent = p.toLocaleString();
-        const target = p + (p - (a.hist.reduce((a,b)=>a+b,0)/a.hist.length)) * 0.3;
-        const conf = Math.max(75, Math.min(99, Math.round(98 - (Math.abs(p-target)/p*1000))));
-        document.getElementById('cv_target').textContent = target.toFixed(2);
-        document.getElementById('cv_conf').textContent = conf + '%';
-        if(p > prev && conf >= 90) addSignal("Bullish Pivot", p, true, conf);
-        else if(p < prev && conf >= 90) addSignal("Bearish Alert", p, false, conf);
-        sysLog(`[PLANNER] Price: ${p.toFixed(2)} | Target: ${target.toFixed(2)}`, '#00d4ff');
-    } catch(e) { sysLog("Conn Error", "#ff4455"); } finally { busy = false; }
-}
+      const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${cur}&interval=1m&limit=30`);
+      const data = await res.json();
+      candles = data.map(d => ({ o: parseFloat(d[1]), h: parseFloat(d[2]), l: parseFloat(d[3]), c: parseFloat(d[4]) }));
+      
+      const last = candles[candles.length-1];
+      document.getElementById('v_price').textContent = last.c.toLocaleString();
+      const target = last.c + (last.c - candles[0].o) * 0.2;
+      const conf = Math.max(80, Math.min(99, 95 + (last.c > last.o ? 2 : -2)));
+      
+      document.getElementById('v_target').textContent = target.toFixed(2);
+      document.getElementById('v_conf').textContent = conf + '%';
+      
+      canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+      drawCandles();
 
-window.switchAsset = (s) => { cur = s; tick(); };
-setInterval(tick, 3000); tick();
+      if(last.c > last.o && conf >= 90) addSignal("Candle Bull", last.c, true, conf);
+      sysLog(`Tick updated: ${last.c}`, '#00ff9f');
+    } catch(e) { sysLog("Stream Error", "#ff4455"); } finally { busy = false; }
+  }
+
+  window.switchAsset = (s) => { cur = s; tick(); };
+  setInterval(tick, 5000); tick();
 })();
 </script>
 </body>
