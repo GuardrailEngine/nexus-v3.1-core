@@ -1,408 +1,229 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+caleString(undef<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS v4.0 | LIVE TRADING ENGINE</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<title>NEXUS v4.1 LIVE</title>
+
 <style>
-:root {
-  --gold: #d4af37; --cyan: #00d4ff; --green: #00ff9f; --red: #ff4455;
-  --bg: #020408; --panel: #060c12; --panel2: #07101a; --border: #0a1a2a;
-  --border2: #102030; --text: #c8d8e8; --dim: #334455;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 11px; }
-
-/* SCANLINES */
-body::before {
-  content: ''; position: fixed; inset: 0; z-index: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-  pointer-events: none;
+body {
+  background:#020408;
+  color:#00ff9f;
+  font-family: monospace;
+  margin:0;
 }
 
-.wrapper { max-width: 1600px; margin: auto; padding: 8px; position: relative; z-index: 1; }
-
-/* ── HEADER ── */
-.nx-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 15px; background: var(--panel); border: 1px solid var(--border);
-  border-top: 2px solid var(--gold); margin-bottom: 8px;
-  position: relative; overflow: hidden;
+.header {
+  padding:10px;
+  border-bottom:1px solid #0a1a2a;
+  display:flex;
+  justify-content:space-between;
 }
-.nx-header::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  animation: sweep 3s linear infinite;
+
+.status { color:#ff4455; }
+.status.live { color:#00ff9f; }
+
+.container {
+  padding:10px;
 }
-@keyframes sweep { 0%{opacity:0} 50%{opacity:1} 100%{opacity:0} }
-.nx-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; background: linear-gradient(135deg, var(--gold), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.ws-status { display: flex; align-items: center; gap: 6px; font-size: 0.55rem; }
-.ws-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); transition: background 0.3s; }
-.ws-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; }
-.ws-dot.error { background: var(--red); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* ── ASSET BUTTONS ── */
-.abtn { background: #000; border: 1px solid var(--border); color: var(--dim); padding: 4px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.55rem; transition: all 0.2s; }
-.abtn.active { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px rgba(212,175,55,0.3); }
-.abtn:hover:not(.active) { border-color: var(--cyan); color: var(--cyan); }
-
-/* ── TOP STATS ── */
-.stats-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
-@media (max-width: 768px) { .stats-bar { grid-template-columns: repeat(3, 1fr); } }
-.stat-box { background: var(--panel); border: 1px solid var(--border); padding: 6px; text-align: center; }
-.stat-val { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; }
-.stat-lbl { font-size: 0.45rem; color: var(--dim); margin-top: 2px; text-transform: uppercase; }
-
-/* ── CARDS ── */
-.cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
-@media (max-width: 600px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
-.nx-card { background: var(--panel); border: 1px solid var(--border); padding: 12px; text-align: center; position: relative; overflow: hidden; }
-.nx-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.5; }
-.card-label { font-size: 0.45rem; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
-.card-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: #eee; }
-.card-sub { font-size: 0.5rem; color: var(--dim); margin-top: 3px; }
-
-/* ── STRATEGY BADGE ── */
-.strategy-banner {
-  background: var(--panel2); border: 1px solid var(--border2);
-  border-left: 3px solid var(--gold); padding: 8px 12px;
-  margin-bottom: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+canvas {
+  width:100%;
+  height:200px;
+  background:#000;
+  border:1px solid #0a1a2a;
 }
-.strat-name { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--gold); }
-.strat-tag { background: rgba(0,212,255,0.1); border: 1px solid var(--cyan); color: var(--cyan); padding: 2px 6px; font-size: 0.45rem; }
-.strat-tag.active-bull { background: rgba(0,255,159,0.1); border-color: var(--green); color: var(--green); }
-.strat-tag.active-bear { background: rgba(255,68,85,0.1); border-color: var(--red); color: var(--red); }
 
-/* ── MAIN GRID ── */
-.main-grid { display: grid; grid-template-columns: 1fr 220px; gap: 8px; margin-bottom: 8px; }
-@media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+.row {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
 
-/* ── CHART ── */
-.chart-wrap { background: #000; border: 1px solid var(--border); position: relative; }
-.chart-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--border); font-size: 0.5rem; color: var(--dim); }
-.tf-btn { background: none; border: 1px solid var(--border); color: var(--dim); padding: 2px 6px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.5rem; }
-.tf-btn.active { border-color: var(--cyan); color: var(--cyan); }
-#candleCanvas { display: block; width: 100%; height: 180px; }
+.box {
+  flex:1;
+  background:#060c12;
+  padding:10px;
+  border:1px solid #0a1a2a;
+  height:200px;
+  overflow:auto;
+}
 
-/* ── ORDER BOOK ── */
-.orderbook { background: var(--panel); border: 1px solid var(--border); display: flex; flex-direction: column; }
-.ob-header { padding: 6px 10px; border-bottom: 1px solid var(--border); font-family: 'Orbitron', sans-serif; font-size: 0.6rem; color: var(--gold); }
-.ob-side { flex: 1; overflow: hidden; padding: 4px 0; }
-.ob-label { font-size: 0.45rem; color: var(--dim); padding: 2px 8px; display: flex; justify-content: space-between; }
-.ob-row { display: flex; justify-content: space-between; padding: 1px 8px; position: relative; font-size: 0.55rem; cursor: default; }
-.ob-row:hover { background: rgba(255,255,255,0.03); }
-.ob-bar { position: absolute; top: 0; bottom: 0; right: 0; opacity: 0.12; transition: width 0.3s; }
-.ob-ask .ob-bar { background: var(--red); }
-.ob-bid .ob-bar { background: var(--green); }
-.ob-mid { text-align: center; padding: 4px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; }
-.ob-spread { font-size: 0.45rem; color: var(--dim); }
-
-/* ── BOTTOM GRID ── */
-.bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-@media (max-width: 768px) { .bottom-grid { grid-template-columns: 1fr; } }
-.nx-panel { background: var(--panel); border: 1px solid var(--border); display: flex; flex-direction: column; height: 200px; }
-.panel-header { padding: 6px 10px; border-bottom: 1px solid var(--border); font-family: 'Orbitron', sans-serif; font-size: 0.55rem; color: var(--gold); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
-.panel-body { flex: 1; overflow-y: auto; padding: 4px; }
-.panel-body::-webkit-scrollbar { width: 3px; }
-.panel-body::-webkit-scrollbar-track { background: var(--bg); }
-.panel-body::-webkit-scrollbar-thumb { background: var(--border2); }
-
-/* ── SIGNALS ── */
-.sig-row { padding: 4px 6px; border-bottom: 1px solid rgba(10,26,42,0.5); display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; font-size: 0.55rem; }
-.sig-bull { color: var(--green); } .sig-bear { color: var(--red); }
-.sig-conf { font-size: 0.45rem; padding: 1px 4px; border: 1px solid; }
-.sig-bull .sig-conf { border-color: var(--green); color: var(--green); }
-.sig-bear .sig-conf { border-color: var(--red); color: var(--red); }
-
-/* ── EXECUTIONS ── */
-.exec-row { padding: 4px 6px; border-bottom: 1px solid rgba(10,26,42,0.5); font-size: 0.5rem; display: grid; grid-template-columns: auto 1fr auto auto; gap: 6px; align-items: center; }
-.exec-buy { color: var(--green); } .exec-sell { color: var(--red); }
-.exec-pnl { font-size: 0.45rem; }
-.exec-pnl.pos { color: var(--green); } .exec-pnl.neg { color: var(--red); }
-
-/* ── LOG ── */
-.log-row { padding: 2px 4px; font-size: 0.5rem; direction: ltr; }
-
-/* ── EXECUTION PANEL ── */
-.exec-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.exec-kv { text-align: center; }
-.exec-kv .v { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; }
-.exec-kv .k { font-size: 0.4rem; color: var(--dim); margin-top: 1px; }
-
-/* FLASH */
-@keyframes flashGreen { 0%{background:rgba(0,255,159,0.15)} 100%{background:transparent} }
-@keyframes flashRed   { 0%{background:rgba(255,68,85,0.15)}  100%{background:transparent} }
-.flash-green { animation: flashGreen 0.5s ease-out; }
-.flash-red   { animation: flashRed   0.5s ease-out; }
+.green { color:#00ff9f }
+.red { color:#ff4455 }
 </style>
 </head>
+
 <body>
-<div class="wrapper">
 
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stat-box"><div class="stat-val" id="st_signals" style="color:var(--gold)">0</div><div class="stat-lbl">Signals</div></div>
-    <div class="stat-box"><div class="stat-val" id="st_bull"    style="color:var(--green)">0</div><div class="stat-lbl">Bull</div></div>
-    <div class="stat-box"><div class="stat-val" id="st_bear"    style="color:var(--red)">0</div>  <div class="stat-lbl">Bear</div></div>
-    <div class="stat-box"><div class="stat-val" id="st_conf"    style="color:var(--cyan)">--</div><div class="stat-lbl">Avg Conf</div></div>
-    <div class="stat-box"><div class="stat-val" id="st_pnl"     style="color:var(--green)">$0</div><div class="stat-lbl">Paper P&L</div></div>
-    <div class="stat-box"><div class="stat-val" id="st_trades"  style="color:var(--text)">0</div> <div class="stat-lbl">Trades</div></div>
+<div class="header">
+  <div>NEXUS v4.1 LIVE ENGINE</div>
+  <div id="wsStatus" class="status">OFFLINE</div>
+</div>
+
+<div class="container">
+
+<canvas id="chart"></canvas>
+
+<div class="row">
+  <div class="box">
+    <b>OrderBook</b>
+    <div id="orderbook"></div>
   </div>
 
-  <!-- HEADER -->
-  <div class="nx-header">
-    <div class="nx-title">NEXUS v4.0 | LIVE ENGINE</div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="ws-status"><div class="ws-dot" id="wsDot"></div><span id="wsLabel">OFFLINE</span></div>
-      <button class="abtn active" id="btn_BTC" onclick="switchAsset('BTCUSDT','BTC')">BTC</button>
-      <button class="abtn"        id="btn_ETH" onclick="switchAsset('ETHUSDT','ETH')">ETH</button>
-      <button class="abtn"        id="btn_SOL" onclick="switchAsset('SOLUSDT','SOL')">SOL</button>
-    </div>
+  <div class="box">
+    <b>Signals</b>
+    <div id="signals"></div>
   </div>
 
-  <!-- CARDS -->
-  <div class="cards-grid">
-    <div class="nx-card">
-      <div class="card-label">Market Pulse</div>
-      <div class="card-value" id="v_price">---</div>
-      <div class="card-sub" id="v_change">--</div>
-    </div>
-    <div class="nx-card">
-      <div class="card-label">AI Target</div>
-      <div class="card-value" id="v_target" style="color:var(--cyan)">---</div>
-      <div class="card-sub" id="v_target_dist">--</div>
-    </div>
-    <div class="nx-card">
-      <div class="card-label">Confidence</div>
-      <div class="card-value" id="v_conf" style="color:var(--green)">---</div>
-      <div class="card-sub" id="v_bias">--</div>
-    </div>
-    <div class="nx-card">
-      <div class="card-label">24h Volume</div>
-      <div class="card-value" id="v_vol" style="color:var(--gold)">---</div>
-      <div class="card-sub" id="v_high_low">--</div>
-    </div>
+  <div class="box">
+    <b>Logs</b>
+    <div id="logs"></div>
   </div>
-
-  <!-- STRATEGY BANNER -->
-  <div class="strategy-banner">
-    <span class="strat-name">⚡ STRATEGY:</span>
-    <span class="strat-tag" id="strat_type">EMA CROSS + MACD</span>
-    <span class="strat-tag" id="strat_tf">TF: 1M</span>
-    <span class="strat-tag" id="strat_signal">NEUTRAL</span>
-    <span class="strat-tag" id="strat_ob">OB: BALANCED</span>
-    <span class="strat-tag" id="strat_vol">VOL: NORMAL</span>
-    <span class="strat-tag" id="strat_risk">RISK: 1%</span>
-  </div>
-
-  <!-- CHART + ORDER BOOK -->
-  <div class="main-grid">
-    <div class="chart-wrap">
-      <div class="chart-header">
-        <div>
-          <button class="tf-btn active" onclick="switchTF('1m')">1M</button>
-          <button class="tf-btn" onclick="switchTF('5m')">5M</button>
-          <button class="tf-btn" onclick="switchTF('15m')">15M</button>
-        </div>
-        <div id="chart_info" style="color:var(--cyan)">LIVE CANDLESTICK</div>
-        <div id="chart_ohlc" style="font-size:0.45rem"></div>
-      </div>
-      <canvas id="candleCanvas"></canvas>
-    </div>
-
-    <div class="orderbook">
-      <div class="ob-header">ORDER BOOK DEPTH</div>
-      <div class="ob-side ob-ask">
-        <div class="ob-label"><span>PRICE</span><span>QTY</span></div>
-        <div id="asks_list"></div>
-      </div>
-      <div class="ob-mid">
-        <div id="ob_price" style="color:var(--gold)">---</div>
-        <div class="ob-spread" id="ob_spread">SPREAD: --</div>
-      </div>
-      <div class="ob-side ob-bid">
-        <div class="ob-label"><span>PRICE</span><span>QTY</span></div>
-        <div id="bids_list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM: SIGNALS | EXECUTIONS | LOG -->
-  <div class="bottom-grid">
-    <!-- SIGNALS -->
-    <div class="nx-panel">
-      <div class="panel-header">
-        <span>PROVEN SIGNALS</span>
-        <span id="sig_badge" style="color:var(--dim);font-size:0.45rem">SCANNING…</span>
-      </div>
-      <div class="panel-body" id="sig_list"></div>
-    </div>
-
-    <!-- EXECUTION TRACKING -->
-    <div class="nx-panel">
-      <div class="panel-header"><span>EXECUTION TRACKER</span></div>
-      <div class="exec-summary">
-        <div class="exec-kv"><div class="v" id="ex_total" style="color:var(--gold)">0</div><div class="k">Executed</div></div>
-        <div class="exec-kv"><div class="v" id="ex_wr"    style="color:var(--green)">--</div><div class="k">Win Rate</div></div>
-        <div class="exec-kv"><div class="v" id="ex_avg"   style="color:var(--cyan)">--</div><div class="k">Avg Entry</div></div>
-        <div class="exec-kv"><div class="v" id="ex_open"  style="color:var(--text)">0</div><div class="k">Open Pos</div></div>
-      </div>
-      <div class="panel-body" id="exec_list"></div>
-    </div>
-
-    <!-- LOG -->
-    <div class="nx-panel">
-      <div class="panel-header"><span>SYSTEM LOG</span><span id="log_ws" style="font-size:0.45rem;color:var(--dim)">WS:--</span></div>
-      <div class="panel-body" id="log_list" style="direction:ltr"></div>
-    </div>
-  </div>
+</div>
 
 </div>
 
 <script>
-(function(){
-'use strict';
+let wsKline, wsDepth;
+let candles = [];
+let bids = [], asks = [];
 
-/* ─── STATE ─── */
-let CUR = 'BTCUSDT', TF = '1m';
-let candles = [], orderBook = { bids: [], asks: [] };
-let wsKline = null, wsDepth = null, wsTicker = null;
-let reconnectTimer = null;
+const log = (msg) => {
+  const el = document.createElement("div");
+  el.textContent = msg;
+  document.getElementById("logs").prepend(el);
+};
 
-const stats = { t:0, bu:0, be:0, cSum:0, cCnt:0 };
-const exec  = { total:0, wins:0, open:0, positions:[], pnl:0 };
-let lastPrice = 0, prevClose = 0;
-
-/* ─── INDICATORS ─── */
-function ema(arr, n) {
-  if (arr.length < n) return null;
-  const k = 2/(n+1);
-  let e = arr.slice(0,n).reduce((a,b)=>a+b,0)/n;
-  for (let i=n; i<arr.length; i++) e = arr[i]*k + e*(1-k);
-  return e;
-}
-function macd(closes) {
-  const e12 = ema(closes,12), e26 = ema(closes,26);
-  if (!e12||!e26) return null;
-  return { line: e12-e26, hist: (e12-e26)*0.5 };
-}
-function rsi(closes, period=14) {
-  if (closes.length < period+1) return 50;
-  let gains=0, losses=0;
-  for (let i=closes.length-period; i<closes.length; i++) {
-    const d = closes[i]-closes[i-1];
-    if (d>0) gains+=d; else losses+=Math.abs(d);
-  }
-  const rs = gains/(losses||0.001);
-  return 100-(100/(1+rs));
-}
-function bollinger(closes, n=20) {
-  if (closes.length < n) return null;
-  const sl = closes.slice(-n);
-  const mean = sl.reduce((a,b)=>a+b,0)/n;
-  const std  = Math.sqrt(sl.reduce((a,b)=>a+(b-mean)**2,0)/n);
-  return { upper: mean+2*std, lower: mean-2*std, mid: mean };
+function setStatus(on){
+  const el = document.getElementById("wsStatus");
+  el.textContent = on ? "LIVE" : "OFFLINE";
+  el.className = "status " + (on ? "live" : "");
 }
 
-/* ─── STRATEGY ENGINE ─── */
-function runStrategy() {
-  if (candles.length < 30) return;
+function connect(){
+
+  wsKline = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1m");
+  wsDepth = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@depth");
+
+  wsKline.onopen = () => {
+    setStatus(true);
+    log("Kline connected");
+  };
+
+  wsKline.onmessage = (e) => {
+    const k = JSON.parse(e.data).k;
+
+    const c = {
+      o:+k.o,
+      h:+k.h,
+      l:+k.l,
+      c:+k.c
+    };
+
+    candles.push(c);
+    if(candles.length>100) candles.shift();
+
+    draw();
+    strategy();
+  };
+
+  wsDepth.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    bids = d.b || [];
+    asks = d.a || [];
+
+    renderOB();
+  };
+
+  wsKline.onclose = reconnect;
+  wsDepth.onclose = reconnect;
+}
+
+function reconnect(){
+  setStatus(false);
+  log("Reconnecting...");
+  setTimeout(connect,3000);
+}
+
+/* ===== CHART ===== */
+function draw(){
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  if(candles.length<2) return;
+
+  const prices = candles.map(c=>c.c);
+  const max = Math.max(...prices);
+  const min = Math.min(...prices);
+
+  candles.forEach((c,i)=>{
+    const x = i * (canvas.width / candles.length);
+    const y = canvas.height - ((c.c-min)/(max-min))*canvas.height;
+
+    ctx.fillStyle = "#00ff9f";
+    ctx.fillRect(x,y,3,3);
+  });
+}
+
+/* ===== ORDERBOOK ===== */
+function renderOB(){
+  const el = document.getElementById("orderbook");
+  el.innerHTML = "";
+
+  bids.slice(0,5).forEach(b=>{
+    const d = document.createElement("div");
+    d.innerHTML = `<span class="green">${b[0]}</span> | ${b[1]}`;
+    el.appendChild(d);
+  });
+
+  asks.slice(0,5).forEach(a=>{
+    const d = document.createElement("div");
+    d.innerHTML = `<span class="red">${a[0]}</span> | ${a[1]}`;
+    el.appendChild(d);
+  });
+}
+
+/* ===== STRATEGY ===== */
+function strategy(){
+  if(candles.length<10) return;
+
   const closes = candles.map(c=>c.c);
-  const last   = candles[candles.length-1];
 
-  const ema9   = ema(closes, 9);
-  const ema21  = ema(closes, 21);
-  const mc     = macd(closes);
-  const r      = rsi(closes);
-  const bb     = bollinger(closes);
+  const avg = closes.slice(-10).reduce((a,b)=>a+b,0)/10;
+  const last = closes[closes.length-1];
 
-  if (!ema9||!ema21||!mc||!bb) return;
+  const signalBox = document.getElementById("signals");
 
-  // Scoring
-  let score = 0, reasons = [];
-  if (ema9 > ema21)      { score++; reasons.push('EMA↑'); } else { score--; reasons.push('EMA↓'); }
-  if (mc.hist > 0)       { score++; reasons.push('MACD↑'); } else { score--; reasons.push('MACD↓'); }
-  if (r < 30)            { score+=2; reasons.push('RSI-OS'); }
-  else if (r > 70)       { score-=2; reasons.push('RSI-OB'); }
-  if (last.c < bb.lower) { score++;  reasons.push('BB-Low'); }
-  if (last.c > bb.upper) { score--;  reasons.push('BB-High'); }
-
-  // Order book imbalance
-  const bidVol = orderBook.bids.slice(0,5).reduce((s,b)=>s+parseFloat(b[1]),0);
-  const askVol = orderBook.asks.slice(0,5).reduce((s,b)=>s+parseFloat(b[1]),0);
-  const obRatio = bidVol/(askVol||1);
-  if (obRatio > 1.3)      { score++;  reasons.push('OB-Bull'); }
-  else if (obRatio < 0.7) { score--;  reasons.push('OB-Bear'); }
-
-  const isBull = score >= 2;
-  const isBear = score <= -2;
-  const conf   = Math.min(99, Math.max(55, 70 + Math.abs(score)*5));
-  const biasEl = document.getElementById('v_bias');
-  const stratSig = document.getElementById('strat_signal');
-  const stratOB  = document.getElementById('strat_ob');
-
-  stratOB.textContent  = `OB: ${obRatio>1.2?'BULL':obRatio<0.8?'BEAR':'BALANCED'}`;
-  stratOB.className    = `strat-tag ${obRatio>1.2?'active-bull':obRatio<0.8?'active-bear':''}`;
-  document.getElementById('strat_vol').textContent = `RSI: ${r.toFixed(0)}`;
-
-  if (isBull) {
-    stratSig.textContent = '▲ LONG'; stratSig.className = 'strat-tag active-bull';
-    biasEl.textContent = `EMA9:${ema9.toFixed(0)} EMA21:${ema21.toFixed(0)}`;
-    biasEl.style.color = 'var(--green)';
-    document.getElementById('v_conf').style.color = 'var(--green)';
-    addSignal(reasons.join('+'), last.c, true, conf);
-    fireExecution(last.c, true, conf);
-  } else if (isBear) {
-    stratSig.textContent = '▼ SHORT'; stratSig.className = 'strat-tag active-bear';
-    biasEl.textContent = `EMA9:${ema9.toFixed(0)} EMA21:${ema21.toFixed(0)}`;
-    biasEl.style.color = 'var(--red)';
-    document.getElementById('v_conf').style.color = 'var(--red)';
-    addSignal(reasons.join('+'), last.c, false, conf);
-    fireExecution(last.c, false, conf);
+  if(last > avg){
+    addSignal("LONG", last);
   } else {
-    stratSig.textContent = '◈ NEUTRAL'; stratSig.className = 'strat-tag';
-    biasEl.textContent = `Score: ${score}`;
-    biasEl.style.color = 'var(--dim)';
+    addSignal("SHORT", last);
   }
-
-  document.getElementById('v_conf').textContent = conf + '%';
-  updateTarget(last.c, isBull, isBear, ema9, ema21);
 }
 
-function updateTarget(price, bull, bear, e9, e21) {
-  let target;
-  if (bull)       target = price + (e9 - e21) * 2;
-  else if (bear)  target = price - (e9 - e21) * 2;
-  else            target = (e9 + e21) / 2;
-  const dist = ((target - price) / price * 100).toFixed(2);
-  document.getElementById('v_target').textContent = '$' + target.toFixed(2);
-  document.getElementById('v_target_dist').textContent = `${dist > 0 ? '+' : ''}${dist}% from current`;
-  document.getElementById('v_target_dist').style.color = dist > 0 ? 'var(--green)' : 'var(--red)';
+let lastSignal = 0;
+
+function addSignal(type, price){
+  if(Date.now() - lastSignal < 5000) return;
+  lastSignal = Date.now();
+
+  const el = document.createElement("div");
+  el.innerHTML = `${type} @ ${price}`;
+
+  el.className = type==="LONG" ? "green" : "red";
+
+  document.getElementById("signals").prepend(el);
 }
 
-/* ─── SIGNALS ─── */
-const sigCooldown = {};
-function addSignal(type, price, bull, conf) {
-  const key = type + bull;
-  if (sigCooldown[key] && Date.now() - sigCooldown[key] < 15000) return;
-  sigCooldown[key] = Date.now();
+/* START */
+connect();
+</script>
 
-  stats.t++; bull ? stats.bu++ : stats.be++;
-  stats.cSum += conf; stats.cCnt++;
-
-  document.getElementById('st_signals').textContent = stats.t;
-  document.getElementById('st_bull').textContent    = stats.bu;
-  document.getElementById('st_bear').textContent    = stats.be;
-  document.getElementById('st_conf').textContent    = Math.round(stats.cSum/stats.cCnt)+'%';
-
-  const badge = document.getElementById('sig_badge');
-  badge.textContent = bull ? '▲ BULL' : '▼ BEAR';
-  badge.style.color = bull ? 'var(--green)' : 'var(--red)';
-
-  const row = document.createElement('div');
-  row.className = 'sig-row ' + (bull ? 'sig-bull' : 'sig-bear');
-  row.innerHTML = `
-    <span>${bull?'▲':'▼'}</span>
-    <span style="font-size:0.5rem">${type}<br><span style="color:var(--dim)">$${price.toLocaleString(undef
+</body>
+</html>
