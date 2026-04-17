@@ -1,469 +1,735 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS v3.3.5 | THE FINAL</title>
-    <style>
-        :root {
-            --g: #d4af37;
-            --bg: #050505;
-            --s: #00ff9f;
-            --a: #00d4ff;
-            --e: #ff4444;
-            --panel: #0a0a0a;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS v4.0 | DIAMOND EDITION</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:    #d4af37;
+  --gold2:   #f5d76e;
+  --diamond: #a8d8f0;
+  --cyan:    #00d4ff;
+  --green:   #00ff9f;
+  --red:     #ff4455;
+  --bg:      #020408;
+  --panel:   #060c12;
+  --border:  #0a1a2a;
+  --text:    #c8d8e8;
+}
 
-        * { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background: var(--bg);
-            color: var(--g);
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 10px;
-            overflow-x: hidden;
-        }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-        ._0x_frame {
-            border: 2px solid var(--g);
-            padding: 15px;
-            max-width: 1300px;
-            margin: auto;
-            min-height: 95vh;
-            transition: border-color 0.5s;
-            position: relative;
-        }
+/* ===== خلفية متحركة ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,180,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212,175,55,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-        ._0x_frame.bullish { border-color: var(--s); box-shadow: 0 0 15px rgba(0,255,159,0.15); }
-        ._0x_frame.bearish { border-color: var(--e); box-shadow: 0 0 15px rgba(255,68,68,0.15); }
+/* شبكة خلفية */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid #222;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: auto;
+  padding: 12px;
+}
 
-        ._grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+/* ===== رأس الصفحة ===== */
+.nx-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(6,12,18,0.95), rgba(10,20,30,0.95));
+  border: 1px solid rgba(212,175,55,0.3);
+  border-top: 2px solid var(--gold);
+  position: relative;
+  overflow: hidden;
+}
 
-        @media (min-width: 768px) { ._grid { grid-template-columns: repeat(4, 1fr); } }
+.nx-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: scanline 4s linear infinite;
+}
 
-        ._card {
-            background: var(--panel);
-            border: 1px solid #222;
-            padding: 10px;
-            text-align: center;
-        }
+@keyframes scanline {
+  0% { left: -60%; }
+  100% { left: 110%; }
+}
 
-        ._val {
-            display: block;
-            font-size: 1.1rem;
-            color: #fff;
-            text-shadow: 0 0 5px var(--g);
-            margin: 5px 0;
-        }
+.nx-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(0.9rem, 3vw, 1.3rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold), var(--gold2), var(--diamond));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
 
-        ._view {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
+.nx-sub {
+  font-size: 0.55rem;
+  color: #445566;
+  letter-spacing: 3px;
+  margin-top: 3px;
+}
 
-        @media (min-width: 768px) { ._view { grid-template-columns: 1fr 2.2fr; } }
+.nx-meta {
+  text-align: right;
+  font-size: 0.6rem;
+  direction: ltr;
+}
 
-        ._panel {
-            border: 1px solid #222;
-            background: #000;
-            padding: 12px;
-            height: 350px;
-            overflow-y: auto;
-        }
+.nx-meta .arch { color: var(--gold); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; }
+.nx-meta .stat { margin-top: 4px; }
 
-        .btn {
-            background: #111;
-            border: 1px solid var(--g);
-            color: var(--g);
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            margin: 2px;
-            transition: background 0.2s;
-        }
+.status-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-left: 5px;
+  animation: pulse-dot 1.5s ease infinite;
+}
 
-        .btn:hover, .btn.active {
-            background: var(--g);
-            color: #000;
-        }
+.status-dot.online  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink-dot 0.6s ease infinite; }
 
-        #_feed {
-            font-size: 0.65rem;
-            color: var(--a);
-            line-height: 1.6;
-            text-align: left;
-            direction: ltr;
-        }
+@keyframes pulse-dot { 0%,100%{transform:scale(1); opacity:1} 50%{transform:scale(1.4); opacity:0.7} }
+@keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-        .label {
-            color: #555;
-            font-size: 0.55rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+/* ===== أزرار الأصول ===== */
+.asset-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
 
-        input {
-            background: #000;
-            color: var(--a);
-            border: 1px solid #333;
-            font-size: 0.75rem;
-            text-align: center;
-            width: 85%;
-            padding: 4px;
-            margin-top: 5px;
-        }
+.abtn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+  border: 1px solid #1a2a3a;
+  background: #060c12;
+  color: #445566;
+  letter-spacing: 2px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
 
-        .win-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.6rem;
-            border-bottom: 1px solid #111;
-            padding: 4px 0;
-            color: var(--s);
-        }
+.abtn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.25s;
+}
 
-        .win-row.bearish-row { color: var(--e); }
+.abtn:hover { color: var(--text); border-color: #2a3a4a; }
 
-        /* إصلاح: تأثيرات بصرية للإشارات */
-        .signal-badge {
-            display: inline-block;
-            padding: 1px 5px;
-            border-radius: 2px;
-            font-size: 0.55rem;
-        }
-        .signal-bull { background: rgba(0,255,159,0.15); color: var(--s); border: 1px solid var(--s); }
-        .signal-bear { background: rgba(255,68,68,0.15); color: var(--e); border: 1px solid var(--e); }
+.abtn.active-btc  { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.08); }
+.abtn.active-btc::after  { background: var(--gold); }
+.abtn.active-eth  { color: var(--cyan); border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+.abtn.active-eth::after  { background: var(--cyan); }
+.abtn.active-gold { color: var(--gold2); border-color: var(--gold2); background: rgba(245,215,110,0.08); }
+.abtn.active-gold::after { background: var(--gold2); }
 
-        /* إصلاح: مؤشر تحميل */
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    </style>
+/* ===== شبكة البطاقات الرئيسية ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (min-width: 700px) { .cards-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.nx-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 14px 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.nx-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent);
+}
+
+.nx-card:hover { border-color: rgba(212,175,55,0.25); }
+
+.card-label {
+  font-size: 0.48rem;
+  letter-spacing: 2px;
+  color: #334455;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  font-weight: 700;
+  color: #eee;
+  text-shadow: 0 0 20px rgba(0,212,255,0.3);
+  display: block;
+  margin-bottom: 4px;
+  transition: color 0.3s;
+}
+
+.card-sub { font-size: 0.5rem; color: #334455; }
+
+/* بطاقة إدارة المخاطر */
+.risk-card { border-color: rgba(0,212,255,0.2) !important; }
+.risk-card::before { background: linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent); }
+
+.risk-input {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  text-align: center;
+  width: 90%;
+  padding: 6px 8px;
+  margin: 6px 0 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.risk-input:focus { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,212,255,0.15); }
+.risk-input::placeholder { color: #2a3a4a; }
+
+.risk-result {
+  font-size: 0.5rem;
+  color: var(--gold);
+  line-height: 1.6;
+  min-height: 28px;
+}
+
+/* بطاقة الثقة */
+.conf-value { color: var(--green) !important; text-shadow: 0 0 15px rgba(0,255,159,0.4) !important; }
+.strat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.48rem;
+  letter-spacing: 1px;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+.badge-bull { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.3); }
+.badge-bear { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.3); }
+.badge-neut { background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid rgba(212,175,55,0.3); }
+
+/* ===== قسم الرسم البياني ===== */
+.chart-section {
+  margin-bottom: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+  position: relative;
+}
+
+.chart-label {
+  font-size: 0.48rem;
+  letter-spacing: 2px;
+  color: #334455;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#sparkline {
+  width: 100%;
+  height: 70px;
+  display: block;
+}
+
+/* ===== اللوحتان السفليتان ===== */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 700px) { .bottom-grid { grid-template-columns: 1fr 1.8fr; } }
+
+.nx-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 14px;
+  height: 320px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.nx-panel::-webkit-scrollbar { width: 3px; }
+.nx-panel::-webkit-scrollbar-track { background: transparent; }
+.nx-panel::-webkit-scrollbar-thumb { background: #1a2a3a; border-radius: 3px; }
+
+.panel-title {
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  color: #334455;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #0a1a2a;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel-title-icon { font-size: 0.7rem; }
+
+/* ===== إشارات ===== */
+.signal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 6px;
+  border-bottom: 1px solid rgba(10,26,42,0.8);
+  animation: fadeInRow 0.4s ease;
+  gap: 6px;
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.sig-type {
+  font-size: 0.55rem;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.45rem;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.sig-bull { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.25); }
+.sig-bear { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.25); }
+
+.sig-price {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  color: #667788;
+  flex: 1;
+  text-align: center;
+}
+
+.sig-time {
+  font-size: 0.48rem;
+  color: #334455;
+  direction: ltr;
+  white-space: nowrap;
+}
+
+/* ===== سجل الأحداث ===== */
+#feed-log {
+  font-size: 0.6rem;
+  line-height: 1.8;
+  direction: ltr;
+}
+
+.log-line {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(10,26,42,0.5);
+  animation: fadeInRow 0.3s ease;
+}
+
+.log-time { color: #2a3a4a; font-size: 0.5rem; white-space: nowrap; flex-shrink: 0; }
+.log-msg  { flex: 1; }
+
+/* ===== شريط الإحصائيات ===== */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stat-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: block;
+}
+
+.stat-lbl { font-size: 0.45rem; color: #334455; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ===== تأثيرات الاتجاه ===== */
+.frame-bull { border-color: rgba(0,255,159,0.3) !important; box-shadow: 0 0 30px rgba(0,255,159,0.05); }
+.frame-bear { border-color: rgba(255,68,85,0.3)  !important; box-shadow: 0 0 30px rgba(255,68,85,0.05); }
+
+/* ===== تأثير ظهور عند التحميل ===== */
+.fade-in { animation: fadeInUp 0.6s ease both; }
+.fade-in:nth-child(1) { animation-delay: 0.1s; }
+.fade-in:nth-child(2) { animation-delay: 0.2s; }
+.fade-in:nth-child(3) { animation-delay: 0.3s; }
+.fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== شريط الوقت الحي ===== */
+.live-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.5rem;
+  color: #2a3a4a;
+  padding: 6px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #0a1218;
+  direction: ltr;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--green);
+  font-size: 0.5rem;
+}
+
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot 1.2s ease infinite;
+}
+
+/* ===== تأثير تغيير السعر ===== */
+@keyframes flash-up   { 0%{color:var(--green)} 100%{color:#eee} }
+@keyframes flash-down { 0%{color:var(--red)}   100%{color:#eee} }
+.flash-up   { animation: flash-up   0.6s ease; }
+.flash-down { animation: flash-down 0.6s ease; }
+
+/* ===== تذييل ===== */
+.nx-footer {
+  text-align: center;
+  font-size: 0.45rem;
+  color: #1a2a3a;
+  letter-spacing: 2px;
+  padding: 10px 0 4px;
+  border-top: 1px solid #0a1218;
+  margin-top: 14px;
+}
+</style>
 </head>
 <body>
 
-<div class="_0x_frame" id="nx_core">
-    <header>
-        <div>
-            <h2 style="margin:0; font-size: 1.1rem;">⚔️ NEXUS v3.3.5 | THE FINAL</h2>
-            <div style="margin-top:8px;">
-                <button class="btn active" id="btn_btc" onclick="svc('BTCUSDT','BTC/USD','btn_btc')">BTC</button>
-                <button class="btn" id="btn_eth" onclick="svc('ETHUSDT','ETH/USD','btn_eth')">ETH</button>
-                <button class="btn" id="btn_gold" onclick="svc('PAXGUSDT','GOLD/USD','btn_gold')">GOLD</button>
-            </div>
-        </div>
-        <div style="text-align:left; font-size: 0.6rem; direction: ltr;">
-            <div>ARCHITECT: <span style="color:var(--g)">CHAKIR</span></div>
-            <div>STATUS: <span id="conn_status" style="color:var(--e)" class="blink">CONNECTING</span></div>
-            <div style="color:#333; margin-top:3px;" id="last_update">--:--:--</div>
-        </div>
-    </header>
+<div class="wrapper" id="main_frame">
 
-    <div class="_grid">
-        <!-- بطاقة الثقة -->
-        <div class="_card">
-            <span class="label">Confidence Score</span>
-            <span class="_val" id="cv">---</span>
-            <div id="strat_advice" style="font-size:0.5rem; color:var(--s)">[ANALYZING]</div>
-        </div>
+  <!-- شريط الوقت الحي -->
+  <div class="live-bar">
+    <div class="live-indicator">
+      <div class="live-dot" id="live_dot"></div>
+      <span id="live_label">CONNECTING...</span>
+    </div>
+    <div id="live_time" style="direction:ltr;">--:--:-- | ---</div>
+    <div>NEXUS SOVEREIGN ENGINE v4.0</div>
+  </div>
 
-        <!-- بطاقة إدارة المخاطر - إصلاح: منع القيم السالبة -->
-        <div class="_card" style="border-color: var(--a);">
-            <span class="label">Risk Manager</span>
-            <input type="number" id="balance" placeholder="Capital $" min="1" oninput="runRisk()">
-            <div id="risk_result" style="font-size:0.5rem; color:var(--g); margin-top:3px;">Balance Required</div>
-        </div>
+  <!-- الرأس -->
+  <div class="nx-header fade-in">
+    <div>
+      <div class="nx-title">⬡ NEXUS v4.0 | DIAMOND</div>
+      <div class="nx-sub">SOVEREIGN TRADING INTELLIGENCE SYSTEM</div>
+      <div class="asset-btns" style="margin-top:10px;">
+        <button class="abtn active-btc" id="btn_btc"  onclick="switchAsset('BTCUSDT','BTC/USD','btc')">BTC</button>
+        <button class="abtn"            id="btn_eth"  onclick="switchAsset('ETHUSDT','ETH/USD','eth')">ETH</button>
+        <button class="abtn"            id="btn_gold" onclick="switchAsset('PAXGUSDT','GOLD/USD','gold')">GOLD</button>
+      </div>
+    </div>
+    <div class="nx-meta" style="direction:ltr;">
+      <div class="arch">CHAKIR</div>
+      <div style="color:#334455; font-size:0.45rem; letter-spacing:1px; margin-top:2px;">ARCHITECT</div>
+      <div class="stat" style="margin-top:6px;">
+        <span class="status-dot online" id="status_dot"></span>
+        <span id="status_txt" style="color:var(--green);">SECURE</span>
+      </div>
+      <div id="upd_time" style="color:#2a3a4a; font-size:0.45rem; margin-top:3px; direction:ltr;">--:--:--</div>
+    </div>
+  </div>
 
-        <!-- بطاقة السعر الحالي -->
-        <div class="_card">
-            <span class="label">Market Pulse</span>
-            <span class="_val" id="cp">LOADING</span>
-            <small id="an" style="color:#555;">BTC/USD</small>
-        </div>
+  <!-- شريط الإحصائيات -->
+  <div class="stats-bar fade-in">
+    <div class="stat-box">
+      <span class="stat-num" id="stat_signals" style="color:var(--gold);">0</span>
+      <span class="stat-lbl">Total Signals</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num" id="stat_bull" style="color:var(--green);">0</span>
+      <span class="stat-lbl">Bullish</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num" id="stat_bear" style="color:var(--red);">0</span>
+      <span class="stat-lbl">Bearish</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num" id="stat_acc" style="color:var(--cyan);">--</span>
+      <span class="stat-lbl">Avg Conf</span>
+    </div>
+  </div>
 
-        <!-- بطاقة الهدف - إصلاح: حساب الهدف بشكل صحيح -->
-        <div class="_card">
-            <span class="label">AI Target</span>
-            <span class="_val" id="pt" style="color:var(--a)">---</span>
-            <small style="color:#555;">SMA_MODEL</small>
-        </div>
+  <!-- البطاقات الرئيسية الأربع -->
+  <div class="cards-grid fade-in">
+
+    <!-- هدف الذكاء الاصطناعي -->
+    <div class="nx-card">
+      <div class="card-label">⬡ AI Target</div>
+      <span class="card-value" id="cv_target" style="color:var(--cyan);">---</span>
+      <div class="card-sub">SMA_MODEL</div>
     </div>
 
-    <div class="_view">
-        <!-- لوحة الإشارات -->
-        <div class="_panel">
-            <div class="label" style="margin-bottom:10px;">🏆 Proven Signals</div>
-            <div id="win_ledger"></div>
-        </div>
-
-        <!-- لوحة السجل -->
-        <div class="_panel">
-            <div class="label" style="margin-bottom:10px;">System Logic Feed</div>
-            <div id="_feed" dir="ltr">>> Initializing Sovereign Core <<</div>
-        </div>
+    <!-- السعر الحالي -->
+    <div class="nx-card">
+      <div class="card-label">◈ Market Pulse</div>
+      <span class="card-value" id="cv_price">LOADING</span>
+      <div class="card-sub" id="cv_pair">BTC/USD</div>
     </div>
-</div>
+
+    <!-- إدارة المخاطر -->
+    <div class="nx-card risk-card">
+      <div class="card-label">⚙ Risk Manager</div>
+      <input type="number" class="risk-input" id="balance_input" placeholder="$ Capital" min="1" oninput="calcRisk()">
+      <div class="risk-result" id="risk_out">Balance Required</div>
+    </div>
+
+    <!-- درجة الثقة -->
+    <div class="nx-card">
+      <div class="card-label">◎ Confidence</div>
+      <span class="card-value conf-value" id="cv_conf">---</span>
+      <div id="strat_badge"><span class="strat-badge badge-neut">[ANALYZING]</span></div>
+    </div>
+
+  </div>
+
+  <!-- الرسم البياني -->
+  <div class="chart-section fade-in">
+    <div class="chart-label">◈ Price Sparkline — Last 20 Ticks</div>
+    <canvas id="sparkline" height="70"></canvas>
+  </div>
+
+  <!-- اللوحتان -->
+  <div class="bottom-grid fade-in">
+
+    <!-- الإشارات -->
+    <div class="nx-panel">
+      <div class="panel-title">
+        <span class="panel-title-icon">🏆</span>
+        Proven Signals
+      </div>
+      <div id="signal_ledger"></div>
+    </div>
+
+    <!-- سجل الأحداث -->
+    <div class="nx-panel">
+      <div class="panel-title">
+        <span class="panel-title-icon">⬡</span>
+        System Logic Feed
+      </div>
+      <div id="feed_log"></div>
+    </div>
+
+  </div>
+
+  <!-- تذييل -->
+  <div class="nx-footer">
+    NEXUS v4.0 DIAMOND EDITION · ARCHITECT: CHAKIR · SOVEREIGN INTELLIGENCE ENGINE · ALL RIGHTS RESERVED
+  </div>
+
+</div><!-- end wrapper -->
 
 <script>
 (function(){
-    'use strict';
+'use strict';
 
-    // ===== الإصلاح الرئيسي: متغيرات منفصلة لكل أصل =====
-    const ASSETS = {
-        'BTCUSDT': { hist: [], lastPrice: 0, label: 'BTC/USD' },
-        'ETHUSDT': { hist: [], lastPrice: 0, label: 'ETH/USD' },
-        'PAXGUSDT': { hist: [], lastPrice: 0, label: 'GOLD/USD' }
-    };
+/* ======================================================
+   NEXUS v4.0 — Diamond Edition
+   Architect: CHAKIR
+   Engine: Sovereign Frontend AI
+   ====================================================== */
 
-    let currentAsset = 'BTCUSDT';
-    let currentBtn = 'btn_btc';
-    let engineTimer = null;
-    let isRunning = false;
+// ===== ثوابت وإعدادات =====
+const ASSETS = {
+  BTCUSDT:  { hist: [], lp: 0, label: 'BTC/USD',  min: 10000,  max: 500000 },
+  ETHUSDT:  { hist: [], lp: 0, label: 'ETH/USD',  min: 100,    max: 50000  },
+  PAXGUSDT: { hist: [], lp: 0, label: 'GOLD/USD', min: 1000,   max: 10000  }
+};
 
-    // ===== إصلاح: حدود أسعار منطقية للتحقق من صحة البيانات =====
-    const PRICE_GUARDS = {
-        'BTCUSDT':  { min: 10000,  max: 500000 },
-        'ETHUSDT':  { min: 100,    max: 50000  },
-        'PAXGUSDT': { min: 1000,   max: 10000  }
-    };
+const SMA_WINDOW  = 20;
+const CONF_THRESH = 90;
+const TICK_MS     = 3000;
 
-    // ===== إصلاح: التحقق من صحة السعر (Critic Agent) =====
-    function validatePrice(symbol, price) {
-        const guard = PRICE_GUARDS[symbol];
-        if (!guard) return false;
-        if (isNaN(price) || price <= 0) {
-            log(`[CRITIC] ⚠️ Invalid price rejected: ${price}`, '#ff4444');
-            return false;
-        }
-        if (price < guard.min || price > guard.max) {
-            log(`[CRITIC] 🛡️ Anomaly detected! Price ${price} out of range [${guard.min}-${guard.max}]`, '#ff4444');
-            return false;
-        }
-        return true;
-    }
+let cur       = 'BTCUSDT';
+let curStyle  = 'btc';
+let busy      = false;
+let timer     = null;
 
-    // ===== إصلاح: حساب SMA صحيح =====
-    function calcSMA(prices) {
-        if (!prices || prices.length === 0) return 0;
-        const sum = prices.reduce((a, b) => a + b, 0);
-        return sum / prices.length;
-    }
+// إحصائيات الجلسة
+let stats = { total: 0, bull: 0, bear: 0, confSum: 0, confCnt: 0 };
 
-    // ===== إصلاح: حساب الهدف بناءً على SMA الفعلي وليس قيمة عشوائية =====
-    function calcTarget(hist, currentPrice) {
-        if (hist.length < 2) return currentPrice;
-        const sma = calcSMA(hist);
-        // الهدف = السعر + (فرق السعر عن المتوسط * معامل الزخم)
-        const diff = currentPrice - sma;
-        const momentum = diff * 0.3;
-        const target = currentPrice + momentum;
-        // التأكد من أن الهدف إيجابي ومنطقي
-        return Math.max(target, currentPrice * 0.9);
-    }
+/* ===== الحماية من القيم الشاذة ===== */
+function criticCheck(sym, price) {
+  const a = ASSETS[sym];
+  if (!a) return false;
+  if (!isFinite(price) || price <= 0) {
+    sysLog(`[CRITIC] ⚠ Invalid price: ${price}`, '#ff4455');
+    return false;
+  }
+  if (price < a.min || price > a.max) {
+    sysLog(`[CRITIC] 🛡 Anomaly blocked! ${price} ∉ [${a.min}, ${a.max}]`, '#ff4455');
+    return false;
+  }
+  return true;
+}
 
-    // ===== إصلاح: حساب الثقة بناءً على استقرار السعر =====
-    function calcConfidence(hist, currentPrice) {
-        if (hist.length < 3) return 85;
-        const sma = calcSMA(hist);
-        const distances = hist.map(p => Math.abs(p - sma) / sma * 100);
-        const avgDist = calcSMA(distances);
-        // كلما كان السعر أقرب للمتوسط، كلما زادت الثقة
-        const conf = Math.max(75, Math.min(99, Math.round(98 - avgDist * 10)));
-        return conf;
-    }
+/* ===== SMA ===== */
+function sma(arr) {
+  if (!arr.length) return 0;
+  return arr.reduce((s,v) => s+v, 0) / arr.length;
+}
 
-    // ===== محرك جلب البيانات =====
-    async function engine() {
-        if (isRunning) return;
-        isRunning = true;
+/* ===== حساب الهدف ===== */
+function calcTarget(hist, price) {
+  if (hist.length < 2) return price;
+  const avg = sma(hist);
+  const momentum = (price - avg) * 0.3;
+  return Math.max(price + momentum, price * 0.85);
+}
 
-        try {
-            const res = await fetch(
-                `https://api.binance.com/api/v3/ticker/price?symbol=${currentAsset}`,
-                { cache: 'no-cache' }
-            );
+/* ===== حساب الثقة ===== */
+function calcConf(hist, price) {
+  if (hist.length < 3) return 85;
+  const avg = sma(hist);
+  const volatility = sma(hist.map(p => Math.abs(p - avg) / avg * 100));
+  return Math.max(75, Math.min(99, Math.round(98 - volatility * 8)));
+}
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+/* ===== محرك البيانات ===== */
+async function tick() {
+  if (busy) return;
+  busy = true;
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cur}`, { cache:'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { price: raw } = await res.json();
+    const p = parseFloat(raw);
+    if (!criticCheck(cur, p)) { busy = false; return; }
 
-            const data = await res.json();
-            const rawPrice = parseFloat(data.price);
+    const asset = ASSETS[cur];
+    const prev  = asset.lp;
+    asset.lp    = p;
+    asset.hist.push(p);
+    if (asset.hist.length > SMA_WINDOW) asset.hist.shift();
 
-            // ===== تشغيل Critic Agent للتحقق =====
-            if (!validatePrice(currentAsset, rawPrice)) {
-                log(`[EXECUTOR] Price rejected by Critic. Retrying...`, '#ff4444');
-                isRunning = false;
-                return;
-            }
+    setOnline(true);
+    updatePrice(p, prev);
+    analyze(p, asset.hist);
+    calcRisk();
+    drawSparkline(asset.hist);
 
-            const asset = ASSETS[currentAsset];
-            asset.lastPrice = rawPrice;
-            asset.hist.push(rawPrice);
-            if (asset.hist.length > 20) asset.hist.shift(); // نافذة أكبر للدقة
+  } catch(e) {
+    setOnline(false);
+    sysLog(`[ERROR] ${e.message}`, '#ff4455');
+  } finally { busy = false; }
+}
 
-            // تحديث الواجهة
-            document.getElementById('conn_status').textContent = 'SECURE';
-            document.getElementById('conn_status').style.color = 'var(--s)';
-            document.getElementById('conn_status').classList.remove('blink');
-            document.getElementById('cp').textContent = rawPrice.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+/* ===== تحديث السعر مع تأثير لوني ===== */
+function updatePrice(p, prev) {
+  const el = document.getElementById('cv_price');
+  el.textContent = p.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  el.classList.remove('flash-up','flash-down');
+  void el.offsetWidth;
+  if      (p > prev) el.classList.add('flash-up');
+  else if (p < prev) el.classList.add('flash-down');
+  document.getElementById('upd_time').textContent = nowTime();
+}
 
-            // تحديث الوقت
-            const now = new Date();
-            document.getElementById('last_update').textContent =
-                now.toLocaleTimeString('en-GB');
+/* ===== التحليل ===== */
+function analyze(price, hist) {
+  const target = calcTarget(hist, price);
+  const conf   = calcConf(hist, price);
+  const prev   = hist.length >= 2 ? hist[hist.length-2] : price;
+  const change = price - prev;
 
-            analyze(rawPrice, asset.hist);
-            runRisk();
+  if (!criticCheck(cur, target)) return;
 
-        } catch (e) {
-            document.getElementById('conn_status').textContent = 'OFFLINE';
-            document.getElementById('conn_status').style.color = 'var(--e)';
-            document.getElementById('conn_status').classList.add('blink');
-            log(`[!] Connection Error: ${e.message}`, '#ff4444');
-        } finally {
-            isRunning = false;
-        }
-    }
+  document.getElementById('cv_target').textContent = target.toFixed(2);
+  document.getElementById('cv_conf').textContent   = conf + '%';
 
-    // ===== تحليل البيانات =====
-    function analyze(price, hist) {
-        const target = calcTarget(hist, price);
-        const conf = calcConfidence(hist, price);
-        const prevPrice = hist.length >= 2 ? hist[hist.length - 2] : price;
-        const change = price - prevPrice;
+  // إحصائيات
+  stats.confSum += conf; stats.confCnt++;
+  document.getElementById('stat_acc').textContent =
+    Math.round(stats.confSum / stats.confCnt) + '%';
 
-        // ===== إصلاح: التحقق من صحة الهدف قبل العرض =====
-        if (!validatePrice(currentAsset, target)) {
-            log(`[CRITIC] Target anomaly prevented: ${target.toFixed(2)}`, '#ff4444');
-            return;
-        }
+  const frame = document.getElementById('main_frame');
+  const badge = document.getElementById('strat_badge');
 
-        document.getElementById('pt').textContent = target.toFixed(2);
-        document.getElementById('cv').textContent = conf + '%';
-
-        const ad = document.getElementById('strat_advice');
-        const core = document.getElementById('nx_core');
-
-        if (change > 0) {
-            ad.textContent = '[BULLISH_SIGNAL]';
-            ad.style.color = 'var(--s)';
-            core.className = '_0x_frame bullish';
-            if (conf >= 90) addSignal('Bullish Pivot', price, true);
-        } else if (change < 0) {
-            ad.textContent = '[BEARISH_PRESSURE]';
-            ad.style.color = 'var(--e)';
-            core.className = '_0x_frame bearish';
-            if (conf >= 90) addSignal('Bearish Alert', price, false);
-        } else {
-            ad.textContent = '[NEUTRAL_ZONE]';
-            ad.style.color = 'var(--g)';
-            core.className = '_0x_frame';
-        }
-
-        log(`[PLANNER] Price: ${price.toFixed(2)} | Target: ${target.toFixed(2)} | Conf: ${conf}%`, '#00d4ff');
-    }
-
-    // ===== إضافة إشارة للسجل =====
-    function addSignal(type, price, isBull) {
-        const ledger = document.getElementById('win_ledger');
-        const row = document.createElement('div');
-        row.className = 'win-row' + (isBull ? '' : ' bearish-row');
-        const badge = isBull ? 'signal-bull' : 'signal-bear';
-        const icon = isBull ? '🏆' : '⚠️';
-        row.innerHTML = `
-            <span>${icon} <span class="signal-badge ${badge}">${type}</span></span>
-            <span>@ ${price.toLocaleString('en-US', {maximumFractionDigits: 0})}</span>
-        `;
-        ledger.prepend(row);
-        if (ledger.childNodes.length > 8) ledger.lastChild.remove();
-    }
-
-    // ===== إصلاح: حساب إدارة المخاطر مع التحقق من القيم =====
-    window.runRisk = () => {
-        const balInput = document.getElementById('balance').value;
-        const b = parseFloat(balInput);
-        const asset = ASSETS[currentAsset];
-        const lp = asset.lastPrice;
-
-        if (b > 0 && lp > 0) {
-            const riskAmount = b * 0.01;           // 1% من رأس المال
-            const slPrice = lp * 0.98;             // وقف خسارة 2%
-            const slDiff = lp - slPrice;           // الفرق الإيجابي دائماً
-
-            // ===== إصلاح: منع القسمة على صفر والقيم السالبة =====
-            if (slDiff <= 0) {
-                document.getElementById('risk_result').innerHTML = 'Calculating...';
-                return;
-            }
-
-            const size = riskAmount / slDiff;
-
-            document.getElementById('risk_result').innerHTML =
-                `Size: ${size.toFixed(4)} | SL: ${slPrice.toLocaleString('en-US', {maximumFractionDigits: 0})}`;
-        }
-    };
-
-    // ===== تبديل الأصل =====
-    window.svc = (symbol, label, btnId) => {
-        currentAsset = symbol;
-        document.getElementById('an').textContent = label;
-
-        // تحديث الأزرار
-        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(btnId).classList.add('active');
-
-        // إعادة تعيين الواجهة
-        document.getElementById('cp').textContent = 'LOADING';
-        document.getElementById('pt').textContent = '---';
-        document.getElementById('cv').textContent = '---';
-        document.getElementById('strat_advice').textContent = '[SWITCHING]';
-        document.getElementById('risk_result').textContent = 'Balance Required';
-        document.getElementById('balance').value = '';
-        document.getElementById('nx_core').className = '_0x_frame';
-
-        log(`[!] Switching to: ${symbol}`, '#d4af37');
-        engine();
-    };
-
-    // ===== تسجيل الأحداث =====
-    function log(msg, color) {
-        const feed = document.getElementById('_feed');
-        const div = document.createElement('div');
-        div.style.color = color || '#00d4ff';
-        div.style.direction = 'ltr';
-        div.textContent = `>> ${msg}`;
-        feed.prepend(div);
-        // إبقاء السجل في حجم معقول
-        while (feed.childNodes.length > 50) feed.lastChild.remove();
-    }
-
-    // ===== التشغيل =====
-    log('[NEXUS] Sovereign Core Initialized ✓', '#d4af37');
-    log('[CRITIC] Price validation layer: ACTIVE', '#00ff9f');
-    log('[PLANNER] Awaiting market data...', '#00d4ff');
-
-    engine();
-    engineTimer = setInterval(engine, 3000);
-
-})();
-</script>
-</body>
-    </html>
-    
+  if (change > 0) {
+    frame.className = 'wrapper frame-bull';
+    badge.innerHTML = '<span class="strat-badge badge-bull">▲ BULLISH_SIGNAL</span>';
+    if (conf >= CONF_THRESH) addSignal('Bullish Pivot', price, true, conf);
+  } else if (change < 0) {
+    frame.className = 'wrapper frame-bear';
+    badge.innerHTML = '<span class="strat-badge badge-bear">▼ BEARISH_PRESSURE</span>';
+    if (conf >= CONF_THRESH) add
