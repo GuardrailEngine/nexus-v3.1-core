@@ -1,229 +1,568 @@
-caleString(undef<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS v4.1 LIVE</title>
+import { useState, useEffect, useRef, useCallback } from "react";
 
-<style>
-body {
-  background:#020408;
-  color:#00ff9f;
-  font-family: monospace;
-  margin:0;
+// ─── ENGINES ──────────────────────────────────────────────────────────────────
+
+function calcZScore(prices, window = 20) {
+  if (prices.length < window) return 0;
+  const slice = prices.slice(-window);
+  const mean = slice.reduce((a, b) => a + b, 0) / window;
+  const std = Math.sqrt(slice.reduce((a, b) => a + (b - mean) ** 2, 0) / window);
+  if (std === 0) return 0;
+  return (prices[prices.length - 1] - mean) / std;
 }
 
-.header {
-  padding:10px;
-  border-bottom:1px solid #0a1a2a;
-  display:flex;
-  justify-content:space-between;
-}
+function calcSupportResistance(prices, lookback = 50) {
+  if (prices.length < lookback) return { support: null, resistance: null };
+  const slice = prices.slice(-lookback);
+  const levels = [];
 
-.status { color:#ff4455; }
-.status.live { color:#00ff9f; }
-
-.container {
-  padding:10px;
-}
-
-canvas {
-  width:100%;
-  height:200px;
-  background:#000;
-  border:1px solid #0a1a2a;
-}
-
-.row {
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-.box {
-  flex:1;
-  background:#060c12;
-  padding:10px;
-  border:1px solid #0a1a2a;
-  height:200px;
-  overflow:auto;
-}
-
-.green { color:#00ff9f }
-.red { color:#ff4455 }
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  <div>NEXUS v4.1 LIVE ENGINE</div>
-  <div id="wsStatus" class="status">OFFLINE</div>
-</div>
-
-<div class="container">
-
-<canvas id="chart"></canvas>
-
-<div class="row">
-  <div class="box">
-    <b>OrderBook</b>
-    <div id="orderbook"></div>
-  </div>
-
-  <div class="box">
-    <b>Signals</b>
-    <div id="signals"></div>
-  </div>
-
-  <div class="box">
-    <b>Logs</b>
-    <div id="logs"></div>
-  </div>
-</div>
-
-</div>
-
-<script>
-let wsKline, wsDepth;
-let candles = [];
-let bids = [], asks = [];
-
-const log = (msg) => {
-  const el = document.createElement("div");
-  el.textContent = msg;
-  document.getElementById("logs").prepend(el);
-};
-
-function setStatus(on){
-  const el = document.getElementById("wsStatus");
-  el.textContent = on ? "LIVE" : "OFFLINE";
-  el.className = "status " + (on ? "live" : "");
-}
-
-function connect(){
-
-  wsKline = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1m");
-  wsDepth = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@depth");
-
-  wsKline.onopen = () => {
-    setStatus(true);
-    log("Kline connected");
-  };
-
-  wsKline.onmessage = (e) => {
-    const k = JSON.parse(e.data).k;
-
-    const c = {
-      o:+k.o,
-      h:+k.h,
-      l:+k.l,
-      c:+k.c
-    };
-
-    candles.push(c);
-    if(candles.length>100) candles.shift();
-
-    draw();
-    strategy();
-  };
-
-  wsDepth.onmessage = (e) => {
-    const d = JSON.parse(e.data);
-    bids = d.b || [];
-    asks = d.a || [];
-
-    renderOB();
-  };
-
-  wsKline.onclose = reconnect;
-  wsDepth.onclose = reconnect;
-}
-
-function reconnect(){
-  setStatus(false);
-  log("Reconnecting...");
-  setTimeout(connect,3000);
-}
-
-/* ===== CHART ===== */
-function draw(){
-  const canvas = document.getElementById("chart");
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  if(candles.length<2) return;
-
-  const prices = candles.map(c=>c.c);
-  const max = Math.max(...prices);
-  const min = Math.min(...prices);
-
-  candles.forEach((c,i)=>{
-    const x = i * (canvas.width / candles.length);
-    const y = canvas.height - ((c.c-min)/(max-min))*canvas.height;
-
-    ctx.fillStyle = "#00ff9f";
-    ctx.fillRect(x,y,3,3);
-  });
-}
-
-/* ===== ORDERBOOK ===== */
-function renderOB(){
-  const el = document.getElementById("orderbook");
-  el.innerHTML = "";
-
-  bids.slice(0,5).forEach(b=>{
-    const d = document.createElement("div");
-    d.innerHTML = `<span class="green">${b[0]}</span> | ${b[1]}`;
-    el.appendChild(d);
-  });
-
-  asks.slice(0,5).forEach(a=>{
-    const d = document.createElement("div");
-    d.innerHTML = `<span class="red">${a[0]}</span> | ${a[1]}`;
-    el.appendChild(d);
-  });
-}
-
-/* ===== STRATEGY ===== */
-function strategy(){
-  if(candles.length<10) return;
-
-  const closes = candles.map(c=>c.c);
-
-  const avg = closes.slice(-10).reduce((a,b)=>a+b,0)/10;
-  const last = closes[closes.length-1];
-
-  const signalBox = document.getElementById("signals");
-
-  if(last > avg){
-    addSignal("LONG", last);
-  } else {
-    addSignal("SHORT", last);
+  for (let i = 2; i < slice.length - 2; i++) {
+    const isPeak =
+      slice[i] > slice[i - 1] &&
+      slice[i] > slice[i - 2] &&
+      slice[i] > slice[i + 1] &&
+      slice[i] > slice[i + 2];
+    const isTrough =
+      slice[i] < slice[i - 1] &&
+      slice[i] < slice[i - 2] &&
+      slice[i] < slice[i + 1] &&
+      slice[i] < slice[i + 2];
+    if (isPeak || isTrough) levels.push(slice[i]);
   }
+
+  const current = prices[prices.length - 1];
+  const above = levels.filter((l) => l > current).sort((a, b) => a - b);
+  const below = levels.filter((l) => l < current).sort((a, b) => b - a);
+
+  return {
+    resistance: above[0] ?? null,
+    support: below[0] ?? null,
+    levels,
+  };
 }
 
-let lastSignal = 0;
-
-function addSignal(type, price){
-  if(Date.now() - lastSignal < 5000) return;
-  lastSignal = Date.now();
-
-  const el = document.createElement("div");
-  el.innerHTML = `${type} @ ${price}`;
-
-  el.className = type==="LONG" ? "green" : "red";
-
-  document.getElementById("signals").prepend(el);
+function calcMAs(prices) {
+  const avg = (arr, n) => {
+    if (arr.length < n) return null;
+    return arr.slice(-n).reduce((a, b) => a + b, 0) / n;
+  };
+  return { fast: avg(prices, 10), slow: avg(prices, 30) };
 }
 
-/* START */
-connect();
-</script>
+function calcMomentum(prices) {
+  if (prices.length < 6) return 0;
+  return prices[prices.length - 1] - prices[prices.length - 6];
+}
 
-</body>
-</html>
+function classifySignal(zscore, trend, sr, price) {
+  const { support, resistance } = sr;
+  const nearSupport = support && Math.abs(price - support) / price < 0.005;
+  const nearResistance = resistance && Math.abs(price - resistance) / price < 0.005;
+
+  if (Math.abs(zscore) > 2.5) {
+    if (zscore > 2.5 && nearResistance) return { label: "REVERSAL_SELL", color: "#ff4466", priority: "HIGH" };
+    if (zscore < -2.5 && nearSupport) return { label: "REVERSAL_BUY", color: "#00ff9f", priority: "HIGH" };
+    if (zscore > 2.5) return { label: "BREAKOUT_UP", color: "#00ccff", priority: "MEDIUM" };
+    if (zscore < -2.5) return { label: "BREAKDOWN", color: "#ff8800", priority: "MEDIUM" };
+  }
+  if (trend === "BULLISH" && nearSupport) return { label: "BUY_ZONE", color: "#00ff9f", priority: "MEDIUM" };
+  if (trend === "BEARISH" && nearResistance) return { label: "SELL_ZONE", color: "#ff4466", priority: "MEDIUM" };
+  return { label: "NEUTRAL", color: "#888", priority: "LOW" };
+}
+
+// ─── SIMULATED PRICE FEED (no real WS in sandbox) ─────────────────────────────
+
+function usePriceFeed(asset) {
+  const [prices, setPrices] = useState([]);
+  const [currentPrice, setCurrentPrice] = useState(null);
+  const intervalRef = useRef(null);
+
+  const BASE = { BTCUSDT: 67800, ETHUSDT: 3420, SOLUSDT: 148 };
+  const VOLATILITY = { BTCUSDT: 120, ETHUSDT: 18, SOLUSDT: 1.2 };
+
+  useEffect(() => {
+    const base = BASE[asset];
+    const vol = VOLATILITY[asset];
+    let price = base;
+    const initial = Array.from({ length: 60 }, (_, i) => {
+      price += (Math.random() - 0.5) * vol;
+      return price;
+    });
+    setPrices(initial);
+    setCurrentPrice(initial[initial.length - 1]);
+
+    intervalRef.current = setInterval(() => {
+      setPrices((prev) => {
+        const last = prev[prev.length - 1];
+        const drift = (Math.random() - 0.48) * vol * 0.4;
+        const next = Math.max(last + drift, base * 0.8);
+        const updated = [...prev.slice(-200), next];
+        setCurrentPrice(next);
+        return updated;
+      });
+    }, 800);
+
+    return () => clearInterval(intervalRef.current);
+  }, [asset]);
+
+  return { prices, currentPrice };
+}
+
+// ─── CANVAS CHART ─────────────────────────────────────────────────────────────
+
+function PriceChart({ prices, sr, zscore }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || prices.length < 2) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const visible = prices.slice(-80);
+    const min = Math.min(...visible) * 0.9995;
+    const max = Math.max(...visible) * 1.0005;
+    const range = max - min || 1;
+
+    const xOf = (i) => (i / (visible.length - 1)) * W;
+    const yOf = (p) => H - ((p - min) / range) * H;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // background grid
+    ctx.strokeStyle = "rgba(0,255,159,0.04)";
+    ctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const y = (g / 4) * H;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+
+    // S/R lines
+    if (sr.resistance) {
+      const ry = yOf(sr.resistance);
+      ctx.strokeStyle = "rgba(255,68,102,0.6)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, ry);
+      ctx.lineTo(W, ry);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,68,102,0.8)";
+      ctx.font = "10px 'Courier New'";
+      ctx.fillText(`R ${sr.resistance.toFixed(0)}`, W - 70, ry - 3);
+    }
+    if (sr.support) {
+      const sy = yOf(sr.support);
+      ctx.strokeStyle = "rgba(0,255,159,0.6)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, sy);
+      ctx.lineTo(W, sy);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(0,255,159,0.8)";
+      ctx.font = "10px 'Courier New'";
+      ctx.fillText(`S ${sr.support.toFixed(0)}`, W - 70, sy + 12);
+    }
+    ctx.setLineDash([]);
+
+    // price line
+    const absZ = Math.abs(zscore);
+    const lineColor =
+      absZ > 2.5 ? "#ff4466" : absZ > 1.5 ? "#ffcc00" : "#00ff9f";
+
+    const gradient = ctx.createLinearGradient(0, 0, W, 0);
+    gradient.addColorStop(0, "rgba(0,255,159,0.3)");
+    gradient.addColorStop(1, lineColor);
+
+    ctx.beginPath();
+    visible.forEach((p, i) => {
+      i === 0 ? ctx.moveTo(xOf(i), yOf(p)) : ctx.lineTo(xOf(i), yOf(p));
+    });
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // fill under
+    ctx.lineTo(xOf(visible.length - 1), H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(0,255,159,0.03)";
+    ctx.fill();
+  }, [prices, sr, zscore]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={700}
+      height={180}
+      style={{ width: "100%", height: "180px", display: "block" }}
+    />
+  );
+}
+
+// ─── Z-SCORE GAUGE ────────────────────────────────────────────────────────────
+
+function ZGauge({ zscore }) {
+  const clamped = Math.max(-3, Math.min(3, zscore));
+  const pct = ((clamped + 3) / 6) * 100;
+  const color =
+    Math.abs(zscore) > 2.5 ? "#ff4466" : Math.abs(zscore) > 1.5 ? "#ffcc00" : "#00ff9f";
+
+  return (
+    <div style={{ padding: "8px 0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#555", marginBottom: "4px" }}>
+        <span>-3σ</span>
+        <span style={{ color: "#888" }}>Z-SCORE: <span style={{ color }}>{zscore.toFixed(2)}</span></span>
+        <span>+3σ</span>
+      </div>
+      <div style={{ background: "#0a0e14", borderRadius: "2px", height: "6px", position: "relative" }}>
+        <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: "1px", background: "#333" }} />
+        <div
+          style={{
+            width: "10px",
+            height: "10px",
+            background: color,
+            borderRadius: "50%",
+            position: "absolute",
+            top: "-2px",
+            left: `calc(${pct}% - 5px)`,
+            boxShadow: `0 0 6px ${color}`,
+            transition: "left 0.3s ease, background 0.3s ease",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── CLAUDE CONTEXT PANEL ─────────────────────────────────────────────────────
+
+function ClaudePanel({ asset, price, zscore, signal, sr, trend, momentum }) {
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [lastFetch, setLastFetch] = useState(0);
+
+  const fetchAnalysis = useCallback(async () => {
+    const now = Date.now();
+    if (now - lastFetch < 15000) return; // throttle 15s
+    setLoading(true);
+    setLastFetch(now);
+
+    const prompt = `أنت محلل أسواق مالية محترف ومتخصص في التداول الكمي. قدم لي تحليلاً استراتيجياً موجزاً وحاداً (3-4 جمل فقط) للوضع التالي:
+
+الأصل: ${asset}
+السعر الحالي: ${price?.toFixed(2)}
+Z-Score: ${zscore?.toFixed(2)} (${Math.abs(zscore) > 2.5 ? "⚡ حركة استثنائية" : Math.abs(zscore) > 1.5 ? "⚠️ حركة قوية" : "✓ حركة عادية"})
+الاتجاه: ${trend}
+الزخم: ${momentum?.toFixed(2)}
+إشارة النظام: ${signal?.label}
+مستوى الدعم: ${sr?.support?.toFixed(2) ?? "غير محدد"}
+مستوى المقاومة: ${sr?.resistance?.toFixed(2) ?? "غير محدد"}
+
+قدم:
+1. قراءة Z-Score: ماذا تعني هذه الحركة؟
+2. موقع السعر من S/R: أين نحن على الخارطة؟
+3. السيناريو الأرجح خلال الساعات القادمة
+4. مستوى المخاطرة الآن (منخفض/متوسط/عالٍ) مع سبب واحد
+
+كن مباشراً، دقيقاً، بلا مقدمات.`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await res.json();
+      const text = data.content?.map((b) => b.text || "").join("") || "لا يوجد رد";
+      setAnalysis(text);
+    } catch (e) {
+      setAnalysis("⚠️ خطأ في الاتصال بـ Claude API");
+    }
+    setLoading(false);
+  }, [asset, price, zscore, signal, sr, trend, momentum, lastFetch]);
+
+  return (
+    <div style={{
+      border: "1px solid #0d2030",
+      background: "linear-gradient(135deg, #020a0f 0%, #030d15 100%)",
+      padding: "12px",
+      marginTop: "8px",
+      position: "relative",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{
+            width: "6px", height: "6px", borderRadius: "50%",
+            background: "#00ccff", boxShadow: "0 0 8px #00ccff",
+            animation: loading ? "pulse 1s infinite" : "none"
+          }} />
+          <span style={{ color: "#00ccff", fontSize: "11px", letterSpacing: "2px" }}>CLAUDE STRATEGIC CONTEXT</span>
+        </div>
+        <button
+          onClick={fetchAnalysis}
+          disabled={loading}
+          style={{
+            background: "transparent",
+            border: "1px solid #00ccff",
+            color: loading ? "#444" : "#00ccff",
+            padding: "4px 12px",
+            fontSize: "10px",
+            letterSpacing: "1px",
+            cursor: loading ? "not-allowed" : "pointer",
+            fontFamily: "'Courier New', monospace",
+          }}
+        >
+          {loading ? "ANALYZING..." : "▶ ANALYZE"}
+        </button>
+      </div>
+
+      {!analysis && !loading && (
+        <div style={{ color: "#333", fontSize: "11px", fontStyle: "italic", textAlign: "center", padding: "16px 0" }}>
+          اضغط ANALYZE للحصول على رؤية استراتيجية من Claude
+        </div>
+      )}
+
+      {loading && (
+        <div style={{ display: "flex", gap: "4px", padding: "16px 0", justifyContent: "center" }}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} style={{
+              width: "3px", height: "20px",
+              background: "#00ccff",
+              animation: `bar-bounce 1s ease-in-out infinite`,
+              animationDelay: `${i * 0.1}s`,
+              opacity: 0.7,
+            }} />
+          ))}
+        </div>
+      )}
+
+      {analysis && !loading && (
+        <div style={{
+          color: "#aac8d8",
+          fontSize: "12px",
+          lineHeight: "1.7",
+          whiteSpace: "pre-wrap",
+          direction: "rtl",
+          textAlign: "right",
+          borderTop: "1px solid #0d2030",
+          paddingTop: "10px",
+        }}>
+          {analysis}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @keyframes bar-bounce { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── ALERT LOG ────────────────────────────────────────────────────────────────
+
+function AlertLog({ alerts }) {
+  return (
+    <div style={{ border: "1px solid #0a1a20", padding: "8px", maxHeight: "120px", overflowY: "auto" }}>
+      <div style={{ color: "#556", fontSize: "10px", letterSpacing: "2px", marginBottom: "6px" }}>ALERT LOG</div>
+      {alerts.length === 0 && <div style={{ color: "#333", fontSize: "11px" }}>Monitoring...</div>}
+      {[...alerts].reverse().map((a, i) => (
+        <div key={i} style={{
+          display: "flex", gap: "8px", fontSize: "10px",
+          color: a.priority === "HIGH" ? "#ff4466" : a.priority === "MEDIUM" ? "#ffcc00" : "#555",
+          padding: "2px 0", borderBottom: "1px solid #0a0e14"
+        }}>
+          <span style={{ color: "#333" }}>{a.time}</span>
+          <span>{a.asset}</span>
+          <span style={{ color: a.color }}>{a.label}</span>
+          <span style={{ color: "#444" }}>Z={a.zscore}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+
+const ASSETS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
+
+export default function App() {
+  const [asset, setAsset] = useState("BTCUSDT");
+  const { prices, currentPrice } = usePriceFeed(asset);
+  const [alerts, setAlerts] = useState([]);
+  const prevSignalRef = useRef(null);
+
+  const zscore = calcZScore(prices, 20);
+  const sr = calcSupportResistance(prices, 60);
+  const { fast, slow } = calcMAs(prices);
+  const momentum = calcMomentum(prices);
+  const trend = fast && slow ? (fast > slow ? "BULLISH" : "BEARISH") : "LOADING";
+  const signal = classifySignal(zscore, trend, sr, currentPrice ?? 0);
+
+  // Alert on signal change
+  useEffect(() => {
+    if (signal.priority !== "LOW" && signal.label !== prevSignalRef.current) {
+      prevSignalRef.current = signal.label;
+      setAlerts((prev) => [
+        ...prev.slice(-49),
+        {
+          time: new Date().toLocaleTimeString("en", { hour12: false }),
+          asset,
+          label: signal.label,
+          color: signal.color,
+          zscore: zscore.toFixed(2),
+          priority: signal.priority,
+        },
+      ]);
+    }
+  }, [signal.label, asset]);
+
+  const priceFormatted = currentPrice
+    ? asset === "BTCUSDT"
+      ? currentPrice.toFixed(0)
+      : asset === "ETHUSDT"
+      ? currentPrice.toFixed(1)
+      : currentPrice.toFixed(3)
+    : "—";
+
+  const pChange = prices.length > 1
+    ? ((currentPrice - prices[0]) / prices[0] * 100).toFixed(2)
+    : "0.00";
+
+  return (
+    <div style={{
+      background: "#020408",
+      minHeight: "100vh",
+      color: "#00ff9f",
+      fontFamily: "'Courier New', Courier, monospace",
+      padding: "0",
+    }}>
+      {/* Header */}
+      <div style={{
+        borderBottom: "1px solid #0a1a2a",
+        padding: "10px 16px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "linear-gradient(90deg, #020810 0%, #020408 100%)",
+      }}>
+        <div>
+          <div style={{ fontSize: "13px", letterSpacing: "4px", color: "#00ff9f" }}>NEXUS MARKET LAB</div>
+          <div style={{ fontSize: "9px", color: "#334", letterSpacing: "2px" }}>v3 · Z-SCORE + S/R + LLM CONTEXT</div>
+        </div>
+        <div style={{ display: "flex", gap: "4px" }}>
+          {ASSETS.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAsset(a)}
+              style={{
+                background: asset === a ? "#00ff9f" : "transparent",
+                color: asset === a ? "#000" : "#00ff9f",
+                border: "1px solid #0a2a1a",
+                padding: "4px 10px",
+                fontSize: "10px",
+                letterSpacing: "1px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontWeight: asset === a ? "bold" : "normal",
+              }}
+            >
+              {a.replace("USDT", "")}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "10px 16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "6px" }}>
+        {/* Price */}
+        <div style={{ border: "1px solid #0a1a2a", padding: "8px", background: "#020810" }}>
+          <div style={{ fontSize: "9px", color: "#445", letterSpacing: "2px" }}>PRICE</div>
+          <div style={{ fontSize: "18px", marginTop: "2px", letterSpacing: "1px" }}>{priceFormatted}</div>
+          <div style={{ fontSize: "10px", color: parseFloat(pChange) >= 0 ? "#00ff9f" : "#ff4466" }}>
+            {parseFloat(pChange) >= 0 ? "+" : ""}{pChange}%
+          </div>
+        </div>
+
+        {/* Trend */}
+        <div style={{ border: "1px solid #0a1a2a", padding: "8px", background: "#020810" }}>
+          <div style={{ fontSize: "9px", color: "#445", letterSpacing: "2px" }}>TREND</div>
+          <div style={{
+            fontSize: "14px", marginTop: "4px",
+            color: trend === "BULLISH" ? "#00ff9f" : trend === "BEARISH" ? "#ff4466" : "#888"
+          }}>{trend}</div>
+          <div style={{ fontSize: "10px", color: "#446" }}>MA10/MA30</div>
+        </div>
+
+        {/* Signal */}
+        <div style={{ border: `1px solid ${signal.color}33`, padding: "8px", background: "#020810" }}>
+          <div style={{ fontSize: "9px", color: "#445", letterSpacing: "2px" }}>SIGNAL</div>
+          <div style={{ fontSize: "12px", marginTop: "4px", color: signal.color, letterSpacing: "1px" }}>{signal.label}</div>
+          <div style={{ fontSize: "10px", color: signal.priority === "HIGH" ? "#ff4466" : "#666" }}>
+            ● {signal.priority}
+          </div>
+        </div>
+
+        {/* S/R */}
+        <div style={{ border: "1px solid #0a1a2a", padding: "8px", background: "#020810" }}>
+          <div style={{ fontSize: "9px", color: "#445", letterSpacing: "2px" }}>S/R LEVELS</div>
+          <div style={{ fontSize: "11px", color: "#ff4466", marginTop: "2px" }}>
+            R: {sr.resistance?.toFixed(asset === "BTCUSDT" ? 0 : 2) ?? "—"}
+          </div>
+          <div style={{ fontSize: "11px", color: "#00ff9f" }}>
+            S: {sr.support?.toFixed(asset === "BTCUSDT" ? 0 : 2) ?? "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div style={{ margin: "0 16px", border: "1px solid #0a1a2a", background: "#010508" }}>
+        <PriceChart prices={prices} sr={sr} zscore={zscore} />
+      </div>
+
+      {/* Z-Score Gauge */}
+      <div style={{ margin: "6px 16px", border: "1px solid #0a1a2a", padding: "8px", background: "#020810" }}>
+        <div style={{ fontSize: "9px", color: "#445", letterSpacing: "2px", marginBottom: "4px" }}>Z-SCORE RADAR</div>
+        <ZGauge zscore={zscore} />
+        <div style={{ fontSize: "10px", color: "#445", marginTop: "4px" }}>
+          {Math.abs(zscore) > 2.5 && (
+            <span style={{ color: "#ff4466" }}>⚡ حركة استثنائية — تحقق من S/R فوراً</span>
+          )}
+          {Math.abs(zscore) > 1.5 && Math.abs(zscore) <= 2.5 && (
+            <span style={{ color: "#ffcc00" }}>⚠ ضغط متراكم — راقب المستويات</span>
+          )}
+          {Math.abs(zscore) <= 1.5 && (
+            <span style={{ color: "#445" }}>✓ ضمن النطاق الاعتيادي</span>
+          )}
+        </div>
+      </div>
+
+      {/* Claude Panel */}
+      <div style={{ margin: "6px 16px" }}>
+        <ClaudePanel
+          asset={asset}
+          price={currentPrice}
+          zscore={zscore}
+          signal={signal}
+          sr={sr}
+          trend={trend}
+          momentum={momentum}
+        />
+      </div>
+
+      {/* Alert Log */}
+      <div style={{ margin: "6px 16px 16px" }}>
+        <AlertLog alerts={alerts} />
+      </div>
+    </div>
+  );
+}
