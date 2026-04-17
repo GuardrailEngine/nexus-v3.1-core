@@ -7,922 +7,117 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold:    #d4af37;
-  --gold2:   #f5d76e;
-  --diamond: #a8d8f0;
-  --cyan:    #00d4ff;
-  --green:   #00ff9f;
-  --red:     #ff4455;
-  --bg:      #020408;
-  --panel:   #060c12;
-  --border:  #0a1a2a;
-  --text:    #c8d8e8;
+  --gold:    #d4af37; --gold2:   #f5d76e; --diamond: #a8d8f0; --cyan:    #00d4ff;
+  --green:   #00ff9f; --red:     #ff4455; --bg:      #020408; --panel:   #060c12;
+  --border:  #0a1a2a; --text:    #c8d8e8;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ===== خلفية متحركة ===== */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,180,255,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212,175,55,0.05) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* شبكة خلفية */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 1400px;
-  margin: auto;
-  padding: 12px;
-}
-
-/* ===== رأس الصفحة ===== */
-.nx-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 20px;
-  margin-bottom: 14px;
-  background: linear-gradient(135deg, rgba(6,12,18,0.95), rgba(10,20,30,0.95));
-  border: 1px solid rgba(212,175,55,0.3);
-  border-top: 2px solid var(--gold);
-  position: relative;
-  overflow: hidden;
-}
-
-.nx-header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 60%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  animation: scanline 4s linear infinite;
-}
-
-@keyframes scanline {
-  0% { left: -60%; }
-  100% { left: 110%; }
-}
-
-.nx-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(0.9rem, 3vw, 1.3rem);
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--gold), var(--gold2), var(--diamond));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 2px;
-}
-
-.nx-sub {
-  font-size: 0.55rem;
-  color: #445566;
-  letter-spacing: 3px;
-  margin-top: 3px;
-}
-
-.nx-meta {
-  text-align: right;
-  font-size: 0.6rem;
-  direction: ltr;
-}
-
-.nx-meta .arch { color: var(--gold); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; }
-.nx-meta .stat { margin-top: 4px; }
-
-.status-dot {
-  display: inline-block;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  margin-left: 5px;
-  animation: pulse-dot 1.5s ease infinite;
-}
-
-.status-dot.online  { background: var(--green); box-shadow: 0 0 8px var(--green); }
-.status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink-dot 0.6s ease infinite; }
-
-@keyframes pulse-dot { 0%,100%{transform:scale(1); opacity:1} 50%{transform:scale(1.4); opacity:0.7} }
-@keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-/* ===== أزرار الأصول ===== */
-.asset-btns {
-  display: flex;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.abtn {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 5px 12px;
-  cursor: pointer;
-  border: 1px solid #1a2a3a;
-  background: #060c12;
-  color: #445566;
-  letter-spacing: 2px;
-  transition: all 0.25s;
-  position: relative;
-  overflow: hidden;
-}
-
-.abtn::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: transparent;
-  transition: background 0.25s;
-}
-
-.abtn:hover { color: var(--text); border-color: #2a3a4a; }
-
-.abtn.active-btc  { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.08); }
-.abtn.active-btc::after  { background: var(--gold); }
-.abtn.active-eth  { color: var(--cyan); border-color: var(--cyan); background: rgba(0,212,255,0.08); }
-.abtn.active-eth::after  { background: var(--cyan); }
-.abtn.active-gold { color: var(--gold2); border-color: var(--gold2); background: rgba(245,215,110,0.08); }
-.abtn.active-gold::after { background: var(--gold2); }
-
-/* ===== شبكة البطاقات الرئيسية ===== */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
+body { background: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; min-height: 100vh; overflow-x: hidden; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,180,255,0.07) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+.wrapper { position: relative; z-index: 1; max-width: 1400px; margin: auto; padding: 12px; }
+.nx-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; margin-bottom: 14px; background: rgba(6,12,18,0.95); border: 1px solid rgba(212,175,55,0.3); border-top: 2px solid var(--gold); }
+.nx-title { font-family: 'Orbitron', sans-serif; font-size: clamp(0.9rem, 3vw, 1.3rem); font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--gold2), var(--diamond)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.abtn { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; padding: 5px 12px; cursor: pointer; border: 1px solid #1a2a3a; background: #060c12; color: #445566; margin-left: 5px; }
+.abtn.active { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.08); }
+.cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 @media (min-width: 700px) { .cards-grid { grid-template-columns: repeat(4, 1fr); } }
-
-.nx-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 14px 12px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.4s, box-shadow 0.4s;
-}
-
-.nx-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent);
-}
-
-.nx-card:hover { border-color: rgba(212,175,55,0.25); }
-
-.card-label {
-  font-size: 0.48rem;
-  letter-spacing: 2px;
-  color: #334455;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.card-value {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(1rem, 3.5vw, 1.4rem);
-  font-weight: 700;
-  color: #eee;
-  text-shadow: 0 0 20px rgba(0,212,255,0.3);
-  display: block;
-  margin-bottom: 4px;
-  transition: color 0.3s;
-}
-
-.card-sub { font-size: 0.5rem; color: #334455; }
-
-/* بطاقة إدارة المخاطر */
-.risk-card { border-color: rgba(0,212,255,0.2) !important; }
-.risk-card::before { background: linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent); }
-
-.risk-input {
-  background: rgba(0,212,255,0.04);
-  border: 1px solid rgba(0,212,255,0.2);
-  color: var(--cyan);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
-  text-align: center;
-  width: 90%;
-  padding: 6px 8px;
-  margin: 6px 0 4px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.risk-input:focus { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,212,255,0.15); }
-.risk-input::placeholder { color: #2a3a4a; }
-
-.risk-result {
-  font-size: 0.5rem;
-  color: var(--gold);
-  line-height: 1.6;
-  min-height: 28px;
-}
-
-/* بطاقة الثقة */
-.conf-value { color: var(--green) !important; text-shadow: 0 0 15px rgba(0,255,159,0.4) !important; }
-.strat-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 0.48rem;
-  letter-spacing: 1px;
-  border-radius: 2px;
-  margin-top: 4px;
-}
-.badge-bull { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.3); }
-.badge-bear { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.3); }
-.badge-neut { background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid rgba(212,175,55,0.3); }
-
-/* ===== قسم الرسم البياني ===== */
-.chart-section {
-  margin-bottom: 14px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 12px;
-  position: relative;
-}
-
-.chart-label {
-  font-size: 0.48rem;
-  letter-spacing: 2px;
-  color: #334455;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-#sparkline {
-  width: 100%;
-  height: 70px;
-  display: block;
-}
-
-/* ===== اللوحتان السفليتان ===== */
-.bottom-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
+.nx-card { background: var(--panel); border: 1px solid var(--border); padding: 14px 12px; text-align: center; }
+.card-label { font-size: 0.48rem; color: #334455; text-transform: uppercase; margin-bottom: 8px; }
+.card-value { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 700; color: #eee; }
+.risk-input { background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.2); color: var(--cyan); width: 90%; padding: 6px; text-align: center; outline: none; }
+.chart-section { background: var(--panel); border: 1px solid var(--border); padding: 12px; margin-bottom: 14px; }
+.bottom-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 @media (min-width: 700px) { .bottom-grid { grid-template-columns: 1fr 1.8fr; } }
-
-.nx-panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 14px;
-  height: 320px;
-  overflow-y: auto;
-  position: relative;
-}
-
-.nx-panel::-webkit-scrollbar { width: 3px; }
-.nx-panel::-webkit-scrollbar-track { background: transparent; }
-.nx-panel::-webkit-scrollbar-thumb { background: #1a2a3a; border-radius: 3px; }
-
-.panel-title {
-  font-size: 0.5rem;
-  letter-spacing: 2px;
-  color: #334455;
-  text-transform: uppercase;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #0a1a2a;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.panel-title-icon { font-size: 0.7rem; }
-
-/* ===== إشارات ===== */
-.signal-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 7px 6px;
-  border-bottom: 1px solid rgba(10,26,42,0.8);
-  animation: fadeInRow 0.4s ease;
-  gap: 6px;
-}
-
-@keyframes fadeInRow {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-.sig-type {
-  font-size: 0.55rem;
-  padding: 2px 7px;
-  border-radius: 2px;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.45rem;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.sig-bull { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.25); }
-.sig-bear { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.25); }
-
-.sig-price {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.55rem;
-  color: #667788;
-  flex: 1;
-  text-align: center;
-}
-
-.sig-time {
-  font-size: 0.48rem;
-  color: #334455;
-  direction: ltr;
-  white-space: nowrap;
-}
-
-/* ===== سجل الأحداث ===== */
-#feed-log {
-  font-size: 0.6rem;
-  line-height: 1.8;
-  direction: ltr;
-}
-
-.log-line {
-  display: flex;
-  gap: 8px;
-  padding: 2px 0;
-  border-bottom: 1px solid rgba(10,26,42,0.5);
-  animation: fadeInRow 0.3s ease;
-}
-
-.log-time { color: #2a3a4a; font-size: 0.5rem; white-space: nowrap; flex-shrink: 0; }
-.log-msg  { flex: 1; }
-
-/* ===== شريط الإحصائيات ===== */
-.stats-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.stat-box {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 8px 10px;
-  text-align: center;
-}
-
-.stat-num {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  display: block;
-}
-
-.stat-lbl { font-size: 0.45rem; color: #334455; letter-spacing: 1px; text-transform: uppercase; }
-
-/* ===== تأثيرات الاتجاه ===== */
-.frame-bull { border-color: rgba(0,255,159,0.3) !important; box-shadow: 0 0 30px rgba(0,255,159,0.05); }
-.frame-bear { border-color: rgba(255,68,85,0.3)  !important; box-shadow: 0 0 30px rgba(255,68,85,0.05); }
-
-/* ===== تأثير ظهور عند التحميل ===== */
-.fade-in { animation: fadeInUp 0.6s ease both; }
-.fade-in:nth-child(1) { animation-delay: 0.1s; }
-.fade-in:nth-child(2) { animation-delay: 0.2s; }
-.fade-in:nth-child(3) { animation-delay: 0.3s; }
-.fade-in:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== شريط الوقت الحي ===== */
-.live-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.5rem;
-  color: #2a3a4a;
-  padding: 6px 0;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #0a1218;
-  direction: ltr;
-}
-
-.live-indicator {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--green);
-  font-size: 0.5rem;
-}
-
-.live-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-  animation: pulse-dot 1.2s ease infinite;
-}
-
-/* ===== تأثير تغيير السعر ===== */
-@keyframes flash-up   { 0%{color:var(--green)} 100%{color:#eee} }
-@keyframes flash-down { 0%{color:var(--red)}   100%{color:#eee} }
-.flash-up   { animation: flash-up   0.6s ease; }
-.flash-down { animation: flash-down 0.6s ease; }
-
-/* ===== تذييل ===== */
-.nx-footer {
-  text-align: center;
-  font-size: 0.45rem;
-  color: #1a2a3a;
-  letter-spacing: 2px;
-  padding: 10px 0 4px;
-  border-top: 1px solid #0a1218;
-  margin-top: 14px;
-}
+.nx-panel { background: var(--panel); border: 1px solid var(--border); padding: 14px; height: 320px; overflow-y: auto; }
+.signal-row { display: flex; justify-content: space-between; padding: 7px 6px; border-bottom: 1px solid #0a1a2a; font-size: 0.55rem; }
+.sig-bull { color: var(--green); } .sig-bear { color: var(--red); }
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat-box { background: var(--panel); border: 1px solid var(--border); padding: 8px; text-align: center; }
+.stat-num { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; }
+.stat-lbl { font-size: 0.45rem; color: #334455; }
+.frame-bull { border-color: rgba(0,255,159,0.3) !important; } .frame-bear { border-color: rgba(255,68,85,0.3) !important; }
 </style>
 </head>
 <body>
 
 <div class="wrapper" id="main_frame">
-
-  <!-- شريط الوقت الحي -->
-  <div class="live-bar">
-    <div class="live-indicator">
-      <div class="live-dot" id="live_dot"></div>
-      <span id="live_label">CONNECTING...</span>
-    </div>
-    <div id="live_time" style="direction:ltr;">--:--:-- | ---</div>
-    <div>NEXUS SOVEREIGN ENGINE v4.0</div>
+  <div class="stats-bar">
+    <div class="stat-box"><span class="stat-num" id="stat_signals" style="color:var(--gold);">0</span><span class="stat-lbl">Total</span></div>
+    <div class="stat-box"><span class="stat-num" id="stat_bull" style="color:var(--green);">0</span><span class="stat-lbl">Bullish</span></div>
+    <div class="stat-box"><span class="stat-num" id="stat_bear" style="color:var(--red);">0</span><span class="stat-lbl">Bearish</span></div>
+    <div class="stat-box"><span class="stat-num" id="stat_acc" style="color:var(--cyan);">--</span><span class="stat-lbl">Avg Conf</span></div>
   </div>
 
-  <!-- الرأس -->
-  <div class="nx-header fade-in">
+  <div class="nx-header">
     <div>
       <div class="nx-title">⬡ NEXUS v4.0 | DIAMOND</div>
-      <div class="nx-sub">SOVEREIGN TRADING INTELLIGENCE SYSTEM</div>
-      <div class="asset-btns" style="margin-top:10px;">
-        <button class="abtn active-btc" id="btn_btc"  onclick="switchAsset('BTCUSDT','BTC/USD','btc')">BTC</button>
-        <button class="abtn"            id="btn_eth"  onclick="switchAsset('ETHUSDT','ETH/USD','eth')">ETH</button>
-        <button class="abtn"            id="btn_gold" onclick="switchAsset('PAXGUSDT','GOLD/USD','gold')">GOLD</button>
-      </div>
+      <div class="asset-btns"><button class="abtn active" id="btn_btc" onclick="switchAsset('BTCUSDT','BTC/USD')">BTC</button>
+      <button class="abtn" id="btn_eth" onclick="switchAsset('ETHUSDT','ETH/USD')">ETH</button>
+      <button class="abtn" id="btn_gold" onclick="switchAsset('PAXGUSDT','GOLD/USD')">GOLD</button></div>
     </div>
-    <div class="nx-meta" style="direction:ltr;">
-      <div class="arch">CHAKIR</div>
-      <div style="color:#334455; font-size:0.45rem; letter-spacing:1px; margin-top:2px;">ARCHITECT</div>
-      <div class="stat" style="margin-top:6px;">
-        <span class="status-dot online" id="status_dot"></span>
-        <span id="status_txt" style="color:var(--green);">SECURE</span>
-      </div>
-      <div id="upd_time" style="color:#2a3a4a; font-size:0.45rem; margin-top:3px; direction:ltr;">--:--:--</div>
-    </div>
+    <div style="text-align:right; font-size:0.6rem; direction:ltr;"><div style="color:var(--gold)">CHAKIR</div><div id="status_txt" style="color:var(--green)">SECURE</div></div>
   </div>
 
-  <!-- شريط الإحصائيات -->
-  <div class="stats-bar fade-in">
-    <div class="stat-box">
-      <span class="stat-num" id="stat_signals" style="color:var(--gold);">0</span>
-      <span class="stat-lbl">Total Signals</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-num" id="stat_bull" style="color:var(--green);">0</span>
-      <span class="stat-lbl">Bullish</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-num" id="stat_bear" style="color:var(--red);">0</span>
-      <span class="stat-lbl">Bearish</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-num" id="stat_acc" style="color:var(--cyan);">--</span>
-      <span class="stat-lbl">Avg Conf</span>
-    </div>
+  <div class="cards-grid">
+    <div class="nx-card"><div class="card-label">AI Target</div><span class="card-value" id="cv_target" style="color:var(--cyan);">---</span></div>
+    <div class="nx-card"><div class="card-label">Market Pulse</div><span class="card-value" id="cv_price">LOADING</span></div>
+    <div class="nx-card"><div class="card-label">Risk Manager</div><input type="number" class="risk-input" id="balance_input" placeholder="$ Capital" oninput="calcRisk()"><div id="risk_out" style="font-size:0.5rem; color:var(--gold)">---</div></div>
+    <div class="nx-card"><div class="card-label">Confidence</div><span class="card-value" id="cv_conf">---</span></div>
   </div>
 
-  <!-- البطاقات الرئيسية الأربع -->
-  <div class="cards-grid fade-in">
+  <div class="chart-section"><canvas id="sparkline" height="70"></canvas></div>
 
-    <!-- هدف الذكاء الاصطناعي -->
-    <div class="nx-card">
-      <div class="card-label">⬡ AI Target</div>
-      <span class="card-value" id="cv_target" style="color:var(--cyan);">---</span>
-      <div class="card-sub">SMA_MODEL</div>
-    </div>
-
-    <!-- السعر الحالي -->
-    <div class="nx-card">
-      <div class="card-label">◈ Market Pulse</div>
-      <span class="card-value" id="cv_price">LOADING</span>
-      <div class="card-sub" id="cv_pair">BTC/USD</div>
-    </div>
-
-    <!-- إدارة المخاطر -->
-    <div class="nx-card risk-card">
-      <div class="card-label">⚙ Risk Manager</div>
-      <input type="number" class="risk-input" id="balance_input" placeholder="$ Capital" min="1" oninput="calcRisk()">
-      <div class="risk-result" id="risk_out">Balance Required</div>
-    </div>
-
-    <!-- درجة الثقة -->
-    <div class="nx-card">
-      <div class="card-label">◎ Confidence</div>
-      <span class="card-value conf-value" id="cv_conf">---</span>
-      <div id="strat_badge"><span class="strat-badge badge-neut">[ANALYZING]</span></div>
-    </div>
-
+  <div class="bottom-grid">
+    <div class="nx-panel"><div>Proven Signals</div><div id="signal_ledger"></div></div>
+    <div class="nx-panel"><div>System Logic Feed</div><div id="feed_log" style="font-size:0.6rem; direction:ltr;"></div></div>
   </div>
-
-  <!-- الرسم البياني -->
-  <div class="chart-section fade-in">
-    <div class="chart-label">◈ Price Sparkline — Last 20 Ticks</div>
-    <canvas id="sparkline" height="70"></canvas>
-  </div>
-
-  <!-- اللوحتان -->
-  <div class="bottom-grid fade-in">
-
-    <!-- الإشارات -->
-    <div class="nx-panel">
-      <div class="panel-title">
-        <span class="panel-title-icon">🏆</span>
-        Proven Signals
-      </div>
-      <div id="signal_ledger"></div>
-    </div>
-
-    <!-- سجل الأحداث -->
-    <div class="nx-panel">
-      <div class="panel-title">
-        <span class="panel-title-icon">⬡</span>
-        System Logic Feed
-      </div>
-      <div id="feed_log"></div>
-    </div>
-
-  </div>
-
-  <!-- تذييل -->
-  <div class="nx-footer">
-    NEXUS v4.0 DIAMOND EDITION · ARCHITECT: CHAKIR · SOVEREIGN INTELLIGENCE ENGINE · ALL RIGHTS RESERVED
-  </div>
-
-</div><!-- end wrapper -->
+</div>
 
 <script>
 (function(){
 'use strict';
+const ASSETS = { BTCUSDT: {hist:[], lp:0, min:10000, max:500000}, ETHUSDT: {hist:[], lp:0, min:100, max:50000}, PAXGUSDT: {hist:[], lp:0, min:1000, max:10000} };
+let cur = 'BTCUSDT', stats = {total:0, bull:0, bear:0, confSum:0, confCnt:0}, busy = false;
 
-/* ======================================================
-   NEXUS v4.0 — Diamond Edition
-   Architect: CHAKIR
-   Engine: Sovereign Frontend AI
-   ====================================================== */
-
-// ===== ثوابت وإعدادات =====
-const ASSETS = {
-  BTCUSDT:  { hist: [], lp: 0, label: 'BTC/USD',  min: 10000,  max: 500000 },
-  ETHUSDT:  { hist: [], lp: 0, label: 'ETH/USD',  min: 100,    max: 50000  },
-  PAXGUSDT: { hist: [], lp: 0, label: 'GOLD/USD', min: 1000,   max: 10000  }
-};
-
-const SMA_WINDOW  = 20;
-const CONF_THRESH = 90;
-const TICK_MS     = 3000;
-
-let cur       = 'BTCUSDT';
-let curStyle  = 'btc';
-let busy      = false;
-let timer     = null;
-
-// إحصائيات الجلسة
-let stats = { total: 0, bull: 0, bear: 0, confSum: 0, confCnt: 0 };
-
-/* ===== الحماية من القيم الشاذة ===== */
-function criticCheck(sym, price) {
-  const a = ASSETS[sym];
-  if (!a) return false;
-  if (!isFinite(price) || price <= 0) {
-    sysLog(`[CRITIC] ⚠ Invalid price: ${price}`, '#ff4455');
-    return false;
-  }
-  if (price < a.min || price > a.max) {
-    sysLog(`[CRITIC] 🛡 Anomaly blocked! ${price} ∉ [${a.min}, ${a.max}]`, '#ff4455');
-    return false;
-  }
-  return true;
+function sysLog(m, c) {
+    const l = document.getElementById('feed_log'), d = document.createElement('div');
+    d.style.color = c || '#00d4ff'; d.textContent = `>> ${m} [${new Date().toLocaleTimeString()}]`;
+    l.prepend(d); if(l.childNodes.length > 30) l.lastChild.remove();
 }
 
-/* ===== SMA ===== */
-function sma(arr) {
-  if (!arr.length) return 0;
-  return arr.reduce((s,v) => s+v, 0) / arr.length;
-}
-
-/* ===== حساب الهدف ===== */
-function calcTarget(hist, price) {
-  if (hist.length < 2) return price;
-  const avg = sma(hist);
-  const momentum = (price - avg) * 0.3;
-  return Math.max(price + momentum, price * 0.85);
-}
-
-/* ===== حساب الثقة ===== */
-function calcConf(hist, price) {
-  if (hist.length < 3) return 85;
-  const avg = sma(hist);
-  const volatility = sma(hist.map(p => Math.abs(p - avg) / avg * 100));
-  return Math.max(75, Math.min(99, Math.round(98 - volatility * 8)));
-}
-
-/* ===== محرك البيانات ===== */
-async function tick() {
-  if (busy) return;
-  busy = true;
-  try {
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cur}`, { cache:'no-cache' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { price: raw } = await res.json();
-    const p = parseFloat(raw);
-    if (!criticCheck(cur, p)) { busy = false; return; }
-
-    const asset = ASSETS[cur];
-    const prev  = asset.lp;
-    asset.lp    = p;
-    asset.hist.push(p);
-    if (asset.hist.length > SMA_WINDOW) asset.hist.shift();
-
-    setOnline(true);
-    updatePrice(p, prev);
-    analyze(p, asset.hist);
-    calcRisk();
-    drawSparkline(asset.hist);
-
-  } catch(e) {
-    setOnline(false);
-    sysLog(`[ERROR] ${e.message}`, '#ff4455');
-  } finally { busy = false; }
-}
-
-/* ===== تحديث السعر مع تأثير لوني ===== */
-function updatePrice(p, prev) {
-  const el = document.getElementById('cv_price');
-  el.textContent = p.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
-  el.classList.remove('flash-up','flash-down');
-  void el.offsetWidth;
-  if      (p > prev) el.classList.add('flash-up');
-  else if (p < prev) el.classList.add('flash-down');
-  document.getElementById('upd_time').textContent = nowTime();
-}
-
-/* ===== التحليل ===== */
-function analyze(price, hist) {
-  const target = calcTarget(hist, price);
-  const conf   = calcConf(hist, price);
-  const prev   = hist.length >= 2 ? hist[hist.length-2] : price;
-  const change = price - prev;
-
-  if (!criticCheck(cur, target)) return;
-
-  document.getElementById('cv_target').textContent = target.toFixed(2);
-  document.getElementById('cv_conf').textContent   = conf + '%';
-
-  // إحصائيات
-  stats.confSum += conf; stats.confCnt++;
-  document.getElementById('stat_acc').textContent =
-    Math.round(stats.confSum / stats.confCnt) + '%';
-
-  const frame = document.getElementById('main_frame');
-  const badge = document.getElementById('strat_badge');
-
-  if (change > 0) {
-    frame.className = 'wrapper frame-bull';
-    badge.innerHTML = '<span class="strat-badge badge-bull">▲ BULLISH_SIGNAL</span>';
-    if (conf >= CONF_THRESH) addSignal('Bullish Pivot', price, true, conf);
-  } else if (change < 0) {
-    frame.className = 'wrapper frame-bear';
-    badge.innerHTML = '<span class="strat-badge badge-bear">▼ BEARISH_PRESSURE</span>';
-    if (conf >= CONF_THRESH) adddSignal('Bearish Alert', price, false, conf);
-  } else {
-    frame.className = 'wrapper';
-    badge.innerHTML = '<span class="strat-badge badge-neut">◈ NEUTRAL_ZONE</span>';
-  }
-
-  sysLog(`[PLANNER] Price:${price.toFixed(2)} Target:${target.toFixed(2)} Conf:${conf}%`, '#00d4ff');
-}
-
-/* ===== إضافة إشارة ===== */
 function addSignal(type, price, isBull, conf) {
-  stats.total++;
-  if (isBull) stats.bull++; else stats.bear++;
-  document.getElementById('stat_signals').textContent = stats.total;
-  document.getElementById('stat_bull').textContent    = stats.bull;
-  document.getElementById('stat_bear').textContent    = stats.bear;
-
-  const ledger = document.getElementById('signal_ledger');
-  const row = document.createElement('div');
-  row.className = 'signal-row';
-  row.innerHTML = `
-    <span class="sig-type ${isBull?'sig-bull':'sig-bear'}">${isBull?'▲':'▼'} ${type}</span>
-    <span class="sig-price">${price.toLocaleString('en-US',{maximumFractionDigits:0})}</span>
-    <span class="sig-time">${nowTime()} · ${conf}%</span>
-  `;
-  ledger.prepend(row);
-  while (ledger.children.length > 10) ledger.lastChild.remove();
+    const l = document.getElementById('signal_ledger'), r = document.createElement('div');
+    r.className = 'signal-row';
+    r.innerHTML = `<span class="${isBull?'sig-bull':'sig-bear'}">${isBull?'▲':'▼'} ${type}</span><span>$${price.toLocaleString()}</span><span>${conf}%</span>`;
+    l.prepend(r); if(l.childNodes.length > 10) l.lastChild.remove();
+    stats.total++; if(isBull) stats.bull++; else stats.bear++;
+    stats.confSum += conf; stats.confCnt++;
+    document.getElementById('stat_signals').textContent = stats.total;
+    document.getElementById('stat_bull').textContent = stats.bull;
+    document.getElementById('stat_bear').textContent = stats.bear;
+    document.getElementById('stat_acc').textContent = Math.round(stats.confSum/stats.confCnt) + '%';
 }
 
-/* ===== إدارة المخاطر ===== */
-window.calcRisk = () => {
-  const b  = parseFloat(document.getElementById('balance_input').value);
-  const lp = ASSETS[cur].lp;
-  if (b > 0 && lp > 0) {
-    const risk = b * 0.01;
-    const sl   = lp * 0.98;
-    const diff = lp - sl;
-    if (diff <= 0) return;
-    const size = risk / diff;
-    const tp   = lp + diff * 2; // نسبة مكافأة/مخاطرة 2:1
-    document.getElementById('risk_out').innerHTML =
-      `Size: ${size.toFixed(4)}<br>SL: ${sl.toFixed(0)} · TP: ${tp.toFixed(0)}`;
-  }
-};
-
-/* ===== الرسم البياني ===== */
-function drawSparkline(hist) {
-  const canvas = document.getElementById('sparkline');
-  const ctx    = canvas.getContext('2d');
-  const W = canvas.width  = canvas.offsetWidth;
-  const H = canvas.height = 70;
-
-  if (hist.length < 2) return;
-
-  const mn = Math.min(...hist);
-  const mx = Math.max(...hist);
-  const range = mx - mn || 1;
-  const pad = 6;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // خط الشبكة
-  ctx.strokeStyle = 'rgba(10,26,42,0.8)';
-  ctx.lineWidth = 1;
-  for (let i=0; i<=4; i++) {
-    const y = pad + (H-pad*2) * (i/4);
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-  }
-
-  const pts = hist.map((v,i) => ({
-    x: pad + (i / (hist.length-1)) * (W - pad*2),
-    y: H - pad - ((v - mn) / range) * (H - pad*2)
-  }));
-
-  // تدرج تحت المنحنى
-  const trend = hist[hist.length-1] >= hist[0];
-  const grad  = ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0, trend ? 'rgba(0,255,159,0.18)' : 'rgba(255,68,85,0.18)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, H);
-  pts.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(pts[pts.length-1].x, H);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // الخط الرئيسي
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i=1; i<pts.length; i++) {
-    const mx2 = (pts[i-1].x + pts[i].x) / 2;
-    ctx.bezierCurveTo(mx2, pts[i-1].y, mx2, pts[i].y, pts[i].x, pts[i].y);
-  }
-  ctx.strokeStyle = trend ? '#00ff9f' : '#ff4455';
-  ctx.lineWidth   = 2;
-  ctx.shadowColor = trend ? 'rgba(0,255,159,0.5)' : 'rgba(255,68,85,0.5)';
-  ctx.shadowBlur  = 6;
-  ctx.stroke();
-  ctx.shadowBlur  = 0;
-
-  // نقطة الوقت الحالي
-  const last = pts[pts.length-1];
-  ctx.beginPath();
-  ctx.arc(last.x, last.y, 4, 0, Math.PI*2);
-  ctx.fillStyle   = trend ? '#00ff9f' : '#ff4455';
-  ctx.shadowColor = trend ? 'rgba(0,255,159,0.8)' : 'rgba(255,68,85,0.8)';
-  ctx.shadowBlur  = 10;
-  ctx.fill();
-  ctx.shadowBlur  = 0;
+async function tick() {
+    if(busy) return; busy = true;
+    try {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cur}`);
+        const data = await res.json(); const p = parseFloat(data.price);
+        const a = ASSETS[cur]; if(p < a.min || p > a.max) { sysLog("Anomaly Blocked", "#ff4455"); busy=false; return; }
+        const prev = a.lp; a.lp = p; a.hist.push(p); if(a.hist.length > 20) a.hist.shift();
+        document.getElementById('cv_price').textContent = p.toLocaleString();
+        const target = p + (p - (a.hist.reduce((a,b)=>a+b,0)/a.hist.length)) * 0.3;
+        const conf = Math.max(75, Math.min(99, Math.round(98 - (Math.abs(p-target)/p*1000))));
+        document.getElementById('cv_target').textContent = target.toFixed(2);
+        document.getElementById('cv_conf').textContent = conf + '%';
+        if(p > prev && conf >= 90) addSignal("Bullish Pivot", p, true, conf);
+        else if(p < prev && conf >= 90) addSignal("Bearish Alert", p, false, conf);
+        sysLog(`[PLANNER] Price: ${p.toFixed(2)} | Target: ${target.toFixed(2)}`, '#00d4ff');
+    } catch(e) { sysLog("Conn Error", "#ff4455"); } finally { busy = false; }
 }
 
-/* ===== تبديل الأصل ===== */
-window.switchAsset = (sym, label, style) => {
-  cur      = sym;
-  curStyle = style;
-
-  document.querySelectorAll('.abtn').forEach(b => b.className = 'abtn');
-  document.getElementById(`btn_${style}`).classList.add(`active-${style}`);
-
-  document.getElementById('cv_pair').textContent   = label;
-  document.getElementById('cv_price').textContent  = 'LOADING';
-  document.getElementById('cv_target').textContent = '---';
-  document.getElementById('cv_conf').textContent   = '---';
-  document.getElementById('risk_out').textContent  = 'Balance Required';
-  document.getElementById('balance_input').value   = '';
-  document.getElementById('main_frame').className  = 'wrapper';
-  document.getElementById('strat_badge').innerHTML = '<span class="strat-badge badge-neut">[SWITCHING]</span>';
-
-  const ctx = document.getElementById('sparkline').getContext('2d');
-  ctx.clearRect(0,0,9999,9999);
-
-  sysLog(`[EXECUTOR] Asset → ${sym}`, '#d4af37');
-  tick();
-};
-
-/* ===== حالة الاتصال ===== */
-function setOnline(on) {
-  const dot = document.getElementById('status_dot');
-  const txt = document.getElementById('status_txt');
-  const ldot= document.getElementById('live_dot');
-  const lbl = document.getElementById('live_label');
-
-  if (on) {
-    dot.className = 'status-dot online';
-    txt.textContent = 'SECURE'; txt.style.color = 'var(--green)';
-    ldot.style.background = 'var(--green)';
-    lbl.textContent = 'LIVE';
-  } else {
-    dot.className = 'status-dot offline';
-    txt.textContent = 'OFFLINE'; txt.style.color = 'var(--red)';
-    ldot.style.background = 'var(--red)';
-    lbl.textContent = 'OFFLINE';
-  }
-}
-
-/* ===== الوقت ===== */
-function nowTime() {
-  return new Date().toLocaleTimeString('en-GB');
-}
-
-function updateClock() {
-  const now = new Date();
-  document.getElementById('live_time').textContent =
-    now.toLocaleTimeString('en-GB') + ' | ' +
-    now.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-}
-
-/* ===== سجل الأحداث ===== */
-function sysLog(msg, color) {
-  const log = document.getElementById('feed_log');
-  const div = document.createElement('div');
-  div.className = 'log-line';
-  div.innerHTML = `<span class="log-time">${nowTime()}</span><span class="log-msg" style="color:${color||'#00d4ff'}">${msg}</span>`;
-  log.prepend(div);
-  while (log.children.length > 60) log.lastChild.remove();
-}
-
-/* ===== التشغيل ===== */
-sysLog('[NEXUS] Diamond Edition Initialized ✓', '#d4af37');
-sysLog('[CRITIC] Sovereign validation layer: ACTIVE', '#00ff9f');
-sysLog('[PLANNER] Connecting to Binance data feed...', '#00d4ff');
-
-setOnline(false);
-updateClock();
-setInterval(updateClock, 1000);
-
-tick();
-timer = setInterval(tick, TICK_MS);
-
+window.switchAsset = (s) => { cur = s; tick(); };
+setInterval(tick, 3000); tick();
 })();
 </script>
 </body>
