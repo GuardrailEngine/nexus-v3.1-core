@@ -6,207 +6,52 @@
 <title>NEXUS MARKET LAB v2</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: #020408;
-  color: #00ff9f;
-  font-family: 'Courier New', monospace;
-  min-height: 100vh;
-  padding: 15px;
-}
-
-.header {
-  text-align: center;
-  padding: 15px 0 20px;
-  border-bottom: 1px solid #00ff9f22;
-  margin-bottom: 20px;
-}
-
-.header h1 {
-  font-size: 1.4rem;
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px #00ff9f66;
-}
-
-.header p {
-  font-size: 0.7rem;
-  color: #00ff9f55;
-  margin-top: 5px;
-  letter-spacing: 2px;
-}
-
-.conn-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.7rem;
-  padding: 4px 12px;
-  border: 1px solid #00ff9f33;
-  border-radius: 20px;
-  margin-top: 8px;
-  background: #00ff9f0a;
-}
-
-.dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #ff4444;
-  transition: background 0.3s;
-}
-.dot.active { background: #00ff9f; animation: blink 2s infinite; }
+body { background:#020408; color:#00ff9f; font-family:'Courier New',monospace; min-height:100vh; padding:15px; }
+.header { text-align:center; padding:15px 0 20px; border-bottom:1px solid #00ff9f22; margin-bottom:20px; }
+.header h1 { font-size:1.4rem; letter-spacing:3px; text-shadow:0 0 10px #00ff9f66; }
+.header p { font-size:0.7rem; color:#00ff9f55; margin-top:5px; letter-spacing:2px; }
+.conn-status { display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; padding:4px 12px; border:1px solid #00ff9f33; border-radius:20px; margin-top:8px; background:#00ff9f0a; }
+.dot { width:7px; height:7px; border-radius:50%; background:#ff4444; transition:background 0.3s; }
+.dot.active { background:#00ff9f; animation:blink 2s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-.asset-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-  justify-content: center;
-}
-
-.asset-btn {
-  background: #0a1a2a;
-  color: #00ff9f88;
-  border: 1px solid #00ff9f33;
-  padding: 8px 18px;
-  cursor: pointer;
-  font-family: monospace;
-  font-weight: bold;
-  font-size: 0.85rem;
-  border-radius: 3px;
-  transition: all 0.2s;
-  letter-spacing: 1px;
-}
-
-.asset-btn:hover, .asset-btn.active {
-  background: #00ff9f15;
-  border-color: #00ff9f;
-  color: #00ff9f;
-  box-shadow: 0 0 10px #00ff9f22;
-}
-
-.chart-box {
-  background: #000;
-  border: 1px solid #00ff9f22;
-  padding: 10px;
-  margin-bottom: 15px;
-  position: relative;
-}
-
-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.chart-labels {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  font-size: 0.65rem;
-  color: #00ff9f66;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.stats-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-@media(max-width: 500px) {
-  .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
-}
-
-.stat-card {
-  background: #0a1a2a22;
-  border: 1px solid #00ff9f22;
-  padding: 10px;
-  text-align: center;
-  border-radius: 3px;
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  color: #00ff9f55;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
-}
-
-.stat-value {
-  font-size: 1.1rem;
-  font-weight: bold;
-  word-break: break-all;
-}
-
-.stat-value.big { font-size: 1.4rem; }
-
-/* Signal colors */
-.sig-HIGH_PROB_BUY  { color: #00ffaa; text-shadow: 0 0 8px #00ffaa88; }
-.sig-BUY            { color: #00cc88; }
-.sig-HIGH_PROB_SELL { color: #ff3366; text-shadow: 0 0 8px #ff336688; }
-.sig-SELL           { color: #cc2255; }
-.sig-RISKY_MARKET   { color: #ffaa33; }
-.sig-NEUTRAL        { color: #666; }
-
-.trend-bull  { color: #00ffaa; }
-.trend-bear  { color: #ff3366; }
-.trend-weak  { color: #ffaa33; }
-.trend-neut  { color: #666; }
-
-.indicators {
-  background: #00000066;
-  border: 1px solid #00ff9f11;
-  padding: 10px 15px;
-  border-radius: 3px;
-  margin-top: 8px;
-}
-
-.ind-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.72rem;
-  padding: 4px 0;
-  border-bottom: 1px solid #00ff9f0a;
-}
-.ind-row:last-child { border-bottom: none; }
-.ind-name { color: #00ff9f55; }
-.ind-val  { color: #00ff9f; }
-
-.rsi-bar {
-  height: 4px;
-  background: #0a1a2a;
-  border-radius: 2px;
-  margin-top: 3px;
-  overflow: hidden;
-}
-.rsi-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s, background 0.5s;
-}
-
-.footer {
-  text-align: center;
-  font-size: 0.65rem;
-  color: #00ff9f33;
-  margin-top: 20px;
-  letter-spacing: 1px;
-}
+.asset-buttons { display:flex; gap:8px; margin-bottom:15px; justify-content:center; }
+.asset-btn { background:#0a1a2a; color:#00ff9f88; border:1px solid #00ff9f33; padding:8px 18px; cursor:pointer; font-family:monospace; font-weight:bold; font-size:0.85rem; border-radius:3px; transition:all 0.2s; letter-spacing:1px; }
+.asset-btn:hover, .asset-btn.active { background:#00ff9f15; border-color:#00ff9f; color:#00ff9f; box-shadow:0 0 10px #00ff9f22; }
+.chart-box { background:#000; border:1px solid #00ff9f22; padding:10px; margin-bottom:15px; position:relative; }
+canvas { display:block; width:100%; height:auto; }
+.chart-labels { position:absolute; top:12px; right:12px; font-size:0.6rem; color:#00ff9f44; }
+.stats-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
+.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:8px; }
+@media(max-width:500px) { .stats-grid-4 { grid-template-columns:repeat(2,1fr); } }
+.stat-card { background:#0a1a2a22; border:1px solid #00ff9f22; padding:10px; text-align:center; border-radius:3px; }
+.stat-label { font-size:0.65rem; color:#00ff9f55; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; }
+.stat-value { font-size:1rem; font-weight:bold; word-break:break-all; }
+.stat-value.big { font-size:1.2rem; }
+.sig-HIGH_PROB_BUY  { color:#00ffaa; text-shadow:0 0 8px #00ffaa88; }
+.sig-BUY            { color:#00cc88; }
+.sig-HIGH_PROB_SELL { color:#ff3366; text-shadow:0 0 8px #ff336688; }
+.sig-SELL           { color:#cc2255; }
+.sig-RISKY_MARKET   { color:#ffaa33; }
+.sig-NEUTRAL        { color:#666; }
+.trend-bull { color:#00ffaa; }
+.trend-bear { color:#ff3366; }
+.trend-weak { color:#ffaa33; }
+.trend-neut { color:#666; }
+.indicators { background:#00000066; border:1px solid #00ff9f11; padding:10px 15px; border-radius:3px; margin-top:8px; }
+.ind-row { display:flex; justify-content:space-between; font-size:0.72rem; padding:5px 0; border-bottom:1px solid #00ff9f0a; }
+.ind-row:last-child { border-bottom:none; }
+.ind-name { color:#00ff9f55; }
+.ind-val  { color:#00ff9f; }
+.rsi-bar { height:4px; background:#0a1a2a; border-radius:2px; margin:3px 0 5px; overflow:hidden; }
+.rsi-fill { height:100%; border-radius:2px; transition:width 0.5s, background 0.5s; }
+.footer { text-align:center; font-size:0.6rem; color:#00ff9f22; margin-top:20px; letter-spacing:1px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>⬡ NEXUS MARKET LAB v2</h1>
-  <p>LIVE SIGNALS — DIRECT BINANCE STREAM</p>
+  <p>LIVE SIGNALS — BINANCE REST API</p>
   <div class="conn-status">
     <div class="dot" id="dot"></div>
     <span id="connText">جاري الاتصال...</span>
@@ -220,393 +65,256 @@ canvas {
 </div>
 
 <div class="chart-box">
-  <div class="chart-labels" id="chartLabel">—</div>
+  <div class="chart-labels">EMA9 | EMA21 | EMA50</div>
   <canvas id="chart" width="800" height="260"></canvas>
 </div>
 
 <div class="stats-grid-4">
-  <div class="stat-card">
-    <div class="stat-label">ASSET</div>
-    <div class="stat-value big" id="sAsset">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">PRICE (USDT)</div>
-    <div class="stat-value big" id="sPrice">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">TREND</div>
-    <div class="stat-value" id="sTrend">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">AI SIGNAL</div>
-    <div class="stat-value" id="sSignal">—</div>
-  </div>
+  <div class="stat-card"><div class="stat-label">ASSET</div><div class="stat-value big" id="sAsset">—</div></div>
+  <div class="stat-card"><div class="stat-label">PRICE (USDT)</div><div class="stat-value big" id="sPrice">—</div></div>
+  <div class="stat-card"><div class="stat-label">TREND</div><div class="stat-value" id="sTrend">—</div></div>
+  <div class="stat-card"><div class="stat-label">AI SIGNAL</div><div class="stat-value" id="sSignal">—</div></div>
 </div>
 
 <div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-label">MOMENTUM</div>
-    <div class="stat-value" id="sMomentum">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">VOLATILITY</div>
-    <div class="stat-value" id="sVolatility">—</div>
-  </div>
+  <div class="stat-card"><div class="stat-label">MOMENTUM</div><div class="stat-value" id="sMomentum">—</div></div>
+  <div class="stat-card"><div class="stat-label">VOLATILITY</div><div class="stat-value" id="sVolatility">—</div></div>
 </div>
 
 <div class="indicators">
-  <div class="ind-row">
-    <span class="ind-name">RSI (14)</span>
-    <span class="ind-val" id="iRsi">—</span>
-  </div>
+  <div class="ind-row"><span class="ind-name">RSI (14)</span><span class="ind-val" id="iRsi">—</span></div>
   <div class="rsi-bar"><div class="rsi-fill" id="rsiBar" style="width:0%"></div></div>
-  <div class="ind-row">
-    <span class="ind-name">EMA 9</span>
-    <span class="ind-val" id="iEma9">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">EMA 21</span>
-    <span class="ind-val" id="iEma21">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">EMA 50</span>
-    <span class="ind-val" id="iEma50">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">BB Upper</span>
-    <span class="ind-val" id="iBBu">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">BB Middle</span>
-    <span class="ind-val" id="iBBm">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">BB Lower</span>
-    <span class="ind-val" id="iBBl">—</span>
-  </div>
-  <div class="ind-row">
-    <span class="ind-name">SCORE</span>
-    <span class="ind-val" id="iScore">—</span>
-  </div>
+  <div class="ind-row"><span class="ind-name">EMA 9</span><span class="ind-val" id="iEma9">—</span></div>
+  <div class="ind-row"><span class="ind-name">EMA 21</span><span class="ind-val" id="iEma21">—</span></div>
+  <div class="ind-row"><span class="ind-name">EMA 50</span><span class="ind-val" id="iEma50">—</span></div>
+  <div class="ind-row"><span class="ind-name">BB Upper</span><span class="ind-val" id="iBBu">—</span></div>
+  <div class="ind-row"><span class="ind-name">BB Middle</span><span class="ind-val" id="iBBm">—</span></div>
+  <div class="ind-row"><span class="ind-name">BB Lower</span><span class="ind-val" id="iBBl">—</span></div>
+  <div class="ind-row"><span class="ind-name">SIGNAL SCORE</span><span class="ind-val" id="iScore">—</span></div>
 </div>
 
-<div class="footer">NEXUS v2 — POWERED BY BINANCE STREAM — NO SERVER NEEDED</div>
+<div class="footer">NEXUS v2 — BINANCE REST API — UPDATES EVERY 3s</div>
 
 <script>
-// ============================================================
-//  ANALYZER — نفس منطق analyzer.js لكن في المتصفح مباشرة
-// ============================================================
-
-function calcEMA(prices, period) {
-  if (prices.length < period) return null;
-  const k = 2 / (period + 1);
-  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
-  for (let i = period; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
-  return ema;
+// ── ANALYZER ──────────────────────────────────────────────
+function calcEMA(p, n) {
+  if (p.length < n) return null;
+  const k = 2 / (n + 1);
+  let e = p.slice(0, n).reduce((a, b) => a + b, 0) / n;
+  for (let i = n; i < p.length; i++) e = p[i] * k + e * (1 - k);
+  return e;
 }
-
-function calcRSI(prices, period = 14) {
-  if (prices.length < period + 1) return null;
-  const changes = [];
-  for (let i = 1; i < prices.length; i++) changes.push(prices[i] - prices[i - 1]);
-  const recent = changes.slice(-period);
-  const gains = recent.filter(c => c > 0).reduce((a, b) => a + b, 0) / period;
-  const losses = Math.abs(recent.filter(c => c < 0).reduce((a, b) => a + b, 0)) / period;
-  if (losses === 0) return 100;
-  return 100 - 100 / (1 + gains / losses);
+function calcRSI(p, n = 14) {
+  if (p.length < n + 1) return null;
+  const ch = p.slice(1).map((v, i) => v - p[i]);
+  const r = ch.slice(-n);
+  const g = r.filter(c => c > 0).reduce((a, b) => a + b, 0) / n;
+  const l = Math.abs(r.filter(c => c < 0).reduce((a, b) => a + b, 0)) / n;
+  return l === 0 ? 100 : 100 - 100 / (1 + g / l);
 }
-
-function calcBB(prices, period = 20) {
-  if (prices.length < period) return null;
-  const slice = prices.slice(-period);
-  const sma = slice.reduce((a, b) => a + b, 0) / period;
-  const std = Math.sqrt(slice.reduce((s, p) => s + Math.pow(p - sma, 2), 0) / period);
-  return { upper: sma + 2 * std, middle: sma, lower: sma - 2 * std };
+function calcBB(p, n = 20) {
+  if (p.length < n) return null;
+  const s = p.slice(-n);
+  const m = s.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(s.reduce((a, b) => a + Math.pow(b - m, 2), 0) / n);
+  return { upper: m + 2 * sd, middle: m, lower: m - 2 * sd };
 }
-
-function calcMomentum(prices, period = 10) {
-  if (prices.length < period + 1) return null;
-  const cur = prices[prices.length - 1];
-  const past = prices[prices.length - 1 - period];
-  return ((cur - past) / past) * 100;
+function calcMom(p, n = 10) {
+  if (p.length < n + 1) return null;
+  return ((p[p.length - 1] - p[p.length - 1 - n]) / p[p.length - 1 - n]) * 100;
 }
-
-function calcVolatility(prices, period = 20) {
-  if (prices.length < period) return null;
-  const slice = prices.slice(-period);
-  const mean = slice.reduce((a, b) => a + b, 0) / period;
-  const std = Math.sqrt(slice.reduce((s, p) => s + Math.pow(p - mean, 2), 0) / period);
-  return std / mean;
+function calcVol(p, n = 20) {
+  if (p.length < n) return null;
+  const s = p.slice(-n), m = s.reduce((a, b) => a + b, 0) / n;
+  return Math.sqrt(s.reduce((a, b) => a + Math.pow(b - m, 2), 0) / n) / m;
 }
-
-function analyze(prices, currentPrice) {
-  const ema9  = calcEMA(prices, 9);
-  const ema21 = calcEMA(prices, 21);
-  const ema50 = calcEMA(prices, 50);
-  const rsi   = calcRSI(prices, 14);
-  const bb    = calcBB(prices, 20);
-  const mom   = calcMomentum(prices, 10);
-  const vol   = calcVolatility(prices, 20);
-
+function analyze(prices, cur) {
+  const e9 = calcEMA(prices, 9), e21 = calcEMA(prices, 21), e50 = calcEMA(prices, 50);
+  const rsi = calcRSI(prices), bb = calcBB(prices), mom = calcMom(prices), vol = calcVol(prices);
   let trend = "NEUTRAL";
-  if (ema9 && ema21 && ema50) {
-    if (ema9 > ema21 && ema21 > ema50)      trend = "↑ BULLISH";
-    else if (ema9 < ema21 && ema21 < ema50) trend = "↓ BEARISH";
-    else if (ema9 > ema21)                  trend = "↗ WEAK BULL";
-    else                                    trend = "↘ WEAK BEAR";
+  if (e9 && e21 && e50) {
+    if      (e9 > e21 && e21 > e50) trend = "↑ BULLISH";
+    else if (e9 < e21 && e21 < e50) trend = "↓ BEARISH";
+    else if (e9 > e21)               trend = "↗ WEAK BULL";
+    else                             trend = "↘ WEAK BEAR";
   }
-
-  let score = 0;
+  let sc = 0;
   if (rsi !== null) {
-    if (rsi < 30) score += 2; else if (rsi < 45) score += 1;
-    else if (rsi > 70) score -= 2; else if (rsi > 55) score -= 1;
+    if (rsi < 30) sc += 2; else if (rsi < 45) sc += 1;
+    else if (rsi > 70) sc -= 2; else if (rsi > 55) sc -= 1;
   }
-  if (ema9 && ema21) score += ema9 > ema21 ? 1 : -1;
-  if (bb) {
-    if (currentPrice < bb.lower) score += 2;
-    else if (currentPrice > bb.upper) score -= 2;
-  }
-  if (mom !== null) score += mom > 0.5 ? 1 : mom < -0.5 ? -1 : 0;
-
+  if (e9 && e21) sc += e9 > e21 ? 1 : -1;
+  if (bb) { if (cur < bb.lower) sc += 2; else if (cur > bb.upper) sc -= 2; }
+  if (mom !== null) sc += mom > 0.5 ? 1 : mom < -0.5 ? -1 : 0;
   let signal = "NEUTRAL";
-  if      (score >= 4)  signal = "HIGH_PROB_BUY";
-  else if (score >= 2)  signal = "BUY";
-  else if (score <= -4) signal = "HIGH_PROB_SELL";
-  else if (score <= -2) signal = "SELL";
-  else if (vol > 0.02)  signal = "RISKY_MARKET";
-
+  if      (sc >= 4)        signal = "HIGH_PROB_BUY";
+  else if (sc >= 2)        signal = "BUY";
+  else if (sc <= -4)       signal = "HIGH_PROB_SELL";
+  else if (sc <= -2)       signal = "SELL";
+  else if (vol && vol > 0.02) signal = "RISKY_MARKET";
   return {
-    trend, signal, score,
+    trend, signal, score: sc,
     momentum: mom !== null ? (mom >= 0 ? `+${mom.toFixed(3)}%` : `${mom.toFixed(3)}%`) : "N/A",
-    volatility: vol !== null ? vol : 0,
-    rsi: rsi !== null ? rsi : null,
-    ema9, ema21, ema50, bb
+    volatility: vol || 0, rsi, ema9: e9, ema21: e21, ema50: e50, bb
   };
 }
 
-// ============================================================
-//  STATE
-// ============================================================
-
+// ── STATE ─────────────────────────────────────────────────
 const history = { BTCUSDT: [], ETHUSDT: [], SOLUSDT: [] };
-let currentAsset = "BTCUSDT";
-let sockets = {};
+let currentAsset = "BTCUSDT", pollTimer = null, errCount = 0;
 
-// ============================================================
-//  BINANCE WebSocket — اتصال مباشر
-// ============================================================
-
-function connectBinance(symbol) {
-  const key = symbol.toUpperCase();
-  if (sockets[key]) return;
-
-  const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);
-
-  ws.onopen = () => {
-    document.getElementById("dot").classList.add("active");
-    document.getElementById("connText").textContent = "متصل بـ Binance";
-  };
-
-  ws.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    const price = parseFloat(data.p);
-
-    history[key].push(price);
-    if (history[key].length > 300) history[key].shift();
-
-    if (key === currentAsset) updateUI(key, price);
-  };
-
-  ws.onerror = () => {
-    document.getElementById("connText").textContent = "خطأ في الاتصال";
-  };
-
-  ws.onclose = () => {
-    delete sockets[key];
-    document.getElementById("connText").textContent = "انقطع الاتصال — إعادة محاولة...";
-    setTimeout(() => connectBinance(symbol), 3000);
-  };
-
-  sockets[key] = ws;
+// ── BINANCE REST API ──────────────────────────────────────
+async function fetchData(symbol) {
+  const [klRes, tkRes] = await Promise.all([
+    fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=150`),
+    fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
+  ]);
+  if (!klRes.ok || !tkRes.ok) throw new Error("API error");
+  const klines = await klRes.json();
+  const ticker = await tkRes.json();
+  const closes = klines.map(k => parseFloat(k[4]));
+  const price  = parseFloat(ticker.price);
+  return { closes, price };
 }
 
-// ============================================================
-//  UI UPDATE
-// ============================================================
+async function poll() {
+  try {
+    const { closes, price } = await fetchData(currentAsset);
+    history[currentAsset] = [...closes, price];
+    errCount = 0;
+    document.getElementById("dot").classList.add("active");
+    document.getElementById("connText").textContent = "✓ متصل — يتحدث كل 3 ثواني";
+    updateUI(currentAsset, price);
+  } catch (e) {
+    errCount++;
+    document.getElementById("dot").classList.remove("active");
+    document.getElementById("connText").textContent = `خطأ في الاتصال (${errCount})`;
+  }
+}
 
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  poll();
+  pollTimer = setInterval(poll, 3000);
+}
+
+// ── UI ────────────────────────────────────────────────────
 function updateUI(asset, price) {
   const prices = history[asset];
-  if (prices.length < 2) return;
-
+  if (!prices || prices.length < 15) return;
   const r = analyze(prices, price);
+  const dec = price > 100 ? 2 : 5;
+  const fmt = v => v != null ? `$${v.toFixed(dec)}` : "—";
 
-  // Price
-  document.getElementById("sAsset").textContent = asset.replace("USDT", "");
-  document.getElementById("sPrice").textContent = price > 1000
-    ? `$${price.toFixed(1)}` : `$${price.toFixed(4)}`;
+  document.getElementById("sAsset").textContent = asset.replace("USDT","");
+  document.getElementById("sPrice").textContent = price > 100 ? `$${price.toFixed(2)}` : `$${price.toFixed(5)}`;
 
-  // Trend
   const tEl = document.getElementById("sTrend");
   tEl.textContent = r.trend;
-  tEl.className = "stat-value " + (
-    r.trend.includes("BULL") ? "trend-bull" :
-    r.trend.includes("BEAR") ? "trend-bear" :
-    r.trend.includes("WEAK") ? "trend-weak" : "trend-neut"
-  );
+  tEl.className = "stat-value " + (r.trend.includes("BULL") ? "trend-bull" : r.trend.includes("BEAR") ? "trend-bear" : r.trend.includes("WEAK") ? "trend-weak" : "trend-neut");
 
-  // Signal
   const sEl = document.getElementById("sSignal");
   sEl.textContent = r.signal;
   sEl.className = `stat-value sig-${r.signal}`;
 
-  // Momentum & Volatility
-  document.getElementById("sMomentum").textContent = r.momentum;
+  document.getElementById("sMomentum").textContent   = r.momentum;
   document.getElementById("sVolatility").textContent = (r.volatility * 100).toFixed(3) + "%";
 
-  // Indicators
   if (r.rsi !== null) {
     document.getElementById("iRsi").textContent = r.rsi.toFixed(1);
     const bar = document.getElementById("rsiBar");
-    bar.style.width = r.rsi + "%";
+    bar.style.width = Math.min(r.rsi, 100) + "%";
     bar.style.background = r.rsi < 30 ? "#00ffaa" : r.rsi > 70 ? "#ff3366" : "#ffaa33";
   }
 
-  const fmt = (v, d=2) => v !== null ? `$${v.toFixed(d)}` : "—";
   document.getElementById("iEma9").textContent  = fmt(r.ema9);
   document.getElementById("iEma21").textContent = fmt(r.ema21);
   document.getElementById("iEma50").textContent = fmt(r.ema50);
-
   if (r.bb) {
     document.getElementById("iBBu").textContent = fmt(r.bb.upper);
     document.getElementById("iBBm").textContent = fmt(r.bb.middle);
     document.getElementById("iBBl").textContent = fmt(r.bb.lower);
   }
-
-  document.getElementById("iScore").textContent =
-    (r.score > 0 ? "+" : "") + r.score + " / 6";
-
-  // Chart
+  document.getElementById("iScore").textContent = (r.score > 0 ? "+" : "") + r.score + " / 6";
   drawChart(asset);
 }
 
-// ============================================================
-//  CHART
-// ============================================================
-
+// ── CHART ─────────────────────────────────────────────────
 function drawChart(asset) {
   const canvas = document.getElementById("chart");
   const ctx = canvas.getContext("2d");
-  const prices = (history[asset] || []).slice(-120);
-
+  const prices = (history[asset] || []).slice(-100);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   if (prices.length < 2) {
-    ctx.fillStyle = "#00ff9f33";
-    ctx.font = "14px monospace";
-    ctx.fillText("جاري تحميل البيانات...", 20, 50);
-    return;
+    ctx.fillStyle = "#00ff9f33"; ctx.font = "13px monospace";
+    ctx.fillText("جاري تحميل البيانات...", 20, 50); return;
   }
-
   const W = canvas.width, H = canvas.height;
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-  const pad = 30;
+  const min = Math.min(...prices) * 0.9998, max = Math.max(...prices) * 1.0002;
+  const range = max - min || 1, pT = 25, pB = 20;
+  const toY = p => H - pB - ((p - min) / range) * (H - pT - pB);
+  const toX = i => (i / (prices.length - 1)) * W;
 
   // Grid
-  ctx.strokeStyle = "#00ff9f11";
-  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = "#00ff9f11"; ctx.lineWidth = 0.5;
   for (let i = 0; i <= 4; i++) {
-    const y = pad + (i / 4) * (H - pad * 2);
+    const y = pT + (i / 4) * (H - pT - pB);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    const label = (max - (i / 4) * range).toFixed(prices[0] > 100 ? 1 : 4);
-    ctx.fillStyle = "#00ff9f33";
-    ctx.font = "9px monospace";
-    ctx.fillText(label, 2, y - 2);
+    const lbl = (max - (i / 4) * range).toFixed(prices[prices.length-1] > 100 ? 1 : 5);
+    ctx.fillStyle = "#00ff9f33"; ctx.font = "8px monospace"; ctx.fillText(lbl, 3, y - 2);
   }
 
-  // EMA lines
-  function drawEMA(period, color) {
-    const k = 2 / (period + 1);
-    if (prices.length < period) return;
-    let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
-    const emaLine = [ema];
-    for (let i = period; i < prices.length; i++) {
-      ema = prices[i] * k + ema * (1 - k);
-      emaLine.push(ema);
+  // EMA
+  function drawEMA(n, color) {
+    if (prices.length < n) return;
+    const k = 2 / (n + 1);
+    let e = prices.slice(0, n).reduce((a, b) => a + b, 0) / n;
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 1;
+    let first = true;
+    for (let i = n; i < prices.length; i++) {
+      e = prices[i] * k + e * (1 - k);
+      const x = toX(i), y = toY(e);
+      first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      first = false;
     }
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    emaLine.forEach((v, i) => {
-      const xi = period + i;
-      const x = (xi / (prices.length - 1)) * W;
-      const y = H - pad - ((v - min) / range) * (H - pad * 2);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
     ctx.stroke();
   }
-
-  drawEMA(9,  "#ffaa3366");
-  drawEMA(21, "#ff336644");
-  drawEMA(50, "#3366ff44");
+  drawEMA(9,  "#ffcc0055");
+  drawEMA(21, "#ff666655");
+  drawEMA(50, "#6666ff55");
 
   // Price line
-  ctx.beginPath();
-  ctx.strokeStyle = "#00ff9f";
-  ctx.lineWidth = 1.5;
-  prices.forEach((p, i) => {
-    const x = (i / (prices.length - 1)) * W;
-    const y = H - pad - ((p - min) / range) * (H - pad * 2);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
+  ctx.beginPath(); ctx.strokeStyle = "#00ff9f"; ctx.lineWidth = 1.8;
+  prices.forEach((p, i) => { const x = toX(i), y = toY(p); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
   ctx.stroke();
 
-  // Gradient fill
-  const lastX = W;
-  const lastY = H - pad - ((prices[prices.length - 1] - min) / range) * (H - pad * 2);
-  ctx.lineTo(lastX, H - pad);
-  ctx.lineTo(0, H - pad);
+  // Fill
+  ctx.lineTo(W, H - pB); ctx.lineTo(0, H - pB);
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, "#00ff9f22");
-  grad.addColorStop(1, "#00ff9f00");
-  ctx.fillStyle = grad;
-  ctx.fill();
+  grad.addColorStop(0, "#00ff9f1a"); grad.addColorStop(1, "#00ff9f00");
+  ctx.fillStyle = grad; ctx.fill();
 
-  // Last price dot
-  const lpx = W - 1;
-  const lpy = H - pad - ((prices[prices.length - 1] - min) / range) * (H - pad * 2);
-  ctx.beginPath();
-  ctx.arc(lpx, lpy, 3, 0, Math.PI * 2);
-  ctx.fillStyle = "#00ff9f";
-  ctx.fill();
-
-  // Chart label
-  document.getElementById("chartLabel").textContent =
-    `— EMA9  — EMA21  — EMA50  | ${prices.length} نقطة`;
+  // Last dot
+  const lp = prices[prices.length - 1];
+  ctx.beginPath(); ctx.arc(W - 2, toY(lp), 3, 0, Math.PI * 2);
+  ctx.fillStyle = "#00ff9f"; ctx.fill();
+  ctx.fillStyle = "#00ff9f"; ctx.font = "9px monospace";
+  ctx.fillText(lp > 100 ? `$${lp.toFixed(2)}` : `$${lp.toFixed(5)}`, W - 78, toY(lp) - 6);
 }
 
-// ============================================================
-//  ASSET SWITCH
-// ============================================================
-
+// ── SWITCH ────────────────────────────────────────────────
 function switchAsset(asset, btn) {
   currentAsset = asset;
   document.querySelectorAll(".asset-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-
-  document.getElementById("sAsset").textContent = "—";
-  document.getElementById("sPrice").textContent = "—";
-
-  connectBinance(asset);
-  drawChart(asset);
+  ["sAsset","sPrice","sTrend","sSignal","sMomentum","sVolatility",
+   "iRsi","iEma9","iEma21","iEma50","iBBu","iBBm","iBBl","iScore"]
+    .forEach(id => document.getElementById(id).textContent = "—");
+  startPolling();
 }
 
-// ============================================================
-//  INIT — اتصل بالثلاث عملات مباشرة
-// ============================================================
-
-["BTCUSDT", "ETHUSDT", "SOLUSDT"].forEach(s => connectBinance(s));
+// ── INIT ──────────────────────────────────────────────────
+startPolling();
 </script>
 </body>
 </html>
