@@ -555,4 +555,414 @@ async function poll() {
     // Fetch current TF + all MTF
     const tfs = [currentTF, "1m", "5m", "15m"].filter((v, i, a) => a.indexOf(v) === i);
     const results = await Promise.all(tfs.map(tf => fetchKlines(currentAsset, TF_MAP[tf])));
-    const main = resu
+    const main = results[0];
+
+    errCount = 0;
+    document.getElementById("dot").classList.add("on");
+    document.getElementById("connTxt").textContent = "LIVE";
+
+    const prev = lastPrice[currentAsset] || main.price;
+    lastPrice[currentAsset] = main.price;
+
+    // Update all asset tabs 24h change
+    await updateTabChanges();
+
+    // Main analysis
+    const r = analyze(main.closes, main.price);
+    if (!r) return;
+
+    // Add to signal history
+    addSignalHistory(currentAsset, r.signal, main.price);
+
+    updateHero(main, r, prev);
+    updateStats(r);
+    updateIndicators(r, main.price, main);
+    updateMTF(currentAsset);
+    drawChart(main);
+
+    document.getElementById("lastUpdate").textContent = "UPDATED: " + new Date().toLocaleTimeString();
+    resetCountdown();
+
+  } catch (e) {
+    errCount++;
+    document.getElementById("dot").classList.remove("on");
+    document.getElementById("connTxt").textContent = `ERROR (${errCount})`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  UPDATE TAB CHANGES
+// ═══════════════════════════════════════════════════════
+async function updateTabChanges() {
+  try {
+    const syms = ["BTCUSDT","ETHUSDT","SOLUSDT"];
+    const res = await Promise.all(syms.map(s =>
+      fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${s}`).then(r => r.json())
+    ));
+    res.forEach((d, i) => {
+      const el = document.getElementById(`chg-${syms[i]}`);
+      if (!el) return;
+      const chg = parseFloat(d.priceChangePercent);
+      el.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
+      el.className = "chg " + (chg >= 0 ? "up" : "dn");
+    });
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════
+//  UPDATE MTF
+// ═══════════════════════════════════════════════════════
+async function updateMTF(symbol) {
+  const tfs = ["1m","5m","15m"];
+  for (const tf of tfs) {
+    try {
+      const d = await fetchKlines(symbol, tf);
+      const r = analyze(d.closes, d.price);
+      if (!r) continue;
+      const sigEl  = document.getElementById(`mtf-${tf}`);
+      const rsiEl  = document.getElementById(`mtf-${tf}-rsi`);
+      if (sigEl) { sigEl.textContent = r.signal; sigEl.className = "mtf-sig " + sigClass(r.signal); }
+      if (rsiEl && r.rsi) rsiEl.textContent = "RSI: " + r.rsi.toFixed(1);
+    } catch(e) {}
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  HERO UPDATE
+// ═══════════════════════════════════════════════════════
+function updateHero(main, r, prev) {
+  const priceEl  = document.getElementById("heroPrice");
+  const changeEl = document.getElementById("heroChange");
+  const sigEl    = document.getElementById("heroSignal");
+  const scoreEl  = document.getElementById("heroScore");
+  const confEl   = document.getElementById("heroConf");
+  const volEl    = document.getElementById("heroVol");
+
+  const dec = main.price > 100 ? 2 : 5;
+  priceEl.textContent = "$" + main.price.toFixed(dec);
+
+  // Price flash animation
+  if (main.price > prev) {
+    priceEl.className = "hero-price price-up";
+    setTimeout(() => priceEl.className = "hero-price", 500);
+  } else if (main.price < prev) {
+    priceEl.className = "hero-price price-dn";
+    setTimeout(() => priceEl.className = "hero-price", 500);
+  }
+
+  const chg = main.change24;
+  changeEl.textContent = (chg >= 0 ? "▲ +" : "▼ ") + chg.toFixed(2) + "% (24h)";
+  changeEl.className   = "hero-change " + (chg >= 0 ? "up" : "dn");
+
+  sigEl.textContent = r.signal.replace(/_/g, " ");
+  sigEl.className   = "hero-signal " + sigClass(r.signal);
+
+  scoreEl.textContent = (r.score > 0 ? "+" : "") + r.score;
+  confEl.textContent  = r.confidence + "%";
+
+  // Format volume
+  const v = main.vol24;
+  volEl.textContent = "VOL 24H: $" + (v > 1e9 ? (v/1e9).toFixed(2)+"B" : v > 1e6 ? (v/1e6).toFixed(1)+"M" : v.toFixed(0));
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════════════
+function updateStats(r) {
+  const tEl = document.getElementById("sTrend");
+  tEl.textContent = r.trend;
+  tEl.className = "stat-val " + (r.trend.includes("BULL") || r.trend.includes("↑") ? "up" : r.trend.includes("BEAR") || r.trend.includes("↓") ? "dn" : "warn");
+
+  if (r.rsi !== null) {
+    const rsiEl = document.getElementById("sRsi");
+    rsiEl.textContent = r.rsi.toFixed(1);
+    rsiEl.className = "stat-val " + (r.rsi < 35 ? "up" : r.rsi > 65 ? "dn" : "");
+    const bar = document.getElementById("rsiBar");
+    bar.style.width = Math.min(r.rsi, 100) + "%";
+    bar.style.background = r.rsi < 35 ? "var(--green)" : r.rsi > 65 ? "var(--red)" : "var(--yellow)";
+  }
+
+  const mEl = document.getElementById("sMom");
+  mEl.textContent = r.momentum;
+  mEl.className = "stat-val " + (r.mom > 0 ? "up" : r.mom < 0 ? "dn" : "dim");
+
+  document.getElementById("sVol").textContent = r.volatility;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INDICATORS
+// ═══════════════════════════════════════════════════════
+function updateIndicators(r, price, main) {
+  const dec = price > 100 ? 2 : 5;
+  const fmt = v => v != null ? "$" + v.toFixed(dec) : "—";
+
+  document.getElementById("iEma9").textContent  = fmt(r.e9);
+  document.getElementById("iEma21").textContent = fmt(r.e21);
+  document.getElementById("iEma50").textContent = fmt(r.e50);
+
+  if (r.bb) {
+    document.getElementById("iBBu").textContent = fmt(r.bb.upper);
+    document.getElementById("iBBm").textContent = fmt(r.bb.middle);
+    document.getElementById("iBBl").textContent = fmt(r.bb.lower);
+    document.getElementById("iBBw").textContent = (r.bb.width * 100).toFixed(3) + "%";
+  }
+
+  const v = main.vol24;
+  document.getElementById("iVol").textContent = v > 1e9 ? "$" + (v/1e9).toFixed(2)+"B" : "$" + (v/1e6).toFixed(1)+"M";
+
+  // Volume bars
+  const vols = main.volumes.slice(-20);
+  const maxV = Math.max(...vols);
+  const volBars = document.getElementById("volBars");
+  const closes = main.closes.slice(-20);
+  const opens  = main.opens.slice(-20);
+  volBars.innerHTML = vols.map((v, i) => {
+    const h = Math.max(4, Math.round((v / maxV) * 40));
+    const cls = closes[i] >= opens[i] ? "up" : "dn";
+    return `<div class="vol-bar ${cls}" style="height:${h}px"></div>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════════
+//  SIGNAL HISTORY
+// ═══════════════════════════════════════════════════════
+let lastSig = {};
+function addSignalHistory(asset, signal, price) {
+  if (lastSig[asset] === signal) return; // Only log changes
+  lastSig[asset] = signal;
+
+  const dec = price > 100 ? 2 : 5;
+  signalHistory.unshift({
+    time: new Date().toLocaleTimeString(),
+    asset: asset.replace("USDT",""),
+    signal,
+    price: "$" + price.toFixed(dec)
+  });
+  if (signalHistory.length > 30) signalHistory.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById("histList");
+  if (signalHistory.length === 0) return;
+  el.innerHTML = signalHistory.map(h => `
+    <div class="hist-item">
+      <span class="hist-time">${h.time}</span>
+      <span class="hist-asset">${h.asset}</span>
+      <span class="hist-sig ${sigClass(h.signal)}">${h.signal.replace(/_/g," ")}</span>
+      <span class="hist-price">${h.price}</span>
+    </div>
+  `).join("");
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHART — CANDLESTICK + EMA + BB
+// ═══════════════════════════════════════════════════════
+function drawChart(main) {
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const n = 80;
+  const closes  = main.closes.slice(-n);
+  const opens   = main.opens.slice(-n);
+  const highs   = main.highs.slice(-n);
+  const lows    = main.lows.slice(-n);
+
+  if (closes.length < 5) {
+    ctx.fillStyle = "rgba(0,255,159,0.3)";
+    ctx.font = "13px Share Tech Mono";
+    ctx.fillText("Loading...", 20, 50);
+    return;
+  }
+
+  const allPrices = [...highs, ...lows];
+  const minP = Math.min(...allPrices) * 0.9998;
+  const maxP = Math.max(...allPrices) * 1.0002;
+  const range = maxP - minP || 1;
+  const padL = 5, padR = 5, padT = 15, padB = 20;
+  const cW = W - padL - padR;
+  const cH = H - padT - padB;
+
+  const toY = p => padT + cH - ((p - minP) / range) * cH;
+  const toX = i => padL + (i / (closes.length - 1)) * cW;
+
+  // Grid
+  ctx.strokeStyle = "rgba(0,255,159,0.07)";
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (i / 4) * cH;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    const lbl = (maxP - (i / 4) * range).toFixed(closes[closes.length - 1] > 100 ? 1 : 5);
+    ctx.fillStyle = "rgba(0,255,159,0.3)";
+    ctx.font = "8px Share Tech Mono";
+    ctx.fillText(lbl, padL + 2, y - 2);
+  }
+
+  // Bollinger Bands fill
+  const bbPeriod = 20;
+  if (closes.length >= bbPeriod) {
+    const bbUpper = [], bbLower = [];
+    for (let i = bbPeriod - 1; i < closes.length; i++) {
+      const slice = closes.slice(i - bbPeriod + 1, i + 1);
+      const m = slice.reduce((a, b) => a + b, 0) / bbPeriod;
+      const sd = Math.sqrt(slice.reduce((a, b) => a + Math.pow(b - m, 2), 0) / bbPeriod);
+      bbUpper.push(m + 2 * sd);
+      bbLower.push(m - 2 * sd);
+    }
+    const offset = closes.length - bbUpper.length;
+
+    // Fill between bands
+    ctx.beginPath();
+    bbUpper.forEach((v, i) => {
+      const x = toX(i + offset), y = toY(v);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    for (let i = bbLower.length - 1; i >= 0; i--) {
+      ctx.lineTo(toX(i + offset), toY(bbLower[i]));
+    }
+    ctx.closePath();
+    ctx.fillStyle = "rgba(0,170,255,0.06)";
+    ctx.fill();
+
+    // BB lines
+    [bbUpper, bbLower].forEach(band => {
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(0,170,255,0.3)";
+      ctx.lineWidth = 0.8;
+      band.forEach((v, i) => {
+        const x = toX(i + offset), y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+  }
+
+  // EMA lines
+  function drawEMA(n, color) {
+    if (closes.length < n) return;
+    const k = 2 / (n + 1);
+    let e = closes.slice(0, n).reduce((a, b) => a + b, 0) / n;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    let first = true;
+    for (let i = n; i < closes.length; i++) {
+      e = closes[i] * k + e * (1 - k);
+      const x = toX(i), y = toY(e);
+      first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      first = false;
+    }
+    ctx.stroke();
+  }
+  drawEMA(9,  "rgba(255,214,10,0.7)");
+  drawEMA(21, "rgba(255,107,107,0.7)");
+  drawEMA(50, "rgba(107,159,255,0.7)");
+
+  // Candlesticks
+  const candleW = Math.max(1.5, (cW / closes.length) * 0.6);
+  for (let i = 0; i < closes.length; i++) {
+    const x  = toX(i);
+    const yO = toY(opens[i]);
+    const yC = toY(closes[i]);
+    const yH = toY(highs[i]);
+    const yL = toY(lows[i]);
+    const up = closes[i] >= opens[i];
+    const col = up ? "rgba(0,255,159,0.85)" : "rgba(255,45,85,0.85)";
+
+    // Wick
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x, yH);
+    ctx.lineTo(x, yL);
+    ctx.stroke();
+
+    // Body
+    const bodyTop = Math.min(yO, yC);
+    const bodyH   = Math.max(1.5, Math.abs(yC - yO));
+    ctx.fillStyle = col;
+    ctx.fillRect(x - candleW / 2, bodyTop, candleW, bodyH);
+  }
+
+  // Last price line
+  const lp = closes[closes.length - 1];
+  const lpY = toY(lp);
+  ctx.setLineDash([3, 3]);
+  ctx.strokeStyle = "rgba(0,255,159,0.4)";
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(padL, lpY);
+  ctx.lineTo(W - padR, lpY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Price label
+  ctx.fillStyle = "rgba(0,255,159,0.9)";
+  ctx.font = "bold 9px Share Tech Mono";
+  const priceLabel = lp > 100 ? "$" + lp.toFixed(2) : "$" + lp.toFixed(5);
+  ctx.fillText(priceLabel, W - padR - 70, lpY - 4);
+}
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function sigClass(signal) {
+  const map = {
+    "HIGH_PROB_BUY": "s-HPB",
+    "BUY": "s-BUY",
+    "HIGH_PROB_SELL": "s-HPS",
+    "SELL": "s-SEL",
+    "RISKY_MARKET": "s-RSK",
+    "NEUTRAL": "s-NEU"
+  };
+  return map[signal] || "s-NEU";
+}
+
+function resetCountdown() {
+  countdownSec = 3;
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    countdownSec--;
+    document.getElementById("countdown").textContent = countdownSec + "s";
+    if (countdownSec <= 0) clearInterval(countdownTimer);
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════════════
+function switchAsset(asset, el) {
+  currentAsset = asset;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  // Clear cache for fresh data
+  Object.keys(cache).filter(k => k.startsWith(asset)).forEach(k => delete cache[k]);
+  startPolling();
+}
+
+function setTF(tf, el) {
+  currentTF = tf;
+  document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  delete cache[currentAsset + TF_MAP[tf]];
+  poll();
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  poll();
+  pollTimer = setInterval(poll, 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+startPolling();
+// Pre-fetch other assets in background
+setTimeout(() => fetchKlines("ETHUSDT","1m").catch(()=>{}), 2000);
+setTimeout(() => fetchKlines("SOLUSDT","1m").catch(()=>{}), 4000);
+</script>
+</body>
+</html>
