@@ -1,197 +1,612 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>NEXUS LAB v2</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS MARKET LAB v2</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#020408;color:#00ff9f;font-family:'Courier New',monospace}
-.container{max-width:1200px;margin:0 auto;padding:20px}
-h3{color:#00ff9f;text-shadow:0 0 5px #00ff9f33;margin:0 0 15px 0}
-.asset-buttons{display:flex;gap:10px;margin-bottom:20px}
-.asset-buttons button{background:#0a1a2a;color:#00ff9f;border:1px solid #00ff9f44;
-padding:8px 20px;cursor:pointer;font-family:monospace;font-weight:bold;
-transition:all 0.2s}
-.asset-buttons button:hover{background:#00ff9f22;border-color:#00ff9f;box-shadow:0 0 8px #00ff9f33}
-.chart-container{background:#000;border:1px solid #00ff9f33;padding:10px;margin-bottom:20px}
-canvas{display:block;width:100%;height:auto;background:#000}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
-.stat-card{background:#0a1a2a22;border:1px solid #00ff9f33;padding:12px;text-align:center}
-.stat-label{font-size:11px;color:#00ff9f88;text-transform:uppercase;letter-spacing:1px}
-.stat-value{font-size:24px;font-weight:bold;margin-top:5px;word-break:break-all}
-.signal-HIGH_PROB_BUY{color:#00ffaa;text-shadow:0 0 5px #00ffaa88}
-.signal-HIGH_PROB_SELL{color:#ff3366;text-shadow:0 0 5px #ff336688}
-.signal-RISKY_MARKET{color:#ffaa33}
-.signal-NEUTRAL{color:#888}
-.status-LOADING{color:#ffaa33;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #020408;
+  color: #00ff9f;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  padding: 15px;
+}
+
+.header {
+  text-align: center;
+  padding: 15px 0 20px;
+  border-bottom: 1px solid #00ff9f22;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px #00ff9f66;
+}
+
+.header p {
+  font-size: 0.7rem;
+  color: #00ff9f55;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.conn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  padding: 4px 12px;
+  border: 1px solid #00ff9f33;
+  border-radius: 20px;
+  margin-top: 8px;
+  background: #00ff9f0a;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #ff4444;
+  transition: background 0.3s;
+}
+.dot.active { background: #00ff9f; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.asset-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.asset-btn {
+  background: #0a1a2a;
+  color: #00ff9f88;
+  border: 1px solid #00ff9f33;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border-radius: 3px;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.asset-btn:hover, .asset-btn.active {
+  background: #00ff9f15;
+  border-color: #00ff9f;
+  color: #00ff9f;
+  box-shadow: 0 0 10px #00ff9f22;
+}
+
+.chart-box {
+  background: #000;
+  border: 1px solid #00ff9f22;
+  padding: 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart-labels {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 0.65rem;
+  color: #00ff9f66;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.stats-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+@media(max-width: 500px) {
+  .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+  background: #0a1a2a22;
+  border: 1px solid #00ff9f22;
+  padding: 10px;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: #00ff9f55;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  word-break: break-all;
+}
+
+.stat-value.big { font-size: 1.4rem; }
+
+/* Signal colors */
+.sig-HIGH_PROB_BUY  { color: #00ffaa; text-shadow: 0 0 8px #00ffaa88; }
+.sig-BUY            { color: #00cc88; }
+.sig-HIGH_PROB_SELL { color: #ff3366; text-shadow: 0 0 8px #ff336688; }
+.sig-SELL           { color: #cc2255; }
+.sig-RISKY_MARKET   { color: #ffaa33; }
+.sig-NEUTRAL        { color: #666; }
+
+.trend-bull  { color: #00ffaa; }
+.trend-bear  { color: #ff3366; }
+.trend-weak  { color: #ffaa33; }
+.trend-neut  { color: #666; }
+
+.indicators {
+  background: #00000066;
+  border: 1px solid #00ff9f11;
+  padding: 10px 15px;
+  border-radius: 3px;
+  margin-top: 8px;
+}
+
+.ind-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  padding: 4px 0;
+  border-bottom: 1px solid #00ff9f0a;
+}
+.ind-row:last-child { border-bottom: none; }
+.ind-name { color: #00ff9f55; }
+.ind-val  { color: #00ff9f; }
+
+.rsi-bar {
+  height: 4px;
+  background: #0a1a2a;
+  border-radius: 2px;
+  margin-top: 3px;
+  overflow: hidden;
+}
+.rsi-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s, background 0.5s;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.65rem;
+  color: #00ff9f33;
+  margin-top: 20px;
+  letter-spacing: 1px;
+}
 </style>
 </head>
-
 <body>
-<div class="container">
 
-<h3>🏗️ NEXUS MARKET LAB v2 — LIVE SIGNALS</h3>
-
-<div class="asset-buttons">
-<button onclick="setAsset('BTCUSDT')">₿ BTC</button>
-<button onclick="setAsset('ETHUSDT')">Ξ ETH</button>
-<button onclick="setAsset('SOLUSDT')">◎ SOL</button>
+<div class="header">
+  <h1>⬡ NEXUS MARKET LAB v2</h1>
+  <p>LIVE SIGNALS — DIRECT BINANCE STREAM</p>
+  <div class="conn-status">
+    <div class="dot" id="dot"></div>
+    <span id="connText">جاري الاتصال...</span>
+  </div>
 </div>
 
-<div class="chart-container">
-<canvas id="chart" width="800" height="300" style="width:100%;height:auto;max-width:800px"></canvas>
+<div class="asset-buttons">
+  <button class="asset-btn active" onclick="switchAsset('BTCUSDT',this)">₿ BTC</button>
+  <button class="asset-btn" onclick="switchAsset('ETHUSDT',this)">Ξ ETH</button>
+  <button class="asset-btn" onclick="switchAsset('SOLUSDT',this)">◎ SOL</button>
+</div>
+
+<div class="chart-box">
+  <div class="chart-labels" id="chartLabel">—</div>
+  <canvas id="chart" width="800" height="260"></canvas>
+</div>
+
+<div class="stats-grid-4">
+  <div class="stat-card">
+    <div class="stat-label">ASSET</div>
+    <div class="stat-value big" id="sAsset">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">PRICE (USDT)</div>
+    <div class="stat-value big" id="sPrice">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">TREND</div>
+    <div class="stat-value" id="sTrend">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">AI SIGNAL</div>
+    <div class="stat-value" id="sSignal">—</div>
+  </div>
 </div>
 
 <div class="stats-grid">
-<div class="stat-card"><div class="stat-label">ASSET</div><div class="stat-value" id="asset">—</div></div>
-<div class="stat-card"><div class="stat-label">PRICE (USDT)</div><div class="stat-value" id="price">—</div></div>
-<div class="stat-card"><div class="stat-label">TREND</div><div class="stat-value" id="trend">—</div></div>
-<div class="stat-card"><div class="stat-label">AI SIGNAL</div><div class="stat-value" id="signal">—</div></div>
+  <div class="stat-card">
+    <div class="stat-label">MOMENTUM</div>
+    <div class="stat-value" id="sMomentum">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">VOLATILITY</div>
+    <div class="stat-value" id="sVolatility">—</div>
+  </div>
 </div>
 
-<div class="stats-grid" style="margin-top:10px">
-<div class="stat-card"><div class="stat-label">MOMENTUM</div><div class="stat-value" id="momentum">—</div></div>
-<div class="stat-card"><div class="stat-label">VOLATILITY</div><div class="stat-value" id="volatility">—</div></div>
+<div class="indicators">
+  <div class="ind-row">
+    <span class="ind-name">RSI (14)</span>
+    <span class="ind-val" id="iRsi">—</span>
+  </div>
+  <div class="rsi-bar"><div class="rsi-fill" id="rsiBar" style="width:0%"></div></div>
+  <div class="ind-row">
+    <span class="ind-name">EMA 9</span>
+    <span class="ind-val" id="iEma9">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">EMA 21</span>
+    <span class="ind-val" id="iEma21">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">EMA 50</span>
+    <span class="ind-val" id="iEma50">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">BB Upper</span>
+    <span class="ind-val" id="iBBu">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">BB Middle</span>
+    <span class="ind-val" id="iBBm">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">BB Lower</span>
+    <span class="ind-val" id="iBBl">—</span>
+  </div>
+  <div class="ind-row">
+    <span class="ind-name">SCORE</span>
+    <span class="ind-val" id="iScore">—</span>
+  </div>
 </div>
 
-</div>
+<div class="footer">NEXUS v2 — POWERED BY BINANCE STREAM — NO SERVER NEEDED</div>
 
 <script>
-const ws = new WebSocket("ws://localhost:3000");
+// ============================================================
+//  ANALYZER — نفس منطق analyzer.js لكن في المتصفح مباشرة
+// ============================================================
 
+function calcEMA(prices, period) {
+  if (prices.length < period) return null;
+  const k = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
+  return ema;
+}
+
+function calcRSI(prices, period = 14) {
+  if (prices.length < period + 1) return null;
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) changes.push(prices[i] - prices[i - 1]);
+  const recent = changes.slice(-period);
+  const gains = recent.filter(c => c > 0).reduce((a, b) => a + b, 0) / period;
+  const losses = Math.abs(recent.filter(c => c < 0).reduce((a, b) => a + b, 0)) / period;
+  if (losses === 0) return 100;
+  return 100 - 100 / (1 + gains / losses);
+}
+
+function calcBB(prices, period = 20) {
+  if (prices.length < period) return null;
+  const slice = prices.slice(-period);
+  const sma = slice.reduce((a, b) => a + b, 0) / period;
+  const std = Math.sqrt(slice.reduce((s, p) => s + Math.pow(p - sma, 2), 0) / period);
+  return { upper: sma + 2 * std, middle: sma, lower: sma - 2 * std };
+}
+
+function calcMomentum(prices, period = 10) {
+  if (prices.length < period + 1) return null;
+  const cur = prices[prices.length - 1];
+  const past = prices[prices.length - 1 - period];
+  return ((cur - past) / past) * 100;
+}
+
+function calcVolatility(prices, period = 20) {
+  if (prices.length < period) return null;
+  const slice = prices.slice(-period);
+  const mean = slice.reduce((a, b) => a + b, 0) / period;
+  const std = Math.sqrt(slice.reduce((s, p) => s + Math.pow(p - mean, 2), 0) / period);
+  return std / mean;
+}
+
+function analyze(prices, currentPrice) {
+  const ema9  = calcEMA(prices, 9);
+  const ema21 = calcEMA(prices, 21);
+  const ema50 = calcEMA(prices, 50);
+  const rsi   = calcRSI(prices, 14);
+  const bb    = calcBB(prices, 20);
+  const mom   = calcMomentum(prices, 10);
+  const vol   = calcVolatility(prices, 20);
+
+  let trend = "NEUTRAL";
+  if (ema9 && ema21 && ema50) {
+    if (ema9 > ema21 && ema21 > ema50)      trend = "↑ BULLISH";
+    else if (ema9 < ema21 && ema21 < ema50) trend = "↓ BEARISH";
+    else if (ema9 > ema21)                  trend = "↗ WEAK BULL";
+    else                                    trend = "↘ WEAK BEAR";
+  }
+
+  let score = 0;
+  if (rsi !== null) {
+    if (rsi < 30) score += 2; else if (rsi < 45) score += 1;
+    else if (rsi > 70) score -= 2; else if (rsi > 55) score -= 1;
+  }
+  if (ema9 && ema21) score += ema9 > ema21 ? 1 : -1;
+  if (bb) {
+    if (currentPrice < bb.lower) score += 2;
+    else if (currentPrice > bb.upper) score -= 2;
+  }
+  if (mom !== null) score += mom > 0.5 ? 1 : mom < -0.5 ? -1 : 0;
+
+  let signal = "NEUTRAL";
+  if      (score >= 4)  signal = "HIGH_PROB_BUY";
+  else if (score >= 2)  signal = "BUY";
+  else if (score <= -4) signal = "HIGH_PROB_SELL";
+  else if (score <= -2) signal = "SELL";
+  else if (vol > 0.02)  signal = "RISKY_MARKET";
+
+  return {
+    trend, signal, score,
+    momentum: mom !== null ? (mom >= 0 ? `+${mom.toFixed(3)}%` : `${mom.toFixed(3)}%`) : "N/A",
+    volatility: vol !== null ? vol : 0,
+    rsi: rsi !== null ? rsi : null,
+    ema9, ema21, ema50, bb
+  };
+}
+
+// ============================================================
+//  STATE
+// ============================================================
+
+const history = { BTCUSDT: [], ETHUSDT: [], SOLUSDT: [] };
 let currentAsset = "BTCUSDT";
-let priceHistory = { BTCUSDT: [], ETHUSDT: [], SOLUSDT: [] };
-let charts = {};
+let sockets = {};
 
-// Initialize canvas for each asset (lazy)
-function getCanvasForAsset(asset) {
-    if (!charts[asset]) {
-        const canvas = document.getElementById("chart");
-        canvas.width = 800;
-        canvas.height = 300;
-        charts[asset] = {
-            ctx: canvas.getContext("2d"),
-            canvas: canvas
-        };
-    }
-    return charts[asset];
+// ============================================================
+//  BINANCE WebSocket — اتصال مباشر
+// ============================================================
+
+function connectBinance(symbol) {
+  const key = symbol.toUpperCase();
+  if (sockets[key]) return;
+
+  const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@trade`);
+
+  ws.onopen = () => {
+    document.getElementById("dot").classList.add("active");
+    document.getElementById("connText").textContent = "متصل بـ Binance";
+  };
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    const price = parseFloat(data.p);
+
+    history[key].push(price);
+    if (history[key].length > 300) history[key].shift();
+
+    if (key === currentAsset) updateUI(key, price);
+  };
+
+  ws.onerror = () => {
+    document.getElementById("connText").textContent = "خطأ في الاتصال";
+  };
+
+  ws.onclose = () => {
+    delete sockets[key];
+    document.getElementById("connText").textContent = "انقطع الاتصال — إعادة محاولة...";
+    setTimeout(() => connectBinance(symbol), 3000);
+  };
+
+  sockets[key] = ws;
 }
 
-function setAsset(asset) {
-    currentAsset = asset;
-    // Redraw with current asset's history
-    drawChart(asset);
+// ============================================================
+//  UI UPDATE
+// ============================================================
+
+function updateUI(asset, price) {
+  const prices = history[asset];
+  if (prices.length < 2) return;
+
+  const r = analyze(prices, price);
+
+  // Price
+  document.getElementById("sAsset").textContent = asset.replace("USDT", "");
+  document.getElementById("sPrice").textContent = price > 1000
+    ? `$${price.toFixed(1)}` : `$${price.toFixed(4)}`;
+
+  // Trend
+  const tEl = document.getElementById("sTrend");
+  tEl.textContent = r.trend;
+  tEl.className = "stat-value " + (
+    r.trend.includes("BULL") ? "trend-bull" :
+    r.trend.includes("BEAR") ? "trend-bear" :
+    r.trend.includes("WEAK") ? "trend-weak" : "trend-neut"
+  );
+
+  // Signal
+  const sEl = document.getElementById("sSignal");
+  sEl.textContent = r.signal;
+  sEl.className = `stat-value sig-${r.signal}`;
+
+  // Momentum & Volatility
+  document.getElementById("sMomentum").textContent = r.momentum;
+  document.getElementById("sVolatility").textContent = (r.volatility * 100).toFixed(3) + "%";
+
+  // Indicators
+  if (r.rsi !== null) {
+    document.getElementById("iRsi").textContent = r.rsi.toFixed(1);
+    const bar = document.getElementById("rsiBar");
+    bar.style.width = r.rsi + "%";
+    bar.style.background = r.rsi < 30 ? "#00ffaa" : r.rsi > 70 ? "#ff3366" : "#ffaa33";
+  }
+
+  const fmt = (v, d=2) => v !== null ? `$${v.toFixed(d)}` : "—";
+  document.getElementById("iEma9").textContent  = fmt(r.ema9);
+  document.getElementById("iEma21").textContent = fmt(r.ema21);
+  document.getElementById("iEma50").textContent = fmt(r.ema50);
+
+  if (r.bb) {
+    document.getElementById("iBBu").textContent = fmt(r.bb.upper);
+    document.getElementById("iBBm").textContent = fmt(r.bb.middle);
+    document.getElementById("iBBl").textContent = fmt(r.bb.lower);
+  }
+
+  document.getElementById("iScore").textContent =
+    (r.score > 0 ? "+" : "") + r.score + " / 6";
+
+  // Chart
+  drawChart(asset);
 }
+
+// ============================================================
+//  CHART
+// ============================================================
 
 function drawChart(asset) {
-    const { ctx, canvas } = getCanvasForAsset(asset);
-    const history = priceHistory[asset] || [];
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (history.length < 2) {
-        ctx.fillStyle = "#00ff9f44";
-        ctx.font = "12px monospace";
-        ctx.fillText("Loading data...", 10, 30);
-        return;
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+  const prices = (history[asset] || []).slice(-120);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (prices.length < 2) {
+    ctx.fillStyle = "#00ff9f33";
+    ctx.font = "14px monospace";
+    ctx.fillText("جاري تحميل البيانات...", 20, 50);
+    return;
+  }
+
+  const W = canvas.width, H = canvas.height;
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  const pad = 30;
+
+  // Grid
+  ctx.strokeStyle = "#00ff9f11";
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad + (i / 4) * (H - pad * 2);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    const label = (max - (i / 4) * range).toFixed(prices[0] > 100 ? 1 : 4);
+    ctx.fillStyle = "#00ff9f33";
+    ctx.font = "9px monospace";
+    ctx.fillText(label, 2, y - 2);
+  }
+
+  // EMA lines
+  function drawEMA(period, color) {
+    const k = 2 / (period + 1);
+    if (prices.length < period) return;
+    let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    const emaLine = [ema];
+    for (let i = period; i < prices.length; i++) {
+      ema = prices[i] * k + ema * (1 - k);
+      emaLine.push(ema);
     }
-    
-    // Find min/max for scaling
-    const prices = history.slice(-100);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const range = maxPrice - minPrice || 1;
-    
-    // Draw grid
-    ctx.strokeStyle = "#00ff9f22";
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 4; i++) {
-        const y = canvas.height - (i * canvas.height / 4);
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-    
-    // Draw price line
     ctx.beginPath();
-    ctx.strokeStyle = "#00ff9f";
-    ctx.lineWidth = 2;
-    
-    let firstPoint = true;
-    prices.forEach((price, idx) => {
-        const x = (idx / (prices.length - 1)) * canvas.width;
-        const y = canvas.height - ((price - minPrice) / range) * (canvas.height - 40) - 20;
-        
-        if (firstPoint) {
-            ctx.moveTo(x, y);
-            firstPoint = false;
-        } else {
-            ctx.lineTo(x, y);
-        }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    emaLine.forEach((v, i) => {
+      const xi = period + i;
+      const x = (xi / (prices.length - 1)) * W;
+      const y = H - pad - ((v - min) / range) * (H - pad * 2);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.stroke();
-    
-    // Draw gradient fill
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#00ff9f22");
-    gradient.addColorStop(1, "#00ff9f00");
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.lineTo(0, canvas.height);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    
-    // Draw latest price label
-    if (prices.length > 0) {
-        const lastPrice = prices[prices.length - 1];
-        const lastX = canvas.width - 10;
-        const lastY = canvas.height - ((lastPrice - minPrice) / range) * (canvas.height - 40) - 20;
-        ctx.fillStyle = "#00ff9f";
-        ctx.font = "10px monospace";
-        ctx.fillText(`$${lastPrice.toFixed(2)}`, lastX - 50, lastY - 5);
-    }
+  }
+
+  drawEMA(9,  "#ffaa3366");
+  drawEMA(21, "#ff336644");
+  drawEMA(50, "#3366ff44");
+
+  // Price line
+  ctx.beginPath();
+  ctx.strokeStyle = "#00ff9f";
+  ctx.lineWidth = 1.5;
+  prices.forEach((p, i) => {
+    const x = (i / (prices.length - 1)) * W;
+    const y = H - pad - ((p - min) / range) * (H - pad * 2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Gradient fill
+  const lastX = W;
+  const lastY = H - pad - ((prices[prices.length - 1] - min) / range) * (H - pad * 2);
+  ctx.lineTo(lastX, H - pad);
+  ctx.lineTo(0, H - pad);
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "#00ff9f22");
+  grad.addColorStop(1, "#00ff9f00");
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Last price dot
+  const lpx = W - 1;
+  const lpy = H - pad - ((prices[prices.length - 1] - min) / range) * (H - pad * 2);
+  ctx.beginPath();
+  ctx.arc(lpx, lpy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = "#00ff9f";
+  ctx.fill();
+
+  // Chart label
+  document.getElementById("chartLabel").textContent =
+    `— EMA9  — EMA21  — EMA50  | ${prices.length} نقطة`;
 }
 
-ws.onmessage = (event) => {
-    const d = JSON.parse(event.data);
-    
-    // Store price history
-    if (!priceHistory[d.asset]) priceHistory[d.asset] = [];
-    priceHistory[d.asset].push(d.price);
-    if (priceHistory[d.asset].length > 200) priceHistory[d.asset].shift();
-    
-    // Update UI for current asset
-    if (d.asset === currentAsset) {
-        document.getElementById("asset").innerHTML = d.asset;
-        document.getElementById("price").innerHTML = `$${d.price.toFixed(2)}`;
-        document.getElementById("trend").innerHTML = d.analysis.trend;
-        document.getElementById("momentum").innerHTML = d.analysis.momentum;
-        document.getElementById("volatility").innerHTML = (parseFloat(d.analysis.volatility) * 100).toFixed(2) + "%";
-        
-        const signalEl = document.getElementById("signal");
-        signalEl.innerHTML = d.analysis.signal;
-        signalEl.className = `stat-value signal-${d.analysis.signal.replace(/[^A-Z_]/g, '')}`;
-        
-        drawChart(currentAsset);
-    }
-};
+// ============================================================
+//  ASSET SWITCH
+// ============================================================
 
-ws.onopen = () => {
-    console.log("🔌 Connected to Nexus Market Lab");
-    document.getElementById("asset").innerHTML = "CONNECTED";
-};
+function switchAsset(asset, btn) {
+  currentAsset = asset;
+  document.querySelectorAll(".asset-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
 
-ws.onerror = (err) => {
-    console.error("WebSocket error:", err);
-    document.getElementById("asset").innerHTML = "ERROR";
-};
+  document.getElementById("sAsset").textContent = "—";
+  document.getElementById("sPrice").textContent = "—";
 
-ws.onclose = () => {
-    document.getElementById("asset").innerHTML = "DISCONNECTED";
-};
+  connectBinance(asset);
+  drawChart(asset);
+}
+
+// ============================================================
+//  INIT — اتصل بالثلاث عملات مباشرة
+// ============================================================
+
+["BTCUSDT", "ETHUSDT", "SOLUSDT"].forEach(s => connectBinance(s));
 </script>
-
 </body>
 </html>
