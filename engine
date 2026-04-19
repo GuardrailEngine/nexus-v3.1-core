@@ -1,0 +1,187 @@
+// ============================================================
+//  NEXUS MARKET LAB v2 — engine/analyzer.js
+//  المؤشرات: EMA, RSI, Bollinger Bands, Momentum, Volatility
+// ============================================================
+
+/**
+ * حساب المتوسط المتحرك الأسي (EMA)
+ * @param {number[]} prices - مصفوفة الأسعار
+ * @param {number} period - الفترة الزمنية
+ */
+function calcEMA(prices, period) {
+  if (prices.length < period) return null;
+
+  const k = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+
+  for (let i = period; i < prices.length; i++) {
+    ema = prices[i] * k + ema * (1 - k);
+  }
+
+  return ema;
+}
+
+/**
+ * حساب مؤشر القوة النسبية (RSI)
+ * @param {number[]} prices - مصفوفة الأسعار
+ * @param {number} period - الفترة (افتراضي 14)
+ */
+function calcRSI(prices, period = 14) {
+  if (prices.length < period + 1) return null;
+
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+
+  const recent = changes.slice(-period);
+  const gains = recent.filter(c => c > 0).reduce((a, b) => a + b, 0) / period;
+  const losses = Math.abs(recent.filter(c => c < 0).reduce((a, b) => a + b, 0)) / period;
+
+  if (losses === 0) return 100;
+
+  const rs = gains / losses;
+  return 100 - 100 / (1 + rs);
+}
+
+/**
+ * حساب Bollinger Bands
+ * @param {number[]} prices - مصفوفة الأسعار
+ * @param {number} period - الفترة (افتراضي 20)
+ * @param {number} stdDev - معامل الانحراف المعياري (افتراضي 2)
+ */
+function calcBollingerBands(prices, period = 20, stdDev = 2) {
+  if (prices.length < period) return null;
+
+  const slice = prices.slice(-period);
+  const sma = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((sum, p) => sum + Math.pow(p - sma, 2), 0) / period;
+  const std = Math.sqrt(variance);
+
+  return {
+    upper: sma + stdDev * std,
+    middle: sma,
+    lower: sma - stdDev * std,
+    std
+  };
+}
+
+/**
+ * حساب الزخم (Momentum)
+ * @param {number[]} prices - مصفوفة الأسعار
+ * @param {number} period - الفترة (افتراضي 10)
+ */
+function calcMomentum(prices, period = 10) {
+  if (prices.length < period + 1) return null;
+  const current = prices[prices.length - 1];
+  const past = prices[prices.length - 1 - period];
+  return ((current - past) / past) * 100;
+}
+
+/**
+ * حساب التقلب (Volatility) بناءً على الانحراف المعياري
+ * @param {number[]} prices - مصفوفة الأسعار
+ * @param {number} period - الفترة (افتراضي 20)
+ */
+function calcVolatility(prices, period = 20) {
+  if (prices.length < period) return null;
+
+  const slice = prices.slice(-period);
+  const mean = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / period;
+  return Math.sqrt(variance) / mean; // معامل الاختلاف (نسبي)
+}
+
+/**
+ * الدالة الرئيسية للتحليل — تُستدعى من server.js
+ * @param {number[]} prices - مصفوفة الأسعار المتراكمة
+ * @param {number} currentPrice - السعر الحالي
+ * @param {string} asset - اسم العملة
+ */
+function analyze(prices, currentPrice, asset) {
+  // --- حساب المؤشرات ---
+  const ema9  = calcEMA(prices, 9);
+  const ema21 = calcEMA(prices, 21);
+  const ema50 = calcEMA(prices, 50);
+  const rsi   = calcRSI(prices, 14);
+  const bb    = calcBollingerBands(prices, 20, 2);
+  const mom   = calcMomentum(prices, 10);
+  const vol   = calcVolatility(prices, 20);
+
+  // --- تحديد الاتجاه (Trend) ---
+  let trend = "NEUTRAL";
+  if (ema9 && ema21 && ema50) {
+    if (ema9 > ema21 && ema21 > ema50) {
+      trend = "↑ BULLISH";
+    } else if (ema9 < ema21 && ema21 < ema50) {
+      trend = "↓ BEARISH";
+    } else if (ema9 > ema21) {
+      trend = "↗ WEAK BULL";
+    } else {
+      trend = "↘ WEAK BEAR";
+    }
+  }
+
+  // --- تحديد الإشارة (Signal) ---
+  let signal = "NEUTRAL";
+  let signalScore = 0;
+
+  // RSI
+  if (rsi !== null) {
+    if (rsi < 30) signalScore += 2;       // ذعر بيع → فرصة شراء
+    else if (rsi < 45) signalScore += 1;
+    else if (rsi > 70) signalScore -= 2;  // ذعر شراء → فرصة بيع
+    else if (rsi > 55) signalScore -= 1;
+  }
+
+  // EMA crossover
+  if (ema9 && ema21) {
+    if (ema9 > ema21) signalScore += 1;
+    else signalScore -= 1;
+  }
+
+  // Bollinger Bands
+  if (bb) {
+    if (currentPrice < bb.lower) signalScore += 2;  // تحت الحد السفلي → شراء
+    else if (currentPrice > bb.upper) signalScore -= 2; // فوق الحد العلوي → بيع
+  }
+
+  // Momentum
+  if (mom !== null) {
+    if (mom > 0.5) signalScore += 1;
+    else if (mom < -0.5) signalScore -= 1;
+  }
+
+  // تحديد الإشارة النهائية
+  if (signalScore >= 4) signal = "HIGH_PROB_BUY";
+  else if (signalScore >= 2) signal = "BUY";
+  else if (signalScore <= -4) signal = "HIGH_PROB_SELL";
+  else if (signalScore <= -2) signal = "SELL";
+  else if (vol !== null && vol > 0.02) signal = "RISKY_MARKET";
+  else signal = "NEUTRAL";
+
+  // --- تنسيق الزخم ---
+  const momentumFormatted = mom !== null
+    ? (mom >= 0 ? `+${mom.toFixed(3)}%` : `${mom.toFixed(3)}%`)
+    : "N/A";
+
+  // --- الإخراج ---
+  return {
+    trend,
+    signal,
+    momentum: momentumFormatted,
+    volatility: vol !== null ? vol.toFixed(6) : "0",
+    rsi: rsi !== null ? rsi.toFixed(1) : "N/A",
+    ema9:  ema9  !== null ? ema9.toFixed(4)  : "N/A",
+    ema21: ema21 !== null ? ema21.toFixed(4) : "N/A",
+    ema50: ema50 !== null ? ema50.toFixed(4) : "N/A",
+    bb: bb ? {
+      upper:  bb.upper.toFixed(4),
+      middle: bb.middle.toFixed(4),
+      lower:  bb.lower.toFixed(4)
+    } : null,
+    score: signalScore
+  };
+}
+
+module.exports = { analyze };
