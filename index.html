@@ -1,496 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS MARKET LAB v3</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:       #020608;
-  --bg2:      #060d12;
-  --bg3:      #0a1520;
-  --green:    #00ff9f;
-  --green2:   #00cc7a;
-  --red:      #ff2d55;
-  --red2:     #cc1f3f;
-  --yellow:   #ffd60a;
-  --blue:     #0af;
-  --dim:      rgba(0,255,159,0.12);
-  --dimr:     rgba(255,45,85,0.12);
-  --border:   rgba(0,255,159,0.18);
-  --text:     #c8ffe8;
-  --muted:    rgba(200,255,232,0.35);
-  --font:     'Share Tech Mono', monospace;
-  --head:     'Orbitron', monospace;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font);
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-body::before{
-  content:'';position:fixed;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
-  pointer-events:none;z-index:999;
-}
-
-.hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(90deg,var(--bg2),var(--bg));
-  position:sticky;top:0;z-index:100;
-  backdrop-filter:blur(10px);
-}
-.logo{
-  font-family:var(--head);
-  font-size:1.1rem;font-weight:900;
-  letter-spacing:4px;
-  color:var(--green);
-  text-shadow:0 0 20px rgba(0,255,159,0.5);
-}
-.logo span{color:var(--muted);font-size:0.6rem;display:block;letter-spacing:3px;margin-top:2px}
-.hdr-right{display:flex;align-items:center;gap:12px}
-.badge{
-  display:flex;align-items:center;gap:6px;
-  font-size:0.65rem;padding:4px 10px;
-  border:1px solid var(--border);border-radius:2px;
-  background:var(--dim);letter-spacing:1px;
-}
-.dot{width:6px;height:6px;border-radius:50%;background:#444;transition:all 0.4s}
-.dot.on{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2)}
-.tab{
-  flex:1;padding:12px;text-align:center;cursor:pointer;
-  font-family:var(--head);font-size:0.7rem;font-weight:700;
-  letter-spacing:2px;color:var(--muted);
-  border-right:1px solid var(--border);
-  transition:all 0.25s;position:relative;
-  background:transparent;border-bottom:none;
-}
-.tab:last-child{border-right:none}
-.tab::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:var(--green);
-  transform:scaleX(0);transition:transform 0.25s;
-}
-.tab.active{color:var(--green);background:var(--dim)}
-.tab.active::after{transform:scaleX(1)}
-.tab:hover{color:var(--green);background:rgba(0,255,159,0.05)}
-.tab .chg{display:block;font-size:0.6rem;margin-top:3px;font-family:var(--font)}
-.tab .chg.up{color:var(--green)}
-.tab .chg.dn{color:var(--red)}
-
-.main{padding:14px;display:grid;grid-template-columns:1fr;gap:14px;max-width:900px;margin:0 auto}
-
-.signal-hero{
-  border:1px solid var(--border);background:var(--bg2);
-  padding:20px;display:flex;align-items:center;justify-content:space-between;
-  gap:16px;position:relative;overflow:hidden;
-}
-.signal-hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 20% 50%,rgba(0,255,159,0.04),transparent 60%);
-}
-.hero-label{font-size:0.62rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px}
-.hero-signal{font-family:var(--head);font-size:1.5rem;font-weight:900;letter-spacing:3px}
-.hero-score{font-size:0.72rem;color:var(--muted);margin-top:6px}
-.hero-score span{color:var(--green)}
-.hero-right{text-align:right}
-.hero-price{font-family:var(--head);font-size:1.6rem;font-weight:700;color:var(--green)}
-.hero-change{font-size:0.75rem;margin-top:4px}
-.hero-change.up{color:var(--green)}
-.hero-change.dn{color:var(--red)}
-
-.s-HPB{color:var(--green);text-shadow:0 0 15px rgba(0,255,159,0.6)}
-.s-BUY{color:var(--green2)}
-.s-HPS{color:var(--red);text-shadow:0 0 15px rgba(255,45,85,0.6)}
-.s-SEL{color:var(--red2)}
-.s-RSK{color:var(--yellow)}
-.s-NEU{color:var(--muted)}
-
-.chart-wrap{border:1px solid var(--border);background:var(--bg2);padding:10px}
-.chart-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.chart-title{font-size:0.65rem;color:var(--muted);letter-spacing:2px}
-.tf-btns{display:flex;gap:6px}
-.tf-btn{
-  font-size:0.6rem;padding:3px 8px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);cursor:pointer;
-  font-family:var(--font);transition:all 0.2s;
-}
-.tf-btn.active,.tf-btn:hover{border-color:var(--green);color:var(--green);background:var(--dim)}
-.canvas-container{width:100%;overflow-x:auto}
-canvas{display:block;width:100%;min-width:400px;height:auto;background:var(--bg3);border-radius:4px}
-
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-@media(max-width:480px){.stats-row{grid-template-columns:repeat(2,1fr)}}
-.stat{
-  border:1px solid var(--border);background:var(--bg2);
-  padding:12px;text-align:center;
-}
-.stat-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px}
-.stat-val{font-family:var(--head);font-size:0.95rem;font-weight:700}
-.stat-val.up{color:var(--green)}
-.stat-val.dn{color:var(--red)}
-.stat-val.warn{color:var(--yellow)}
-
-.panel{border:1px solid var(--border);background:var(--bg2);padding:14px}
-.panel-title{font-family:var(--head);font-size:0.65rem;letter-spacing:3px;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-
-.mtf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.mtf-card{border:1px solid var(--border);padding:10px;text-align:center;background:var(--bg3)}
-.mtf-tf{font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:5px}
-.mtf-sig{font-family:var(--head);font-size:0.75rem;font-weight:700}
-.mtf-rsi{font-size:0.6rem;color:var(--muted);margin-top:3px}
-
-.ind-table{width:100%;border-collapse:collapse}
-.ind-table tr{border-bottom:1px solid rgba(0,255,159,0.05)}
-.ind-table td{padding:7px 4px;font-size:0.72rem}
-.ind-table td:first-child{color:var(--muted);width:45%}
-.ind-table td:last-child{text-align:right;font-weight:bold}
-.ind-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:3px;overflow:hidden}
-.ind-fill{height:100%;border-radius:2px}
-
-.vol-bars{display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:8px}
-.vol-bar{flex:1;background:rgba(0,255,159,0.25);border-radius:1px 1px 0 0}
-.vol-bar.up{background:rgba(0,255,159,0.4)}
-.vol-bar.dn{background:rgba(255,45,85,0.4)}
-
-.history-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
-.history-list::-webkit-scrollbar{width:3px}
-.hist-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 10px;border:1px solid var(--border);
-  background:var(--bg3);font-size:0.68rem;
-}
-.hist-time{color:var(--muted);width:55px}
-.hist-asset{color:var(--blue);width:40px}
-.hist-sig{font-weight:bold;flex:1;text-align:center}
-.hist-price{color:var(--muted);text-align:right}
-
-.status-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 20px;border-top:1px solid var(--border);
-  font-size:0.6rem;color:var(--muted);background:var(--bg2);
-}
-.status-bar span{display:flex;align-items:center;gap:6px}
-.countdown{font-family:var(--head);font-size:0.65rem;color:var(--green);border:1px solid var(--border);padding:3px 8px;min-width:60px;text-align:center}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NEXUS v3.1 – Engineering Sovereignty</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            background:#020608;
+            color:#c8ffe8;
+            font-family:'Share Tech Mono',monospace;
+            padding:20px;
+        }
+        .card{
+            border:1px solid rgba(0,255,159,0.2);
+            background:#060d12;
+            padding:18px;
+            margin-bottom:16px;
+            border-radius:4px;
+        }
+        .title{
+            font-family:'Orbitron',monospace;
+            font-size:0.7rem;
+            letter-spacing:3px;
+            color:#00ff9f;
+            margin-bottom:12px;
+            text-transform:uppercase;
+        }
+        .flex-row{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .asset-buttons{
+            display:flex;
+            gap:12px;
+            margin-bottom:20px;
+        }
+        .asset-btn{
+            background:#0a1520;
+            border:1px solid rgba(0,255,159,0.3);
+            padding:10px 20px;
+            font-family:'Orbitron',monospace;
+            font-weight:bold;
+            cursor:pointer;
+            color:#c8ffe8;
+            transition:0.2s;
+        }
+        .asset-btn.active{
+            border-color:#00ff9f;
+            background:rgba(0,255,159,0.1);
+            color:#00ff9f;
+            box-shadow:0 0 12px rgba(0,255,159,0.2);
+        }
+        .signal-box{
+            font-size:1.5rem;
+            font-weight:bold;
+            font-family:'Orbitron',monospace;
+            letter-spacing:2px;
+        }
+        .price{font-size:1.8rem;color:#00ff9f;font-weight:bold}
+        .change{font-size:0.8rem;margin-top:5px}
+        .up{color:#00ff9f}
+        .dn{color:#ff2d55}
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+            gap:12px;
+            margin:20px 0;
+        }
+        .stat{
+            background:#0a1520;
+            padding:12px;
+            text-align:center;
+            border:1px solid rgba(0,255,159,0.15);
+        }
+        .stat-label{font-size:0.65rem;color:#9bb5b0;margin-bottom:6px}
+        .stat-value{font-size:1rem;font-weight:bold}
+        .rsi-bar{height:3px;background:#1a2a2a;margin-top:6px}
+        .rsi-fill{height:100%;border-radius:2px}
+        .mtf-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:10px;
+            margin-bottom:16px;
+        }
+        .mtf-card{
+            background:#0a1520;
+            padding:12px;
+            text-align:center;
+            border:1px solid rgba(0,255,159,0.2);
+        }
+        .history-list{
+            max-height:180px;
+            overflow-y:auto;
+            font-size:0.7rem;
+        }
+        .hist-item{
+            display:flex;
+            justify-content:space-between;
+            padding:6px 0;
+            border-bottom:1px solid rgba(0,255,159,0.1);
+        }
+        .green{color:#00ff9f}
+        .red{color:#ff2d55}
+        .yellow{color:#ffd60a}
+        .status{
+            margin-top:20px;
+            font-size:0.6rem;
+            color:#5f8b85;
+            text-align:center;
+        }
+    </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="logo">NEXUS <span>MARKET LAB v3</span></div>
-  <div class="hdr-right">
-    <div class="badge"><div class="dot" id="dot"></div><span id="connTxt">LIVE</span></div>
-    <div class="countdown" id="countdown">3s</div>
-  </div>
+<div class="card">
+    <div class="title">⚡ NEXUS v3.1 — ENGINEERING SOVEREIGNTY</div>
+    <div class="asset-buttons" id="assetButtons">
+        <button class="asset-btn active" data-asset="BTCUSDT">₿ BTC</button>
+        <button class="asset-btn" data-asset="ETHUSDT">Ξ ETH</button>
+        <button class="asset-btn" data-asset="SOLUSDT">◎ SOL</button>
+    </div>
+    <div class="flex-row">
+        <div><div class="title">AI SIGNAL</div><div class="signal-box" id="signal">—</div></div>
+        <div style="text-align:right"><div class="price" id="price">$—</div><div class="change" id="change">— %</div></div>
+    </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" data-asset="BTCUSDT">₿ BTC<span class="chg" id="chg-BTCUSDT">—</span></div>
-  <div class="tab" data-asset="ETHUSDT">Ξ ETH<span class="chg" id="chg-ETHUSDT">—</span></div>
-  <div class="tab" data-asset="SOLUSDT">◎ SOL<span class="chg" id="chg-SOLUSDT">—</span></div>
+<div class="card">
+    <div class="title">📊 METRICS</div>
+    <div class="stats-grid">
+        <div class="stat"><div class="stat-label">TREND</div><div class="stat-value" id="trend">—</div></div>
+        <div class="stat"><div class="stat-label">RSI (14)</div><div class="stat-value" id="rsi">—</div><div class="rsi-bar"><div class="rsi-fill" id="rsiFill" style="width:0%"></div></div></div>
+        <div class="stat"><div class="stat-label">MOMENTUM</div><div class="stat-value" id="mom">—</div></div>
+        <div class="stat"><div class="stat-label">VOLATILITY</div><div class="stat-value" id="vol">—</div></div>
+    </div>
 </div>
 
-<div class="main">
-  <div class="signal-hero">
-    <div class="hero-left">
-      <div class="hero-label">AI SIGNAL — MULTI-TIMEFRAME</div>
-      <div class="hero-signal s-NEU" id="heroSignal">INITIALIZING...</div>
-      <div class="hero-score">SCORE: <span id="heroScore">—</span> | CONF: <span id="heroConf">—</span></div>
-    </div>
-    <div class="hero-right">
-      <div class="hero-price" id="heroPrice">$—</div>
-      <div class="hero-change" id="heroChange">— %</div>
-      <div style="font-size:0.6rem;color:var(--muted);margin-top:4px" id="heroVol">VOL: —</div>
-    </div>
-  </div>
-
-  <div class="chart-wrap">
-    <div class="chart-toolbar">
-      <div><div class="chart-title">PRICE CHART (1m)</div></div>
-      <div class="tf-btns">
-        <button class="tf-btn active" data-tf="1m">1M</button>
-        <button class="tf-btn" data-tf="5m">5M</button>
-        <button class="tf-btn" data-tf="15m">15M</button>
-        <button class="tf-btn" data-tf="1h">1H</button>
-      </div>
-    </div>
-    <div class="canvas-container"><canvas id="chart" width="800" height="280"></canvas></div>
-  </div>
-
-  <div class="stats-row">
-    <div class="stat"><div class="stat-lbl">TREND</div><div class="stat-val" id="sTrend">—</div></div>
-    <div class="stat"><div class="stat-lbl">RSI (14)</div><div class="stat-val" id="sRsi">—</div><div class="ind-bar"><div class="ind-fill" id="rsiBar" style="width:0%;background:var(--green)"></div></div></div>
-    <div class="stat"><div class="stat-lbl">MOMENTUM</div><div class="stat-val" id="sMom">—</div></div>
-    <div class="stat"><div class="stat-lbl">VOLATILITY</div><div class="stat-val" id="sVol">—</div></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-title">◈ MULTI-TIMEFRAME</div>
+<div class="card">
+    <div class="title">🕒 MULTI-TIMEFRAME ANALYSIS (1m / 5m / 15m)</div>
     <div class="mtf-grid" id="mtfGrid"></div>
-    <div class="panel-title">◈ INDICATORS</div>
-    <table class="ind-table" id="indTable"></table>
-    <div class="vol-bars" id="volBars"></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-title">◈ SIGNAL HISTORY</div>
-    <div class="history-list" id="histList"><div style="color:var(--muted);text-align:center;padding:20px">Waiting for signals...</div></div>
-  </div>
+    <div style="text-align:right; font-size:0.7rem">refresh: <span id="countdown">3</span>s</div>
 </div>
 
-<div class="status-bar">
-  <span><div class="dot on" style="width:5px;height:5px"></div> BINANCE API</span>
-  <span id="lastUpdate">—</span>
-  <span>NEXUS v3</span>
+<div class="card">
+    <div class="title">📜 SIGNAL HISTORY</div>
+    <div class="history-list" id="historyList"><div style="text-align:center">—</div></div>
+</div>
+
+<div class="status">
+    <span>🟢 BINANCE LIVE API</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>0 dependencies • 3x faster</span>
 </div>
 
 <script>
-// ============================================================
-//  INDICATORS
-// ============================================================
-function calcEMA(prices, period) {
-  if (prices.length < period) return null;
-  const k = 2 / (period + 1);
-  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
-  for (let i = period; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
-  return ema;
-}
-
-function calcRSI(prices, period = 14) {
-  if (prices.length < period + 1) return null;
-  let gains = 0, losses = 0;
-  for (let i = prices.length - period; i < prices.length; i++) {
-    const diff = prices[i] - prices[i-1];
-    if (diff >= 0) gains += diff; else losses -= diff;
-  }
-  const avgGain = gains / period, avgLoss = losses / period;
-  if (avgLoss === 0) return 100;
-  const rs = avgGain / avgLoss;
-  return 100 - (100 / (1 + rs));
-}
-
-function calcBB(prices, period = 20) {
-  if (prices.length < period) return null;
-  const slice = prices.slice(-period);
-  const mean = slice.reduce((a, b) => a + b, 0) / period;
-  const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period;
-  const std = Math.sqrt(variance);
-  return { upper: mean + 2 * std, middle: mean, lower: mean - 2 * std };
-}
-
-function analyze(prices, currentPrice) {
-  if (!prices || prices.length < 20) return null;
-  const ema9 = calcEMA(prices, 9);
-  const ema21 = calcEMA(prices, 21);
-  const ema50 = calcEMA(prices, 50);
-  const rsi = calcRSI(prices, 14);
-  const bb = calcBB(prices, 20);
-  
-  let score = 0;
-  if (rsi !== null) {
-    if (rsi <= 30) score += 30;
-    else if (rsi <= 40) score += 15;
-    else if (rsi >= 70) score -= 30;
-    else if (rsi >= 60) score -= 15;
-  }
-  if (ema9 && ema21 && ema50) {
-    if (ema9 > ema21 && ema21 > ema50) score += 30;
-    else if (ema9 < ema21 && ema21 < ema50) score -= 30;
-  }
-  if (bb && currentPrice) {
-    if (currentPrice <= bb.lower) score += 25;
-    else if (currentPrice >= bb.upper) score -= 25;
-  }
-  
-  let signal = "NEUTRAL";
-  if (score >= 60) signal = "HIGH_PROB_BUY";
-  else if (score >= 25) signal = "BUY";
-  else if (score <= -60) signal = "HIGH_PROB_SELL";
-  else if (score <= -25) signal = "SELL";
-  
-  let trend = "NEUTRAL";
-  if (ema9 && ema21 && ema50) {
-    if (ema9 > ema21 && ema21 > ema50) trend = "BULLISH";
-    else if (ema9 < ema21 && ema21 < ema50) trend = "BEARISH";
-    else if (ema9 > ema21) trend = "WEAK UP";
-    else trend = "WEAK DOWN";
-  }
-  
-  return { signal, score, trend, rsi, ema9, ema21, ema50, bb };
-}
-
-// ============================================================
-//  STATE
-// ============================================================
-let currentAsset = "BTCUSDT";
-let currentTF = "1m";
-let updateInterval = null;
-let history = [];
-let lastPrice = 0;
-
-async function fetchKlines(symbol, interval, limit = 100) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (!Array.isArray(data)) throw new Error("Invalid data");
-  return data.map(k => parseFloat(k[4])); // closing prices
-}
-
-async function fetchTicker(symbol) {
-  const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
-  const data = await res.json();
-  return {
-    price: parseFloat(data.lastPrice),
-    change: parseFloat(data.priceChangePercent),
-    volume: parseFloat(data.quoteVolume)
-  };
-}
-
-async function updateAll() {
-  try {
-    document.getElementById("dot").classList.add("on");
-    const ticker = await fetchTicker(currentAsset);
-    lastPrice = ticker.price;
-    const closes = await fetchKlines(currentAsset, currentTF);
-    const analysis = analyze(closes, ticker.price);
-    
-    // Hero
-    const heroSig = document.getElementById("heroSignal");
-    heroSig.innerText = analysis?.signal || "ERROR";
-    heroSig.className = `hero-signal s-${analysis?.signal === "HIGH_PROB_BUY" ? "HPB" : analysis?.signal === "BUY" ? "BUY" : analysis?.signal === "HIGH_PROB_SELL" ? "HPS" : analysis?.signal === "SELL" ? "SEL" : "NEU"}`;
-    document.getElementById("heroScore").innerText = analysis?.score || 0;
-    document.getElementById("heroConf").innerText = Math.abs(analysis?.score || 0) + "%";
-    document.getElementById("heroPrice").innerText = `$${ticker.price.toFixed(2)}`;
-    const changeClass = ticker.change >= 0 ? "up" : "dn";
-    document.getElementById("heroChange").innerHTML = `<span class="${changeClass}">${ticker.change >= 0 ? "+" : ""}${ticker.change.toFixed(2)}%</span>`;
-    document.getElementById("heroVol").innerText = `VOL: $${(ticker.volume / 1e6).toFixed(2)}M`;
-    
-    // Stats
-    document.getElementById("sTrend").innerText = analysis?.trend || "—";
-    document.getElementById("sTrend").className = `stat-val ${analysis?.trend === "BULLISH" ? "up" : analysis?.trend === "BEARISH" ? "dn" : ""}`;
-    const rsi = analysis?.rsi || 50;
-    document.getElementById("sRsi").innerHTML = `${Math.round(rsi)}`;
-    document.getElementById("rsiBar").style.width = `${rsi}%`;
-    document.getElementById("rsiBar").style.backgroundColor = rsi > 70 ? "var(--red)" : rsi < 30 ? "var(--green)" : "var(--yellow)";
-    
-    // Chart
-    drawChart(closes, analysis);
-    
-    // MTF
-    const mtfs = ["1m", "5m", "15m"];
-    const mtfHtml = [];
-    for (const tf of mtfs) {
-      const tfCloses = await fetchKlines(currentAsset, tf, 50);
-      const tfAnalysis = analyze(tfCloses, ticker.price);
-      let sigClass = "s-NEU";
-      if (tfAnalysis?.signal === "HIGH_PROB_BUY") sigClass = "s-HPB";
-      else if (tfAnalysis?.signal === "BUY") sigClass = "s-BUY";
-      else if (tfAnalysis?.signal === "HIGH_PROB_SELL") sigClass = "s-HPS";
-      else if (tfAnalysis?.signal === "SELL") sigClass = "s-SEL";
-      mtfHtml.push(`<div class="mtf-card"><div class="mtf-tf">${tf}</div><div class="mtf-sig ${sigClass}">${tfAnalysis?.signal || "—"}</div><div class="mtf-rsi">RSI: ${Math.round(tfAnalysis?.rsi || 50)}</div></div>`);
+    // ═══════════════════════════════════════════════
+    //  INDICATORS
+    // ═══════════════════════════════════════════════
+    function calcEMA(prices, period) {
+        if (prices.length < period) return null;
+        const k = 2 / (period + 1);
+        let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+        for (let i = period; i < prices.length; i++) {
+            ema = prices[i] * k + ema * (1 - k);
+        }
+        return ema;
     }
-    document.getElementById("mtfGrid").innerHTML = mtfHtml.join("");
-    
-    // Indicators table
-    document.getElementById("indTable").innerHTML = `
-      <tr><td>EMA 9</td><td>$${analysis?.ema9?.toFixed(2) || "—"}</td></tr>
-      <tr><td>EMA 21</td><td>$${analysis?.ema21?.toFixed(2) || "—"}</td></tr>
-      <tr><td>EMA 50</td><td>$${analysis?.ema50?.toFixed(2) || "—"}</td></tr>
-      <tr><td>BB Upper</td><td>$${analysis?.bb?.upper?.toFixed(2) || "—"}</td></tr>
-      <tr><td>BB Middle</td><td>$${analysis?.bb?.middle?.toFixed(2) || "—"}</td></tr>
-      <tr><td>BB Lower</td><td>$${analysis?.bb?.lower?.toFixed(2) || "—"}</td></tr>
-      <tr><td>Volume 24h</td><td>$${(ticker.volume / 1e6).toFixed(2)}M</td></tr>
-    `;
-    
-    // History
-    if (analysis?.signal && analysis.signal !== "NEUTRAL") {
-      const lastSig = history[0];
-      if (!lastSig || lastSig.signal !== analysis.signal || (Date.now() - lastSig.time) > 3600000) {
-        history.unshift({ time: Date.now(), asset: currentAsset, signal: analysis.signal, price: ticker.price });
-        if (history.length > 10) history.pop();
-      }
+
+    function calcRSI(prices, period = 14) {
+        if (prices.length < period + 1) return 50;
+        let gains = 0, losses = 0;
+        for (let i = prices.length - period; i < prices.length; i++) {
+            const diff = prices[i] - prices[i - 1];
+            if (diff >= 0) gains += diff;
+            else losses -= diff;
+        }
+        const avgGain = gains / period;
+        const avgLoss = losses / period;
+        if (avgLoss === 0) return 100;
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
     }
-    const histHtml = history.map(h => `<div class="hist-item"><span class="hist-time">${new Date(h.time).toLocaleTimeString()}</span><span class="hist-asset">${h.asset}</span><span class="hist-sig s-${h.signal === "HIGH_PROB_BUY" ? "HPB" : h.signal === "BUY" ? "BUY" : h.signal === "HIGH_PROB_SELL" ? "HPS" : "SEL"}">${h.signal}</span><span class="hist-price">$${h.price.toFixed(2)}</span></div>`).join("");
-    document.getElementById("histList").innerHTML = histHtml || '<div style="color:var(--muted);text-align:center;padding:20px">No signals yet</div>';
-    
-    document.getElementById("lastUpdate").innerText = new Date().toLocaleTimeString();
-    document.getElementById("countdown").innerText = "3s";
-    let c = 3;
-    const cnt = setInterval(() => { c--; document.getElementById("countdown").innerText = c + "s"; if (c <= 0) clearInterval(cnt); }, 1000);
-    
-    document.querySelectorAll(`#chg-${currentAsset}`).forEach(el => {
-      if (el) el.innerHTML = `${ticker.change >= 0 ? "+" : ""}${ticker.change.toFixed(1)}%`;
-      if (el) el.className = `chg ${ticker.change >= 0 ? "up" : "dn"}`;
+
+    function calcVolatility(prices, period = 20) {
+        if (prices.length < period) return null;
+        const slice = prices.slice(-period);
+        const mean = slice.reduce((a, b) => a + b, 0) / period;
+        const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period;
+        return Math.sqrt(variance) / mean;
+    }
+
+    function analyzeMarket(prices) {
+        if (!prices || prices.length < 30) return null;
+        const ema9 = calcEMA(prices, 9);
+        const ema21 = calcEMA(prices, 21);
+        const rsi = calcRSI(prices, 14);
+        const vol = calcVolatility(prices, 20);
+        
+        let score = 0;
+        if (rsi !== null) {
+            if (rsi <= 30) score += 35;
+            else if (rsi <= 40) score += 15;
+            else if (rsi >= 70) score -= 35;
+            else if (rsi >= 60) score -= 15;
+        }
+        if (ema9 && ema21) {
+            if (ema9 > ema21) score += 30;
+            else score -= 30;
+        }
+        
+        let signal = "NEUTRAL";
+        if (score >= 60) signal = "HIGH_PROB_BUY";
+        else if (score >= 25) signal = "BUY";
+        else if (score <= -60) signal = "HIGH_PROB_SELL";
+        else if (score <= -25) signal = "SELL";
+        
+        const trend = (ema9 && ema21) ? (ema9 > ema21 ? "BULLISH" : "BEARISH") : "NEUTRAL";
+        const momentum = prices.length > 5 ? ((prices[prices.length-1] - prices[prices.length-6]) / prices[prices.length-6]) * 100 : 0;
+        
+        return { signal, score, trend, rsi, momentum, volatility: vol ? vol * 100 : null };
+    }
+
+    // ═══════════════════════════════════════════════
+    //  API
+    // ═══════════════════════════════════════════════
+    async function fetchKlines(symbol, interval = "1m", limit = 80) {
+        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("Invalid klines");
+        return data.map(k => parseFloat(k[4]));
+    }
+
+    async function fetchTicker(symbol) {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
+        const data = await res.json();
+        return {
+            price: parseFloat(data.lastPrice),
+            change: parseFloat(data.priceChangePercent),
+            volume: parseFloat(data.quoteVolume)
+        };
+    }
+
+    // ═══════════════════════════════════════════════
+    //  UI UPDATES
+    // ═══════════════════════════════════════════════
+    let currentAsset = "BTCUSDT";
+    let historySignals = [];
+    let countdownValue = 3;
+    let intervalId = null;
+
+    async function updateDashboard() {
+        try {
+            const ticker = await fetchTicker(currentAsset);
+            const closes = await fetchKlines(currentAsset, "1m", 60);
+            const analysis = analyzeMarket(closes);
+            
+            // price & signal
+            document.getElementById("price").innerText = `$${ticker.price.toFixed(2)}`;
+            const changeHtml = `<span class="${ticker.change >= 0 ? "up" : "dn"}">${ticker.change >= 0 ? "+" : ""}${ticker.change.toFixed(2)}%</span>`;
+            document.getElementById("change").innerHTML = changeHtml;
+            
+            const signalEl = document.getElementById("signal");
+            let signalText = analysis?.signal || "NEUTRAL";
+            signalEl.innerText = signalText;
+            signalEl.style.color = signalText.includes("BUY") ? "#00ff9f" : (signalText.includes("SELL") ? "#ff2d55" : "#c8ffe8");
+            
+            // stats
+            document.getElementById("trend").innerText = analysis?.trend || "—";
+            document.getElementById("trend").style.color = analysis?.trend === "BULLISH" ? "#00ff9f" : (analysis?.trend === "BEARISH" ? "#ff2d55" : "#c8ffe8");
+            
+            const rsiVal = analysis?.rsi || 50;
+            document.getElementById("rsi").innerText = Math.round(rsiVal);
+            const rsiFill = document.getElementById("rsiFill");
+            rsiFill.style.width = `${rsiVal}%`;
+            rsiFill.style.backgroundColor = rsiVal > 70 ? "#ff2d55" : (rsiVal < 30 ? "#00ff9f" : "#ffd60a");
+            
+            const momVal = analysis?.momentum || 0;
+            document.getElementById("mom").innerHTML = momVal.toFixed(1) + "%";
+            document.getElementById("mom").style.color = momVal >= 0 ? "#00ff9f" : "#ff2d55";
+            
+            const volVal = analysis?.volatility || 0;
+            document.getElementById("vol").innerHTML = volVal.toFixed(2) + "%";
+            
+            // multi-timeframe
+            const tfs = ["1m", "5m", "15m"];
+            let mtfHtml = "";
+            for (let tf of tfs) {
+                try {
+                    const tfCloses = await fetchKlines(currentAsset, tf, 50);
+                    const tfAnalysis = analyzeMarket(tfCloses);
+                    let sigColor = "#c8ffe8";
+                    if (tfAnalysis?.signal?.includes("BUY")) sigColor = "#00ff9f";
+                    else if (tfAnalysis?.signal?.includes("SELL")) sigColor = "#ff2d55";
+                    mtfHtml += `<div class="mtf-card">
+                        <div style="font-size:0.6rem;color:#9bb5b0">${tf}</div>
+                        <div style="font-weight:bold;color:${sigColor};margin:4px 0">${tfAnalysis?.signal || "NEUTRAL"}</div>
+                        <div style="font-size:0.55rem">RSI:${Math.round(tfAnalysis?.rsi || 50)}</div>
+                    </div>`;
+                } catch(e) { mtfHtml += `<div class="mtf-card">${tf}<br>error</div>`; }
+            }
+            document.getElementById("mtfGrid").innerHTML = mtfHtml;
+            
+            // history
+            if (signalText !== "NEUTRAL") {
+                const last = historySignals[0];
+                if (!last || last.sig !== signalText || (Date.now() - last.time) > 3600000) {
+                    historySignals.unshift({
+                        time: Date.now(),
+                        asset: currentAsset,
+                        sig: signalText,
+                        price: ticker.price
+                    });
+                    if (historySignals.length > 10) historySignals.pop();
+                }
+            }
+            const historyHtml = historySignals.map(h => `
+                <div class="hist-item">
+                    <span>${new Date(h.time).toLocaleTimeString()}</span>
+                    <span>${h.asset}</span>
+                    <span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span>
+                    <span>$${h.price.toFixed(1)}</span>
+                </div>
+            `).join("");
+            document.getElementById("historyList").innerHTML = historyHtml || "<div style='text-align:center'>—</div>";
+            
+            document.getElementById("lastUpdate").innerHTML = new Date().toLocaleTimeString();
+        } catch(err) {
+            console.error(err);
+            document.getElementById("signal").innerText = "API ERROR";
+            document.getElementById("signal").style.color = "#ff2d55";
+        }
+    }
+
+    function startCountdown() {
+        if (window.countdownInterval) clearInterval(window.countdownInterval);
+        countdownValue = 3;
+        document.getElementById("countdown").innerText = countdownValue;
+        window.countdownInterval = setInterval(() => {
+            countdownValue--;
+            if (countdownValue < 0) countdownValue = 3;
+            document.getElementById("countdown").innerText = countdownValue;
+        }, 1000);
+    }
+
+    function switchAsset(asset) {
+        currentAsset = asset;
+        document.querySelectorAll(".asset-btn").forEach(btn => btn.classList.remove("active"));
+        document.querySelector(`.asset-btn[data-asset="${asset}"]`).classList.add("active");
+        updateDashboard();
+    }
+
+    // ═══════════════════════════════════════════════
+    //  INIT
+    // ═══════════════════════════════════════════════
+    document.querySelectorAll(".asset-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchAsset(btn.dataset.asset));
     });
-  } catch(e) { console.error(e); document.getElementById("heroSignal").innerText = "API ERROR"; }
-}
-
-function drawChart(prices, analysis) {
-  const canvas = document.getElementById("chart");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const w = canvas.clientWidth, h = 280;
-  canvas.width = w; canvas.height = h;
-  if (!prices.length) return;
-  const min = Math.min(...prices), max = Math.max(...prices);
-  const range = max - min;
-  ctx.clearRect(0, 0, w, h);
-  ctx.beginPath();
-  for (let i = 0; i < prices.length; i++) {
-    const x = (i / (prices.length - 1)) * w;
-    const y = h - ((prices[i] - min) / range) * h * 0.8 - 20;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.strokeStyle = "#00ff9f"; ctx.lineWidth = 2; ctx.stroke();
-  if (analysis?.ema9) {
-    ctx.beginPath(); ctx.strokeStyle = "#ffd60a";
-    for (let i = 0; i < prices.length; i++) {
-      const emaVal = analysis.ema9; // simplified
-      const x = (i / (prices.length - 1)) * w;
-      const y = h - ((emaVal - min) / range) * h * 0.8 - 20;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke()
-    }
-    ctx.stroke();
-  }
-}
-
-async function switchAsset(asset) {
-  currentAsset = asset;
-  document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-  document.querySelector(`.tab[data-asset="${asset}"]`).classList.add("active");
-  await updateAll();
-}
-
-async function setTF(tf) {
-  currentTF = tf;
-  document.querySelectorAll(".tf-btn").forEach(btn => btn.classList.remove("active"));
-  document.querySelector(`.tf-btn[data-tf="${tf}"]`).classList.add("active");
-  await updateAll();
-}
-
-document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => switchAsset(tab.dataset.asset)));
-document.querySelectorAll(".tf-btn").forEach(btn => btn.addEventListener("click", () => setTF(btn.dataset.tf)));
-
-updateAll();
-if (updateInterval) clearInterval(updateInterval);
-updateInterval = setInterval(updateAll, 3000);
+    
+    updateDashboard();
+    startCountdown();
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(updateDashboard, 4000);
 </script>
 </body>
-</html>
-```
-
----
-    
+  </html>
