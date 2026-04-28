@@ -4,289 +4,554 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXUS MARKET LAB v3</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-
 <style>
-
-/* ─────────────────────────
-   DARK MODE (DEFAULT)
-   ───────────────────────── */
 :root {
-  --bg:#020608;
-  --bg2:#060d12;
-  --bg3:#0a1520;
-
-  --green:#00ff9f;
-  --green2:#00cc7a;
-  --red:#ff2d55;
-  --yellow:#ffd60a;
-  --blue:#0af;
-
-  --text:#c8ffe8;
-  --muted:rgba(200,255,232,0.35);
-
-  --border:rgba(0,255,159,0.15);
-  --card:#060d12;
-
-  --font:'Share Tech Mono';
-  --head:'Orbitron';
+  --bg:       #020608;
+  --bg2:      #060d12;
+  --bg3:      #0a1520;
+  --green:    #00ff9f;
+  --green2:   #00cc7a;
+  --red:      #ff2d55;
+  --red2:     #cc1f3f;
+  --yellow:   #ffd60a;
+  --blue:     #0af;
+  --dim:      rgba(0,255,159,0.12);
+  --dimr:     rgba(255,45,85,0.12);
+  --border:   rgba(0,255,159,0.18);
+  --text:     #c8ffe8;
+  --muted:    rgba(200,255,232,0.35);
+  --font:     'Share Tech Mono', monospace;
+  --head:     'Orbitron', monospace;
 }
-
-/* ─────────────────────────
-   LIGHT MODE (FIXED)
-   ───────────────────────── */
-body.light {
-  --bg:#f4f7fb;
-  --bg2:#ffffff;
-  --bg3:#e6ecf2;
-
-  --green:#00a86b;
-  --green2:#008f5a;
-  --red:#d62839;
-  --yellow:#e09f00;
-  --blue:#3a86ff;
-
-  --text:#0a0f14;
-  --muted:rgba(10,15,20,0.55);
-
-  --border:rgba(0,0,0,0.15);
-  --card:#ffffff;
-}
-
-/* GLOBAL */
-*{margin:0;padding:0;box-sizing:border-box}
-
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 body{
   background:var(--bg);
   color:var(--text);
   font-family:var(--font);
-  transition:0.3s;
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-/* HEADER */
+/* ── SCANLINES OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  pointer-events:none;z-index:999;
+}
+
+/* ── HEADER ── */
 .hdr{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  display:flex;align-items:center;justify-content:space-between;
   padding:14px 20px;
   border-bottom:1px solid var(--border);
-  background:var(--bg2);
+  background:linear-gradient(90deg,var(--bg2),var(--bg));
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(10px);
 }
-
 .logo{
   font-family:var(--head);
-  color:var(--green);
+  font-size:1.1rem;font-weight:900;
   letter-spacing:4px;
-}
-
-.hdr-right{
-  display:flex;
-  gap:10px;
-}
-
-/* THEME BUTTON */
-#themeToggle{
-  background:none;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:4px 10px;
-  cursor:pointer;
-}
-
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--border)}
-
-.tab{
-  flex:1;
-  padding:12px;
-  text-align:center;
-  cursor:pointer;
-  color:var(--muted);
-}
-
-.tab.active{
   color:var(--green);
+  text-shadow:0 0 20px rgba(0,255,159,0.5);
+}
+.logo span{color:var(--muted);font-size:0.6rem;display:block;letter-spacing:3px;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.badge{
+  display:flex;align-items:center;gap:6px;
+  font-size:0.65rem;padding:4px 10px;
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--dim);letter-spacing:1px;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:#444;transition:all 0.4s}
+.dot.on{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── ASSET TABS ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2)}
+.tab{
+  flex:1;padding:12px;text-align:center;cursor:pointer;
+  font-family:var(--head);font-size:0.7rem;font-weight:700;
+  letter-spacing:2px;color:var(--muted);
+  border-right:1px solid var(--border);
+  transition:all 0.25s;position:relative;
+  background:transparent;border-bottom:none;
+}
+.tab:last-child{border-right:none}
+.tab::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:var(--green);
+  transform:scaleX(0);transition:transform 0.25s;
+}
+.tab.active{color:var(--green);background:var(--dim)}
+.tab.active::after{transform:scaleX(1)}
+.tab:hover{color:var(--green);background:rgba(0,255,159,0.05)}
+.tab .chg{display:block;font-size:0.6rem;margin-top:3px;font-family:var(--font)}
+.tab .chg.up{color:var(--green)}
+.tab .chg.dn{color:var(--red)}
+
+/* ── MAIN GRID ── */
+.main{padding:14px;display:grid;grid-template-columns:1fr;gap:14px;max-width:900px;margin:0 auto}
+
+/* ── SIGNAL HERO ── */
+.signal-hero{
+  border:1px solid var(--border);background:var(--bg2);
+  padding:20px;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;position:relative;overflow:hidden;
+}
+.signal-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(0,255,159,0.04),transparent 60%);
+}
+.hero-left{}
+.hero-label{font-size:0.62rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px}
+.hero-signal{
+  font-family:var(--head);font-size:1.5rem;font-weight:900;
+  letter-spacing:3px;transition:all 0.4s;
+}
+.hero-score{font-size:0.72rem;color:var(--muted);margin-top:6px}
+.hero-score span{color:var(--green)}
+.hero-right{text-align:right}
+.hero-price{font-family:var(--head);font-size:1.6rem;font-weight:700;color:var(--green)}
+.hero-change{font-size:0.75rem;margin-top:4px}
+.hero-change.up{color:var(--green)}
+.hero-change.dn{color:var(--red)}
+
+/* Signal colors */
+.s-HPB{color:var(--green);text-shadow:0 0 15px rgba(0,255,159,0.6)}
+.s-BUY{color:var(--green2)}
+.s-HPS{color:var(--red);text-shadow:0 0 15px rgba(255,45,85,0.6)}
+.s-SEL{color:var(--red2)}
+.s-RSK{color:var(--yellow)}
+.s-NEU{color:var(--muted)}
+
+/* ── CHART ── */
+.chart-wrap{
+  border:1px solid var(--border);background:var(--bg2);
+  padding:10px;position:relative;
+}
+.chart-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;padding:0 4px;
+}
+.chart-title{font-size:0.65rem;color:var(--muted);letter-spacing:2px}
+.tf-btns{display:flex;gap:6px}
+.tf-btn{
+  font-size:0.6rem;padding:3px 8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;
+  font-family:var(--font);transition:all 0.2s;letter-spacing:1px;
+}
+.tf-btn.active,.tf-btn:hover{border-color:var(--green);color:var(--green);background:var(--dim)}
+.chart-legend{display:flex;gap:12px;font-size:0.58rem;color:var(--muted)}
+.leg-item{display:flex;align-items:center;gap:4px}
+.leg-dot{width:10px;height:2px;border-radius:1px}
+canvas{display:block;width:100%;height:auto}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:480px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat{
+  border:1px solid var(--border);background:var(--bg2);
+  padding:12px;text-align:center;position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  opacity:0.3;
+}
+.stat-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-family:var(--head);font-size:0.95rem;font-weight:700}
+.stat-val.up{color:var(--green)}
+.stat-val.dn{color:var(--red)}
+.stat-val.warn{color:var(--yellow)}
+.stat-val.dim{color:var(--muted)}
+
+/* ── INDICATORS PANEL ── */
+.panel{border:1px solid var(--border);background:var(--bg2);padding:14px}
+.panel-title{
+  font-family:var(--head);font-size:0.65rem;letter-spacing:3px;
+  color:var(--muted);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+
+/* MTF grid */
+.mtf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mtf-card{
+  border:1px solid var(--border);padding:10px;text-align:center;
   background:var(--bg3);
 }
+.mtf-tf{font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:5px}
+.mtf-sig{font-family:var(--head);font-size:0.75rem;font-weight:700}
+.mtf-rsi{font-size:0.6rem;color:var(--muted);margin-top:3px}
 
-/* MAIN */
-.main{
-  max-width:900px;
-  margin:auto;
-  padding:14px;
-  display:grid;
-  gap:14px;
+/* Indicators table */
+.ind-table{width:100%;border-collapse:collapse}
+.ind-table tr{border-bottom:1px solid rgba(0,255,159,0.05)}
+.ind-table tr:last-child{border-bottom:none}
+.ind-table td{padding:7px 4px;font-size:0.72rem;vertical-align:middle}
+.ind-table td:first-child{color:var(--muted);width:45%}
+.ind-table td:last-child{text-align:right;font-weight:bold}
+.ind-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:3px;overflow:hidden}
+.ind-fill{height:100%;border-radius:2px;transition:width 0.6s,background 0.6s}
+
+/* Volume bar */
+.vol-bars{display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:8px}
+.vol-bar{flex:1;background:rgba(0,255,159,0.25);border-radius:1px 1px 0 0;transition:height 0.4s}
+.vol-bar.up{background:rgba(0,255,159,0.4)}
+.vol-bar.dn{background:rgba(255,45,85,0.4)}
+
+/* ── SIGNAL HISTORY ── */
+.history-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.history-list::-webkit-scrollbar{width:3px}
+.history-list::-webkit-scrollbar-track{background:var(--bg3)}
+.history-list::-webkit-scrollbar-thumb{background:var(--border)}
+.hist-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 10px;border:1px solid var(--border);
+  background:var(--bg3);font-size:0.68rem;
+  animation:slideIn 0.3s ease;
 }
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.hist-time{color:var(--muted);width:55px}
+.hist-asset{color:var(--blue);width:40px}
+.hist-sig{font-weight:bold;flex:1;text-align:center}
+.hist-price{color:var(--muted);text-align:right}
 
-/* CARDS (FIXED) */
-.signal-hero,
-.chart-wrap,
-.panel,
-.stat {
-  background:var(--card);
-  border:1px solid var(--border);
-}
-
-/* HERO */
-.signal-hero{
-  display:flex;
-  justify-content:space-between;
-  padding:20px;
-}
-
-.hero-signal{
-  font-family:var(--head);
-  font-size:1.5rem;
-}
-
-.hero-price{
-  font-size:1.6rem;
-  color:var(--green);
-}
-
-/* CHART */
-.chart-wrap{
-  padding:10px;
-}
-
-.tf-btn{
-  padding:4px 8px;
-  border:1px solid var(--border);
-  background:none;
-  color:var(--muted);
-  cursor:pointer;
-}
-
-.tf-btn.active{
-  color:var(--green);
-  border-color:var(--green);
-}
-
-/* STATS */
-.stats-row{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-}
-
-.stat{
-  padding:10px;
-  text-align:center;
-}
-
-/* PANEL */
-.panel{
-  padding:14px;
-}
-
-.panel-title{
-  font-family:var(--head);
-  font-size:0.7rem;
-  margin-bottom:10px;
-}
-
-/* STATUS */
+/* ── BOTTOM STATUS ── */
 .status-bar{
-  padding:10px;
-  border-top:1px solid var(--border);
-  font-size:0.6rem;
-  display:flex;
-  justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px;border-top:1px solid var(--border);
+  font-size:0.6rem;color:var(--muted);background:var(--bg2);
+  letter-spacing:1px;
+}
+.status-bar span{display:flex;align-items:center;gap:6px}
+
+/* ── COUNTDOWN ── */
+.countdown{
+  font-family:var(--head);font-size:0.65rem;color:var(--green);
+  border:1px solid var(--border);padding:3px 8px;
+  min-width:60px;text-align:center;
 }
 
+/* ── ANIMATIONS ── */
+.flash{animation:flash 0.4s}
+@keyframes flash{0%{opacity:0.3}100%{opacity:1}}
+
+.price-up{animation:priceUp 0.5s}
+@keyframes priceUp{0%{color:var(--green);text-shadow:0 0 20px var(--green)}100%{}}
+.price-dn{animation:priceDn 0.5s}
+@keyframes priceDn{0%{color:var(--red);text-shadow:0 0 20px var(--red)}100%{}}
 </style>
 </head>
-
 <body>
 
 <!-- HEADER -->
 <div class="hdr">
-  <div class="logo">NEXUS</div>
+  <div class="logo">NEXUS <span>MARKET LAB v3</span></div>
   <div class="hdr-right">
-    <button id="themeToggle">🌙</button>
+    <div class="badge"><div class="dot" id="dot"></div><span id="connTxt">CONNECTING</span></div>
+    <div class="countdown" id="countdown">—</div>
   </div>
 </div>
 
-<!-- TABS -->
+<!-- ASSET TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="switchAsset('BTCUSDT',this)">BTC</div>
-  <div class="tab" onclick="switchAsset('ETHUSDT',this)">ETH</div>
-  <div class="tab" onclick="switchAsset('SOLUSDT',this)">SOL</div>
+  <div class="tab active" onclick="switchAsset('BTCUSDT',this)" id="tab-BTCUSDT">
+    ₿ BTC<span class="chg" id="chg-BTCUSDT">—</span>
+  </div>
+  <div class="tab" onclick="switchAsset('ETHUSDT',this)" id="tab-ETHUSDT">
+    Ξ ETH<span class="chg" id="chg-ETHUSDT">—</span>
+  </div>
+  <div class="tab" onclick="switchAsset('SOLUSDT',this)" id="tab-SOLUSDT">
+    ◎ SOL<span class="chg" id="chg-SOLUSDT">—</span>
+  </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<div class="signal-hero">
-  <div>
-    <div>AI SIGNAL</div>
-    <div class="hero-signal" id="heroSignal">LOADING</div>
+  <!-- SIGNAL HERO -->
+  <div class="signal-hero">
+    <div class="hero-left">
+      <div class="hero-label">AI SIGNAL — MULTI-TIMEFRAME</div>
+      <div class="hero-signal s-NEU" id="heroSignal">LOADING...</div>
+      <div class="hero-score">SCORE: <span id="heroScore">—</span> | CONFIDENCE: <span id="heroConf">—</span></div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-price" id="heroPrice">$—</div>
+      <div class="hero-change" id="heroChange">— %</div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:4px" id="heroVol">VOL: —</div>
+    </div>
   </div>
-  <div>
-    <div class="hero-price" id="heroPrice">$—</div>
+
+  <!-- CHART -->
+  <div class="chart-wrap">
+    <div class="chart-toolbar">
+      <div>
+        <div class="chart-title">PRICE CHART</div>
+        <div class="chart-legend" style="margin-top:5px">
+          <span class="leg-item"><span class="leg-dot" style="background:#ffd60a"></span>EMA9</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#ff6b6b"></span>EMA21</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#6b9fff"></span>EMA50</span>
+          <span class="leg-item"><span class="leg-dot" style="background:rgba(0,170,255,0.4);width:14px"></span>BB</span>
+        </div>
+      </div>
+      <div class="tf-btns">
+        <button class="tf-btn active" onclick="setTF('1m',this)">1M</button>
+        <button class="tf-btn" onclick="setTF('5m',this)">5M</button>
+        <button class="tf-btn" onclick="setTF('15m',this)">15M</button>
+        <button class="tf-btn" onclick="setTF('1h',this)">1H</button>
+      </div>
+    </div>
+    <canvas id="chart" width="860" height="280"></canvas>
   </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-lbl">TREND</div>
+      <div class="stat-val" id="sTrend">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">RSI (14)</div>
+      <div class="stat-val" id="sRsi">—</div>
+      <div class="ind-bar"><div class="ind-fill" id="rsiBar" style="width:0%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">MOMENTUM</div>
+      <div class="stat-val" id="sMom">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">VOLATILITY</div>
+      <div class="stat-val" id="sVol">—</div>
+    </div>
+  </div>
+
+  <!-- INDICATORS PANEL -->
+  <div class="panel">
+    <div class="panel-title">◈ MULTI-TIMEFRAME ANALYSIS</div>
+    <div class="mtf-grid" id="mtfGrid">
+      <div class="mtf-card"><div class="mtf-tf">1 MIN</div><div class="mtf-sig s-NEU" id="mtf-1m">—</div><div class="mtf-rsi" id="mtf-1m-rsi">RSI: —</div></div>
+      <div class="mtf-card"><div class="mtf-tf">5 MIN</div><div class="mtf-sig s-NEU" id="mtf-5m">—</div><div class="mtf-rsi" id="mtf-5m-rsi">RSI: —</div></div>
+      <div class="mtf-card"><div class="mtf-tf">15 MIN</div><div class="mtf-sig s-NEU" id="mtf-15m">—</div><div class="mtf-rsi" id="mtf-15m-rsi">RSI: —</div></div>
+    </div>
+
+    <div class="panel-title" style="margin-top:14px">◈ TECHNICAL INDICATORS</div>
+    <table class="ind-table">
+      <tr><td>EMA 9</td><td id="iEma9">—</td></tr>
+      <tr><td>EMA 21</td><td id="iEma21">—</td></tr>
+      <tr><td>EMA 50</td><td id="iEma50">—</td></tr>
+      <tr><td>BB Upper</td><td id="iBBu">—</td></tr>
+      <tr><td>BB Middle</td><td id="iBBm">—</td></tr>
+      <tr><td>BB Lower</td><td id="iBBl">—</td></tr>
+      <tr><td>BB Width</td><td id="iBBw">—</td></tr>
+      <tr>
+        <td>Volume (24h)</td>
+        <td id="iVol">—</td>
+      </tr>
+    </table>
+
+    <div class="vol-bars" id="volBars"></div>
+  </div>
+
+  <!-- SIGNAL HISTORY -->
+  <div class="panel">
+    <div class="panel-title">◈ SIGNAL HISTORY</div>
+    <div class="history-list" id="histList">
+      <div style="color:var(--muted);font-size:0.7rem;text-align:center;padding:20px">Waiting for signals...</div>
+    </div>
+  </div>
+
 </div>
 
-<div class="chart-wrap">
-  <button class="tf-btn active" onclick="setTF('1m',this)">1M</button>
-  <button class="tf-btn" onclick="setTF('5m',this)">5M</button>
-  <canvas id="chart"></canvas>
-</div>
-
-<div class="stats-row">
-  <div class="stat"><div>TREND</div><div id="sTrend">—</div></div>
-  <div class="stat"><div>RSI</div><div id="sRsi">—</div></div>
-  <div class="stat"><div>MOM</div><div id="sMom">—</div></div>
-  <div class="stat"><div>VOL</div><div id="sVol">—</div></div>
-</div>
-
-<div class="panel">
-  <div class="panel-title">HISTORY</div>
-  <div id="histList"></div>
-</div>
-
-</div>
-
+<!-- STATUS BAR -->
 <div class="status-bar">
-  <span>BINANCE</span>
+  <span><div class="dot on" style="width:5px;height:5px"></div> BINANCE REST API</span>
   <span id="lastUpdate">—</span>
+  <span>NEXUS v3 — NO SERVER NEEDED</span>
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+//  ANALYZER ENGINE
+// ═══════════════════════════════════════════════════════
 
-/* THEME SYSTEM */
-const btn = document.getElementById("themeToggle");
-
-if(localStorage.getItem("theme")==="light"){
-  document.body.classList.add("light");
-  btn.textContent="☀️";
+function calcEMA(p, n) {
+  if (p.length < n) return null;
+  const k = 2 / (n + 1);
+  let e = p.slice(0, n).reduce((a, b) => a + b, 0) / n;
+  for (let i = n; i < p.length; i++) e = p[i] * k + e * (1 - k);
+  return e;
 }
 
-btn.onclick=()=>{
-  document.body.classList.toggle("light");
-  const light=document.body.classList.contains("light");
-  btn.textContent=light?"☀️":"🌙";
-  localStorage.setItem("theme",light?"light":"dark");
-};
-
-/* BASIC DEMO */
-function switchAsset(a,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
+function calcRSI(p, n = 14) {
+  if (p.length < n + 1) return null;
+  const ch = [];
+  for (let i = 1; i < p.length; i++) ch.push(p[i] - p[i - 1]);
+  const r = ch.slice(-n);
+  const g = r.filter(c => c > 0).reduce((a, b) => a + b, 0) / n;
+  const l = Math.abs(r.filter(c => c < 0).reduce((a, b) => a + b, 0)) / n;
+  return l === 0 ? 100 : 100 - 100 / (1 + g / l);
 }
 
-function setTF(tf,el){
-  document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+function calcBB(p, n = 20) {
+  if (p.length < n) return null;
+  const s = p.slice(-n);
+  const m = s.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(s.reduce((a, b) => a + Math.pow(b - m, 2), 0) / n);
+  return { upper: m + 2 * sd, middle: m, lower: m - 2 * sd, width: (4 * sd) / m };
 }
 
-setInterval(()=>{
-  document.getElementById('heroPrice').innerText="$"+(Math.random()*50000).toFixed(0);
-  document.getElementById('heroSignal').innerText=["BUY","SELL","NEUTRAL"][Math.floor(Math.random()*3)];
-},1500);
+function calcMom(p, n = 10) {
+  if (p.length < n + 1) return null;
+  return ((p[p.length - 1] - p[p.length - 1 - n]) / p[p.length - 1 - n]) * 100;
+}
 
-</script>
+function calcVol(p, n = 20) {
+  if (p.length < n) return null;
+  const s = p.slice(-n), m = s.reduce((a, b) => a + b, 0) / n;
+  return Math.sqrt(s.reduce((a, b) => a + Math.pow(b - m, 2), 0) / n) / m;
+}
 
-</body>
-</html>
+// WEIGHTED SCORING SYSTEM
+function analyze(prices, cur) {
+  if (!prices || prices.length < 20) return null;
+
+  const e9  = calcEMA(prices, 9);
+  const e21 = calcEMA(prices, 21);
+  const e50 = calcEMA(prices, 50);
+  const rsi = calcRSI(prices, 14);
+  const bb  = calcBB(prices, 20);
+  const mom = calcMom(prices, 10);
+  const vol = calcVol(prices, 20);
+
+  // WEIGHTED SCORE (-100 to +100)
+  let score = 0;
+  let maxScore = 0;
+
+  // RSI — weight 30
+  if (rsi !== null) {
+    maxScore += 30;
+    if (rsi <= 25)      score += 30;
+    else if (rsi <= 35) score += 20;
+    else if (rsi <= 45) score += 10;
+    else if (rsi >= 75) score -= 30;
+    else if (rsi >= 65) score -= 20;
+    else if (rsi >= 55) score -= 10;
+  }
+
+  // EMA Stack — weight 25
+  if (e9 && e21 && e50) {
+    maxScore += 25;
+    if (e9 > e21 && e21 > e50)      score += 25;
+    else if (e9 < e21 && e21 < e50) score -= 25;
+    else if (e9 > e21)               score += 10;
+    else                             score -= 10;
+  }
+
+  // Bollinger Bands — weight 25
+  if (bb) {
+    maxScore += 25;
+    const pos = (cur - bb.lower) / (bb.upper - bb.lower); // 0=lower, 1=upper
+    if (pos < 0.1)      score += 25;
+    else if (pos < 0.3) score += 12;
+    else if (pos > 0.9) score -= 25;
+    else if (pos > 0.7) score -= 12;
+  }
+
+  // Momentum — weight 20
+  if (mom !== null) {
+    maxScore += 20;
+    if (mom > 1.5)       score += 20;
+    else if (mom > 0.5)  score += 10;
+    else if (mom < -1.5) score -= 20;
+    else if (mom < -0.5) score -= 10;
+  }
+
+  // Normalize to -100/+100
+  const norm = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+  const confidence = Math.abs(norm);
+
+  // Signal
+  let signal = "NEUTRAL";
+  if      (norm >= 60)  signal = "HIGH_PROB_BUY";
+  else if (norm >= 25)  signal = "BUY";
+  else if (norm <= -60) signal = "HIGH_PROB_SELL";
+  else if (norm <= -25) signal = "SELL";
+  else if (vol && vol > 0.025) signal = "RISKY_MARKET";
+
+  // Trend
+  let trend = "NEUTRAL";
+  if (e9 && e21 && e50) {
+    if (e9 > e21 && e21 > e50)      trend = "↑ BULL";
+    else if (e9 < e21 && e21 < e50) trend = "↓ BEAR";
+    else if (e9 > e21)               trend = "↗ WEAK↑";
+    else                             trend = "↘ WEAK↓";
+  }
+
+  return {
+    signal, trend, score: norm, confidence,
+    rsi, e9, e21, e50, bb, mom, vol,
+    momentum: mom !== null ? (mom >= 0 ? `+${mom.toFixed(2)}%` : `${mom.toFixed(2)}%`) : "N/A",
+    volatility: vol ? (vol * 100).toFixed(3) + "%" : "N/A"
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let currentAsset = "BTCUSDT";
+let currentTF = "1m";
+let pollTimer = null;
+let countdownTimer = null;
+let countdownSec = 3;
+let lastPrice = {};
+let signalHistory = [];
+let errCount = 0;
+
+const TF_MAP = { "1m": "1m", "5m": "5m", "15m": "15m", "1h": "1h" };
+const cache = {}; // cache[symbol+tf] = {closes, volumes, ts}
+
+// ═══════════════════════════════════════════════════════
+//  BINANCE API
+// ═══════════════════════════════════════════════════════
+async function fetchKlines(symbol, interval, limit = 150) {
+  const key = symbol + interval;
+  const now = Date.now();
+  if (cache[key] && now - cache[key].ts < 10000) return cache[key]; // 10s cache
+
+  const [klRes, tkRes, stats24Res] = await Promise.all([
+    fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`),
+    fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
+    fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
+  ]);
+
+  const klines  = await klRes.json();
+  const ticker  = await tkRes.json();
+  const stats24 = await stats24Res.json();
+
+  const result = {
+    closes:   klines.map(k => parseFloat(k[4])),
+    highs:    klines.map(k => parseFloat(k[2])),
+    lows:     klines.map(k => parseFloat(k[3])),
+    opens:    klines.map(k => parseFloat(k[1])),
+    volumes:  klines.map(k => parseFloat(k[5])),
+    price:    parseFloat(ticker.price),
+    change24: parseFloat(stats24.priceChangePercent),
+    vol24:    parseFloat(stats24.quoteVolume),
+    ts: now
+  };
+
+  cache[key] = result;
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+//  POLL
+// ═══════════════════════════════════════════════════════
+async function poll() {
+  try {
+    // Fetch current TF + all MTF
+    const tfs = [currentTF, "1m", "5m", "15m"].filter((v, i, a) => a.indexOf(v) === i);
+    const results = await Promise.all(tfs.map(tf => fetchKlines(c
