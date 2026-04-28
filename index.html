@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS v3.3 – Dark / Light Mode + Advanced Trading</title>
+    <title>NEXUS v3.4 – Voice Bot + Trading Signals</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -12,7 +12,6 @@
             padding:20px;
             transition: background-color 0.3s, color 0.2s;
         }
-        /* Dark mode (default) */
         body.dark{
             background:#020608;
             color:#c8ffe8;
@@ -21,7 +20,6 @@
             background:#e8f0f5;
             color:#1a2a3a;
         }
-        /* cards */
         .card{
             border:1px solid rgba(0,255,159,0.2);
             background:#060d12;
@@ -191,7 +189,7 @@
         body.light .rec-entry{color:#007a5e}
         body.light .rec-sl{color:#bc7a00}
         body.light .rec-tp{color:#0f6e52}
-        .mode-toggle{
+        .mode-toggle, .voice-toggle{
             background:#0a1520;
             border:1px solid rgba(0,255,159,0.3);
             padding:5px 12px;
@@ -204,7 +202,7 @@
             align-items:center;
             gap:8px;
         }
-        body.light .mode-toggle{
+        body.light .mode-toggle, body.light .voice-toggle{
             background:#eef3f7;
             border-color:#90a4b2;
             color:#1a3a4a;
@@ -214,14 +212,49 @@
             align-items:center;
             gap:15px;
         }
+        .voice-controls{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            background:#0a1520;
+            padding:4px 8px;
+            border-radius:20px;
+            border:1px solid rgba(0,255,159,0.3);
+        }
+        body.light .voice-controls{
+            background:#eef3f7;
+            border-color:#90a4b2;
+        }
+        .voice-controls select{
+            background:transparent;
+            border:none;
+            color:inherit;
+            font-family:'Share Tech Mono',monospace;
+            font-size:0.65rem;
+            cursor:pointer;
+        }
     </style>
 </head>
 <body class="dark">
 
 <div class="card">
     <div class="flex-row">
-        <div class="title">⚡ NEXUS v3.3 — DARK/LIGHT MODE + ADVANCED SIGNALS</div>
+        <div class="title">⚡ NEXUS v3.4 — VOICE BOT + ADVANCED SIGNALS</div>
         <div class="header-right">
+            <div class="voice-controls">
+                <span>🔊</span>
+                <select id="voiceSpeed">
+                    <option value="0.8">Slow</option>
+                    <option value="1" selected>Normal</option>
+                    <option value="1.3">Fast</option>
+                </select>
+                <select id="voicePitch">
+                    <option value="0.8">Low</option>
+                    <option value="1" selected>Normal</option>
+                    <option value="1.2">High</option>
+                </select>
+            </div>
+            <div class="voice-toggle" id="voiceToggle">🔊 TALK</div>
             <div class="mode-toggle" id="modeToggle">🌙 DARK</div>
         </div>
     </div>
@@ -275,10 +308,40 @@
 </div>
 
 <div class="status">
-    <span>🟢 BINANCE LIVE API (1h candles)</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>NEXUS v3.3</span>
+    <span>🟢 BINANCE LIVE API (1h candles)</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>NEXUS v3.4 – Voice Bot</span>
 </div>
 
 <script>
+    // ====================== VOICE BOT ======================
+    let voiceEnabled = true;
+    let lastSpokenRecommendation = "";
+
+    function speakText(text) {
+        if (!voiceEnabled) return;
+        if (!window.speechSynthesis) {
+            console.warn("SpeechSynthesis not supported");
+            return;
+        }
+        window.speechSynthesis.cancel(); // stop any ongoing speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        const speed = parseFloat(document.getElementById("voiceSpeed").value);
+        const pitch = parseFloat(document.getElementById("voicePitch").value);
+        utterance.rate = speed;
+        utterance.pitch = pitch;
+        utterance.lang = "en-US";
+        utterance.volume = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function notifyRecommendation(asset, signal, entry, sl, tp, reason) {
+        if (!voiceEnabled) return;
+        const msg = `${asset} signal: ${signal}. Entry at ${entry}. Stop loss at ${sl}. Take profit at ${tp}. Reason: ${reason}`;
+        if (msg !== lastSpokenRecommendation) {
+            lastSpokenRecommendation = msg;
+            speakText(msg);
+        }
+    }
+
     // ====================== INDICATORS ======================
     function calcEMA(prices, period) {
         if (prices.length < period) return null;
@@ -359,17 +422,17 @@
             entry = lastPrice;
             stopLoss = entry * (1 - (atr ? atr/entry * 1.5 : 0.02));
             takeProfit = entry * (1 + (atr ? atr/entry * 2 : 0.04));
-            reason = `EMA bullish (${ema9?.toFixed(0)} > ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (oversold), price near support $${support?.toFixed(2)}. ATR = ${atr?.toFixed(2)} → risk defined.`;
+            reason = `EMA bullish (${ema9?.toFixed(0)} > ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (oversold), price near support $${support?.toFixed(2)}. ATR = ${atr?.toFixed(2)}.`;
         } else if (signal.includes("SELL")) {
             entry = lastPrice;
             stopLoss = entry * (1 + (atr ? atr/entry * 1.5 : 0.02));
             takeProfit = entry * (1 - (atr ? atr/entry * 2 : 0.04));
-            reason = `EMA bearish (${ema9?.toFixed(0)} < ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (overbought), price near resistance $${resistance?.toFixed(2)}. ATR = ${atr?.toFixed(2)} → risk defined.`;
+            reason = `EMA bearish (${ema9?.toFixed(0)} < ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (overbought), price near resistance $${resistance?.toFixed(2)}. ATR = ${atr?.toFixed(2)}.`;
         } else {
             entry = lastPrice;
             stopLoss = entry * 0.99;
             takeProfit = entry * 1.01;
-            reason = "Market consolidating. Wait for breakout above resistance or below support.";
+            reason = "Market consolidating. Wait for breakout.";
         }
         
         return { signal, score, trend, rsi, atr, volatility, support, resistance, entry, stopLoss, takeProfit, reason, ema9, ema21 };
@@ -419,13 +482,10 @@
         const ctx = canvas.getContext("2d");
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
-        
-        const prices = candles.map(c => c.high);
         const minPrice = Math.min(...candles.map(c => c.low), support || 1e10);
-        const maxPrice = Math.max(...prices, resistance || 0);
+        const maxPrice = Math.max(...candles.map(c => c.high), resistance || 0);
         const range = maxPrice - minPrice;
         const candleWidth = Math.max(2, (w / candles.length) - 2);
-        
         for (let i = 0; i < candles.length; i++) {
             const c = candles[i];
             const x = i * (candleWidth + 2);
@@ -436,33 +496,21 @@
             const isBullish = c.close >= c.open;
             ctx.fillStyle = isBullish ? "#00ff9f" : "#ff2d55";
             ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen) || 1);
-            ctx.fillStyle = isBullish ? "#00ff9f" : "#ff2d55";
             ctx.fillRect(x + candleWidth/2 - 1, yHigh, 2, yLow - yHigh);
         }
-        
         if (support) {
             const ySup = h - ((support - minPrice) / range) * h;
-            ctx.beginPath();
-            ctx.moveTo(0, ySup);
-            ctx.lineTo(w, ySup);
-            ctx.strokeStyle = "#ffd60a";
-            ctx.setLineDash([8, 6]);
-            ctx.stroke();
-            ctx.fillStyle = "#ffd60a";
-            ctx.font = "10px monospace";
-            ctx.fillText(`Support $${support.toFixed(2)}`, 10, ySup - 5);
+            ctx.beginPath(); ctx.moveTo(0, ySup); ctx.lineTo(w, ySup);
+            ctx.strokeStyle = "#ffd60a"; ctx.setLineDash([8,6]); ctx.stroke();
+            ctx.fillStyle = "#ffd60a"; ctx.font="10px monospace";
+            ctx.fillText(`Support $${support.toFixed(2)}`, 10, ySup-5);
         }
         if (resistance) {
             const yRes = h - ((resistance - minPrice) / range) * h;
-            ctx.beginPath();
-            ctx.moveTo(0, yRes);
-            ctx.lineTo(w, yRes);
-            ctx.strokeStyle = "#ff2d55";
-            ctx.setLineDash([8, 6]);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, yRes); ctx.lineTo(w, yRes);
+            ctx.strokeStyle = "#ff2d55"; ctx.setLineDash([8,6]); ctx.stroke();
             ctx.fillStyle = "#ff2d55";
-            ctx.font = "10px monospace";
-            ctx.fillText(`Resistance $${resistance?.toFixed(2)}`, 10, yRes + 15);
+            ctx.fillText(`Resistance $${resistance.toFixed(2)}`, 10, yRes+15);
         }
         ctx.setLineDash([]);
     }
@@ -500,14 +548,23 @@
             const volVal = analysis?.volatility || 0;
             document.getElementById("vol").innerHTML = volVal.toFixed(2) + "%";
             
-            document.getElementById("recEntry").innerText = analysis?.entry ? `$${analysis.entry.toFixed(2)}` : "—";
-            document.getElementById("recSl").innerHTML = analysis?.stopLoss ? `$${analysis.stopLoss.toFixed(2)}` : "—";
-            document.getElementById("recTp").innerHTML = analysis?.takeProfit ? `$${analysis.takeProfit.toFixed(2)}` : "—";
-            document.getElementById("recReason").innerText = analysis?.reason || "Awaiting data";
+            const entryVal = analysis?.entry ? `$${analysis.entry.toFixed(2)}` : "—";
+            const slVal = analysis?.stopLoss ? `$${analysis.stopLoss.toFixed(2)}` : "—";
+            const tpVal = analysis?.takeProfit ? `$${analysis.takeProfit.toFixed(2)}` : "—";
+            const reasonText = analysis?.reason || "Awaiting data";
+            document.getElementById("recEntry").innerText = entryVal;
+            document.getElementById("recSl").innerHTML = slVal;
+            document.getElementById("recTp").innerHTML = tpVal;
+            document.getElementById("recReason").innerText = reasonText;
+            
+            // Voice notification
+            if (analysis?.signal && analysis.entry && analysis.stopLoss && analysis.takeProfit) {
+                notifyRecommendation(currentAsset, analysis.signal, entryVal, slVal, tpVal, reasonText);
+            }
             
             // multi‑timeframe
             const tfs = ["1m", "5m", "15m"];
-                       let mtfHtml = "";
+            let mtfHtml = "";
             for (let tf of tfs) {
                 try {
                     const tfData = await fetchKlinesSimple(currentAsset, tf, 30);
@@ -578,7 +635,6 @@
             document.getElementById("modeToggle").innerHTML = "🌙 DARK";
         }
     }
-
     function toggleMode() {
         if (document.body.classList.contains("dark")) {
             document.body.classList.remove("dark");
@@ -591,14 +647,27 @@
             localStorage.setItem("nexus_mode", "dark");
             document.getElementById("modeToggle").innerHTML = "🌙 DARK";
         }
-        // redraw chart to adapt background
         updateDashboard();
+    }
+
+    // ====================== VOICE TOGGLE ======================
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const btn = document.getElementById("voiceToggle");
+        if (voiceEnabled) {
+            btn.innerHTML = "🔊 TALK";
+            speakText("Voice enabled");
+        } else {
+            btn.innerHTML = "🔇 MUTE";
+            window.speechSynthesis.cancel();
+        }
     }
 
     document.querySelectorAll(".asset-btn").forEach(btn => {
         btn.addEventListener("click", () => switchAsset(btn.dataset.asset));
     });
     document.getElementById("modeToggle").addEventListener("click", toggleMode);
+    document.getElementById("voiceToggle").addEventListener("click", toggleVoice);
     
     initMode();
     updateDashboard();
@@ -609,7 +678,3 @@
 </body>
 </html>
 ```
-
----
-            
-       
