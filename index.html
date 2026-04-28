@@ -3,22 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS v3.1 – Engineering Sovereignty</title>
+    <title>NEXUS v3.3 – Dark / Light Mode + Advanced Trading</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{
-            background:#020608;
-            color:#c8ffe8;
             font-family:'Share Tech Mono',monospace;
             padding:20px;
+            transition: background-color 0.3s, color 0.2s;
         }
+        /* Dark mode (default) */
+        body.dark{
+            background:#020608;
+            color:#c8ffe8;
+        }
+        body.light{
+            background:#e8f0f5;
+            color:#1a2a3a;
+        }
+        /* cards */
         .card{
             border:1px solid rgba(0,255,159,0.2);
             background:#060d12;
             padding:18px;
             margin-bottom:16px;
             border-radius:4px;
+            transition: all 0.2s;
+        }
+        body.light .card{
+            background:#ffffff;
+            border:1px solid #c0d0dd;
+            box-shadow:0 2px 6px rgba(0,0,0,0.05);
         }
         .title{
             font-family:'Orbitron',monospace;
@@ -27,6 +42,9 @@
             color:#00ff9f;
             margin-bottom:12px;
             text-transform:uppercase;
+        }
+        body.light .title{
+            color:#006b4f;
         }
         .flex-row{
             display:flex;
@@ -47,8 +65,13 @@
             font-family:'Orbitron',monospace;
             font-weight:bold;
             cursor:pointer;
-            color:#c8ffe8;
             transition:0.2s;
+            color:#c8ffe8;
+        }
+        body.light .asset-btn{
+            background:#eef3f7;
+            border:1px solid #90a4b2;
+            color:#1a3a4a;
         }
         .asset-btn.active{
             border-color:#00ff9f;
@@ -56,16 +79,26 @@
             color:#00ff9f;
             box-shadow:0 0 12px rgba(0,255,159,0.2);
         }
+        body.light .asset-btn.active{
+            border-color:#006b4f;
+            background:#d4f0e8;
+            color:#006b4f;
+            box-shadow:0 0 4px rgba(0,107,79,0.3);
+        }
         .signal-box{
             font-size:1.5rem;
             font-weight:bold;
             font-family:'Orbitron',monospace;
             letter-spacing:2px;
         }
-        .price{font-size:1.8rem;color:#00ff9f;font-weight:bold}
+        .price{font-size:1.8rem;font-weight:bold}
+        body.dark .price{color:#00ff9f}
+        body.light .price{color:#006b4f}
         .change{font-size:0.8rem;margin-top:5px}
         .up{color:#00ff9f}
         .dn{color:#ff2d55}
+        body.light .up{color:#007a5e}
+        body.light .dn{color:#c22a3e}
         .stats-grid{
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
@@ -78,9 +111,16 @@
             text-align:center;
             border:1px solid rgba(0,255,159,0.15);
         }
-        .stat-label{font-size:0.65rem;color:#9bb5b0;margin-bottom:6px}
+        body.light .stat{
+            background:#f7fafc;
+            border:1px solid #cbdbe2;
+        }
+        .stat-label{font-size:0.65rem;margin-bottom:6px}
+        body.dark .stat-label{color:#9bb5b0}
+        body.light .stat-label{color:#5a6e7a}
         .stat-value{font-size:1rem;font-weight:bold}
         .rsi-bar{height:3px;background:#1a2a2a;margin-top:6px}
+        body.light .rsi-bar{background:#dbdfe3}
         .rsi-fill{height:100%;border-radius:2px}
         .mtf-grid{
             display:grid;
@@ -93,6 +133,20 @@
             padding:12px;
             text-align:center;
             border:1px solid rgba(0,255,159,0.2);
+        }
+        body.light .mtf-card{
+            background:#f0f5f8;
+            border:1px solid #cbdae2;
+        }
+        .recommendation-card{
+            background:#0a1520;
+            padding:15px;
+            margin-top:15px;
+            border-left:4px solid #00ff9f;
+        }
+        body.light .recommendation-card{
+            background:#f7fafc;
+            border-left-color:#007a5e;
         }
         .history-list{
             max-height:180px;
@@ -111,40 +165,108 @@
         .status{
             margin-top:20px;
             font-size:0.6rem;
-            color:#5f8b85;
             text-align:center;
+        }
+        body.dark .status{color:#5f8b85}
+        body.light .status{color:#6c8190}
+        .chart-container{
+            width:100%;
+            overflow-x:auto;
+            margin:15px 0;
+        }
+        canvas{
+            background:#0a1520;
+            border-radius:4px;
+            display:block;
+            margin:0 auto;
+            min-width:600px;
+        }
+        body.light canvas{
+            background:#f4f8fb;
+            box-shadow:0 1px 4px rgba(0,0,0,0.05);
+        }
+        .rec-entry{color:#00ff9f;font-weight:bold}
+        .rec-sl{color:#ffd60a}
+        .rec-tp{color:#00cc7a}
+        body.light .rec-entry{color:#007a5e}
+        body.light .rec-sl{color:#bc7a00}
+        body.light .rec-tp{color:#0f6e52}
+        .mode-toggle{
+            background:#0a1520;
+            border:1px solid rgba(0,255,159,0.3);
+            padding:5px 12px;
+            border-radius:20px;
+            cursor:pointer;
+            font-family:'Orbitron',monospace;
+            font-size:0.7rem;
+            transition:0.2s;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+        }
+        body.light .mode-toggle{
+            background:#eef3f7;
+            border-color:#90a4b2;
+            color:#1a3a4a;
+        }
+        .header-right{
+            display:flex;
+            align-items:center;
+            gap:15px;
         }
     </style>
 </head>
-<body>
+<body class="dark">
 
 <div class="card">
-    <div class="title">⚡ NEXUS v3.1 — ENGINEERING SOVEREIGNTY</div>
+    <div class="flex-row">
+        <div class="title">⚡ NEXUS v3.3 — DARK/LIGHT MODE + ADVANCED SIGNALS</div>
+        <div class="header-right">
+            <div class="mode-toggle" id="modeToggle">🌙 DARK</div>
+        </div>
+    </div>
     <div class="asset-buttons" id="assetButtons">
         <button class="asset-btn active" data-asset="BTCUSDT">₿ BTC</button>
         <button class="asset-btn" data-asset="ETHUSDT">Ξ ETH</button>
         <button class="asset-btn" data-asset="SOLUSDT">◎ SOL</button>
     </div>
     <div class="flex-row">
-        <div><div class="title">AI SIGNAL</div><div class="signal-box" id="signal">—</div></div>
+        <div><div class="title">LIVE SIGNAL</div><div class="signal-box" id="signal">—</div></div>
         <div style="text-align:right"><div class="price" id="price">$—</div><div class="change" id="change">— %</div></div>
     </div>
 </div>
 
 <div class="card">
-    <div class="title">📊 METRICS</div>
+    <div class="title">📊 TECHNICAL INDICATORS</div>
     <div class="stats-grid">
         <div class="stat"><div class="stat-label">TREND</div><div class="stat-value" id="trend">—</div></div>
         <div class="stat"><div class="stat-label">RSI (14)</div><div class="stat-value" id="rsi">—</div><div class="rsi-bar"><div class="rsi-fill" id="rsiFill" style="width:0%"></div></div></div>
-        <div class="stat"><div class="stat-label">MOMENTUM</div><div class="stat-value" id="mom">—</div></div>
+        <div class="stat"><div class="stat-label">ATR (14)</div><div class="stat-value" id="atr">—</div></div>
         <div class="stat"><div class="stat-label">VOLATILITY</div><div class="stat-value" id="vol">—</div></div>
     </div>
 </div>
 
 <div class="card">
-    <div class="title">🕒 MULTI-TIMEFRAME ANALYSIS (1m / 5m / 15m)</div>
+    <div class="title">🕯️ CANDLESTICK CHART (1H) + SUP/RES</div>
+    <div class="chart-container">
+        <canvas id="candleCanvas" width="800" height="320"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="title">🎯 TRADING RECOMMENDATION (AI GENERATED)</div>
+    <div class="recommendation-card" id="recCard">
+        <div>📈 ENTRY: <span id="recEntry" class="rec-entry">—</span></div>
+        <div>🛑 STOP‑LOSS: <span id="recSl" class="rec-sl">—</span></div>
+        <div>🎯 TAKE‑PROFIT: <span id="recTp" class="rec-tp">—</span></div>
+        <div>💡 RATIONALE: <span id="recReason">—</span></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="title">🕒 MULTI-TIMEFRAME (1m / 5m / 15m)</div>
     <div class="mtf-grid" id="mtfGrid"></div>
-    <div style="text-align:right; font-size:0.7rem">refresh: <span id="countdown">3</span>s</div>
+    <div style="text-align:right; font-size:0.7rem">refresh: <span id="countdown">5</span>s</div>
 </div>
 
 <div class="card">
@@ -153,20 +275,16 @@
 </div>
 
 <div class="status">
-    <span>🟢 BINANCE LIVE API</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>0 dependencies • 3x faster</span>
+    <span>🟢 BINANCE LIVE API (1h candles)</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>NEXUS v3.3</span>
 </div>
 
 <script>
-    // ═══════════════════════════════════════════════
-    //  INDICATORS
-    // ═══════════════════════════════════════════════
+    // ====================== INDICATORS ======================
     function calcEMA(prices, period) {
         if (prices.length < period) return null;
         const k = 2 / (period + 1);
         let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
-        for (let i = period; i < prices.length; i++) {
-            ema = prices[i] * k + ema * (1 - k);
-        }
+        for (let i = period; i < prices.length; i++) ema = prices[i] * k + ema * (1 - k);
         return ema;
     }
 
@@ -178,27 +296,39 @@
             if (diff >= 0) gains += diff;
             else losses -= diff;
         }
-        const avgGain = gains / period;
-        const avgLoss = losses / period;
+        const avgGain = gains / period, avgLoss = losses / period;
         if (avgLoss === 0) return 100;
-        const rs = avgGain / avgLoss;
-        return 100 - (100 / (1 + rs));
+        return 100 - (100 / (1 + avgGain / avgLoss));
     }
 
-    function calcVolatility(prices, period = 20) {
-        if (prices.length < period) return null;
-        const slice = prices.slice(-period);
-        const mean = slice.reduce((a, b) => a + b, 0) / period;
-        const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period;
-        return Math.sqrt(variance) / mean;
+    function calcATR(high, low, close, period = 14) {
+        if (high.length < period + 1) return null;
+        let tr = [];
+        for (let i = 1; i < high.length; i++) {
+            const hl = high[i] - low[i];
+            const hc = Math.abs(high[i] - close[i - 1]);
+            const lc = Math.abs(low[i] - close[i - 1]);
+            tr.push(Math.max(hl, hc, lc));
+        }
+        if (tr.length === 0) return null;
+        let atr = tr.slice(0, period).reduce((a, b) => a + b, 0) / period;
+        for (let i = period; i < tr.length; i++) atr = (atr * (period - 1) + tr[i]) / period;
+        return atr;
     }
 
-    function analyzeMarket(prices) {
+    function findSupportResistance(high, low, lookback = 20) {
+        const recentHigh = Math.max(...high.slice(-lookback));
+        const recentLow = Math.min(...low.slice(-lookback));
+        return { resistance: recentHigh, support: recentLow };
+    }
+
+    function analyzeMarketWithCandles(prices, highs, lows, closes) {
         if (!prices || prices.length < 30) return null;
         const ema9 = calcEMA(prices, 9);
         const ema21 = calcEMA(prices, 21);
         const rsi = calcRSI(prices, 14);
-        const vol = calcVolatility(prices, 20);
+        const atr = calcATR(highs, lows, closes, 14);
+        const { support, resistance } = findSupportResistance(highs, lows, 20);
         
         let score = 0;
         if (rsi !== null) {
@@ -211,6 +341,9 @@
             if (ema9 > ema21) score += 30;
             else score -= 30;
         }
+        const lastPrice = prices[prices.length - 1];
+        if (support && lastPrice && lastPrice < support * 1.02) score += 20;
+        if (resistance && lastPrice && lastPrice > resistance * 0.98) score -= 20;
         
         let signal = "NEUTRAL";
         if (score >= 60) signal = "HIGH_PROB_BUY";
@@ -219,20 +352,43 @@
         else if (score <= -25) signal = "SELL";
         
         const trend = (ema9 && ema21) ? (ema9 > ema21 ? "BULLISH" : "BEARISH") : "NEUTRAL";
-        const momentum = prices.length > 5 ? ((prices[prices.length-1] - prices[prices.length-6]) / prices[prices.length-6]) * 100 : 0;
+        const volatility = atr ? (atr / prices[prices.length-1]) * 100 : null;
         
-        return { signal, score, trend, rsi, momentum, volatility: vol ? vol * 100 : null };
+        let entry = null, stopLoss = null, takeProfit = null, reason = "";
+        if (signal.includes("BUY")) {
+            entry = lastPrice;
+            stopLoss = entry * (1 - (atr ? atr/entry * 1.5 : 0.02));
+            takeProfit = entry * (1 + (atr ? atr/entry * 2 : 0.04));
+            reason = `EMA bullish (${ema9?.toFixed(0)} > ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (oversold), price near support $${support?.toFixed(2)}. ATR = ${atr?.toFixed(2)} → risk defined.`;
+        } else if (signal.includes("SELL")) {
+            entry = lastPrice;
+            stopLoss = entry * (1 + (atr ? atr/entry * 1.5 : 0.02));
+            takeProfit = entry * (1 - (atr ? atr/entry * 2 : 0.04));
+            reason = `EMA bearish (${ema9?.toFixed(0)} < ${ema21?.toFixed(0)}), RSI ${rsi?.toFixed(0)} (overbought), price near resistance $${resistance?.toFixed(2)}. ATR = ${atr?.toFixed(2)} → risk defined.`;
+        } else {
+            entry = lastPrice;
+            stopLoss = entry * 0.99;
+            takeProfit = entry * 1.01;
+            reason = "Market consolidating. Wait for breakout above resistance or below support.";
+        }
+        
+        return { signal, score, trend, rsi, atr, volatility, support, resistance, entry, stopLoss, takeProfit, reason, ema9, ema21 };
     }
 
-    // ═══════════════════════════════════════════════
-    //  API
-    // ═══════════════════════════════════════════════
-    async function fetchKlines(symbol, interval = "1m", limit = 80) {
+    // ====================== BINANCE API ======================
+    async function fetchCandles(symbol, interval = "1h", limit = 80) {
         const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
         const res = await fetch(url);
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error("Invalid klines");
-        return data.map(k => parseFloat(k[4]));
+        return data.map(k => ({
+            time: k[0],
+            open: parseFloat(k[1]),
+            high: parseFloat(k[2]),
+            low: parseFloat(k[3]),
+            close: parseFloat(k[4]),
+            volume: parseFloat(k[5])
+        }));
     }
 
     async function fetchTicker(symbol) {
@@ -245,31 +401,92 @@
         };
     }
 
-    // ═══════════════════════════════════════════════
-    //  UI UPDATES
-    // ═══════════════════════════════════════════════
+    async function fetchKlinesSimple(symbol, interval = "1h", limit = 60) {
+        const candles = await fetchCandles(symbol, interval, limit);
+        return {
+            prices: candles.map(c => c.close),
+            highs: candles.map(c => c.high),
+            lows: candles.map(c => c.low),
+            closes: candles.map(c => c.close),
+            candles
+        };
+    }
+
+    // ====================== CHART ======================
+    function drawCandles(candles, support, resistance) {
+        const canvas = document.getElementById("candleCanvas");
+        if (!canvas || !candles.length) return;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        const prices = candles.map(c => c.high);
+        const minPrice = Math.min(...candles.map(c => c.low), support || 1e10);
+        const maxPrice = Math.max(...prices, resistance || 0);
+        const range = maxPrice - minPrice;
+        const candleWidth = Math.max(2, (w / candles.length) - 2);
+        
+        for (let i = 0; i < candles.length; i++) {
+            const c = candles[i];
+            const x = i * (candleWidth + 2);
+            const yOpen = h - ((c.open - minPrice) / range) * h;
+            const yClose = h - ((c.close - minPrice) / range) * h;
+            const yHigh = h - ((c.high - minPrice) / range) * h;
+            const yLow = h - ((c.low - minPrice) / range) * h;
+            const isBullish = c.close >= c.open;
+            ctx.fillStyle = isBullish ? "#00ff9f" : "#ff2d55";
+            ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen) || 1);
+            ctx.fillStyle = isBullish ? "#00ff9f" : "#ff2d55";
+            ctx.fillRect(x + candleWidth/2 - 1, yHigh, 2, yLow - yHigh);
+        }
+        
+        if (support) {
+            const ySup = h - ((support - minPrice) / range) * h;
+            ctx.beginPath();
+            ctx.moveTo(0, ySup);
+            ctx.lineTo(w, ySup);
+            ctx.strokeStyle = "#ffd60a";
+            ctx.setLineDash([8, 6]);
+            ctx.stroke();
+            ctx.fillStyle = "#ffd60a";
+            ctx.font = "10px monospace";
+            ctx.fillText(`Support $${support.toFixed(2)}`, 10, ySup - 5);
+        }
+        if (resistance) {
+            const yRes = h - ((resistance - minPrice) / range) * h;
+            ctx.beginPath();
+            ctx.moveTo(0, yRes);
+            ctx.lineTo(w, yRes);
+            ctx.strokeStyle = "#ff2d55";
+            ctx.setLineDash([8, 6]);
+            ctx.stroke();
+            ctx.fillStyle = "#ff2d55";
+            ctx.font = "10px monospace";
+            ctx.fillText(`Resistance $${resistance?.toFixed(2)}`, 10, yRes + 15);
+        }
+        ctx.setLineDash([]);
+    }
+
+    // ====================== UI UPDATES ======================
     let currentAsset = "BTCUSDT";
     let historySignals = [];
-    let countdownValue = 3;
+    let countdownValue = 5;
     let intervalId = null;
 
     async function updateDashboard() {
         try {
             const ticker = await fetchTicker(currentAsset);
-            const closes = await fetchKlines(currentAsset, "1m", 60);
-            const analysis = analyzeMarket(closes);
+            const { prices, highs, lows, closes, candles } = await fetchKlinesSimple(currentAsset, "1h", 60);
+            const analysis = analyzeMarketWithCandles(prices, highs, lows, closes);
             
-            // price & signal
             document.getElementById("price").innerText = `$${ticker.price.toFixed(2)}`;
-            const changeHtml = `<span class="${ticker.change >= 0 ? "up" : "dn"}">${ticker.change >= 0 ? "+" : ""}${ticker.change.toFixed(2)}%</span>`;
-            document.getElementById("change").innerHTML = changeHtml;
+            document.getElementById("change").innerHTML = `<span class="${ticker.change >= 0 ? "up" : "dn"}">${ticker.change >= 0 ? "+" : ""}${ticker.change.toFixed(2)}%</span>`;
             
             const signalEl = document.getElementById("signal");
             let signalText = analysis?.signal || "NEUTRAL";
             signalEl.innerText = signalText;
             signalEl.style.color = signalText.includes("BUY") ? "#00ff9f" : (signalText.includes("SELL") ? "#ff2d55" : "#c8ffe8");
             
-            // stats
             document.getElementById("trend").innerText = analysis?.trend || "—";
             document.getElementById("trend").style.color = analysis?.trend === "BULLISH" ? "#00ff9f" : (analysis?.trend === "BEARISH" ? "#ff2d55" : "#c8ffe8");
             
@@ -279,20 +496,22 @@
             rsiFill.style.width = `${rsiVal}%`;
             rsiFill.style.backgroundColor = rsiVal > 70 ? "#ff2d55" : (rsiVal < 30 ? "#00ff9f" : "#ffd60a");
             
-            const momVal = analysis?.momentum || 0;
-            document.getElementById("mom").innerHTML = momVal.toFixed(1) + "%";
-            document.getElementById("mom").style.color = momVal >= 0 ? "#00ff9f" : "#ff2d55";
-            
+            document.getElementById("atr").innerText = analysis?.atr ? `$${analysis.atr.toFixed(2)}` : "—";
             const volVal = analysis?.volatility || 0;
             document.getElementById("vol").innerHTML = volVal.toFixed(2) + "%";
             
-            // multi-timeframe
+            document.getElementById("recEntry").innerText = analysis?.entry ? `$${analysis.entry.toFixed(2)}` : "—";
+            document.getElementById("recSl").innerHTML = analysis?.stopLoss ? `$${analysis.stopLoss.toFixed(2)}` : "—";
+            document.getElementById("recTp").innerHTML = analysis?.takeProfit ? `$${analysis.takeProfit.toFixed(2)}` : "—";
+            document.getElementById("recReason").innerText = analysis?.reason || "Awaiting data";
+            
+            // multi‑timeframe
             const tfs = ["1m", "5m", "15m"];
-            let mtfHtml = "";
+                       let mtfHtml = "";
             for (let tf of tfs) {
                 try {
-                    const tfCloses = await fetchKlines(currentAsset, tf, 50);
-                    const tfAnalysis = analyzeMarket(tfCloses);
+                    const tfData = await fetchKlinesSimple(currentAsset, tf, 30);
+                    const tfAnalysis = analyzeMarketWithCandles(tfData.prices, tfData.highs, tfData.lows, tfData.closes);
                     let sigColor = "#c8ffe8";
                     if (tfAnalysis?.signal?.includes("BUY")) sigColor = "#00ff9f";
                     else if (tfAnalysis?.signal?.includes("SELL")) sigColor = "#ff2d55";
@@ -305,44 +524,36 @@
             }
             document.getElementById("mtfGrid").innerHTML = mtfHtml;
             
-            // history
             if (signalText !== "NEUTRAL") {
                 const last = historySignals[0];
                 if (!last || last.sig !== signalText || (Date.now() - last.time) > 3600000) {
-                    historySignals.unshift({
-                        time: Date.now(),
-                        asset: currentAsset,
-                        sig: signalText,
-                        price: ticker.price
-                    });
+                    historySignals.unshift({ time: Date.now(), asset: currentAsset, sig: signalText, price: ticker.price });
                     if (historySignals.length > 10) historySignals.pop();
                 }
             }
-            const historyHtml = historySignals.map(h => `
-                <div class="hist-item">
-                    <span>${new Date(h.time).toLocaleTimeString()}</span>
-                    <span>${h.asset}</span>
-                    <span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span>
-                    <span>$${h.price.toFixed(1)}</span>
-                </div>
-            `).join("");
+            const historyHtml = historySignals.map(h => `<div class="hist-item">
+                <span>${new Date(h.time).toLocaleTimeString()}</span>
+                <span>${h.asset}</span>
+                <span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span>
+                <span>$${h.price.toFixed(1)}</span>
+            </div>`).join("");
             document.getElementById("historyList").innerHTML = historyHtml || "<div style='text-align:center'>—</div>";
             
+            drawCandles(candles, analysis?.support, analysis?.resistance);
             document.getElementById("lastUpdate").innerHTML = new Date().toLocaleTimeString();
         } catch(err) {
             console.error(err);
             document.getElementById("signal").innerText = "API ERROR";
-            document.getElementById("signal").style.color = "#ff2d55";
         }
     }
 
     function startCountdown() {
         if (window.countdownInterval) clearInterval(window.countdownInterval);
-        countdownValue = 3;
+        countdownValue = 5;
         document.getElementById("countdown").innerText = countdownValue;
         window.countdownInterval = setInterval(() => {
             countdownValue--;
-            if (countdownValue < 0) countdownValue = 3;
+            if (countdownValue < 0) countdownValue = 5;
             document.getElementById("countdown").innerText = countdownValue;
         }, 1000);
     }
@@ -354,17 +565,51 @@
         updateDashboard();
     }
 
-    // ═══════════════════════════════════════════════
-    //  INIT
-    // ═══════════════════════════════════════════════
+    // ====================== DARK / LIGHT MODE ======================
+    function initMode() {
+        const saved = localStorage.getItem("nexus_mode");
+        if (saved === "light") {
+            document.body.classList.remove("dark");
+            document.body.classList.add("light");
+            document.getElementById("modeToggle").innerHTML = "☀️ LIGHT";
+        } else {
+            document.body.classList.remove("light");
+            document.body.classList.add("dark");
+            document.getElementById("modeToggle").innerHTML = "🌙 DARK";
+        }
+    }
+
+    function toggleMode() {
+        if (document.body.classList.contains("dark")) {
+            document.body.classList.remove("dark");
+            document.body.classList.add("light");
+            localStorage.setItem("nexus_mode", "light");
+            document.getElementById("modeToggle").innerHTML = "☀️ LIGHT";
+        } else {
+            document.body.classList.remove("light");
+            document.body.classList.add("dark");
+            localStorage.setItem("nexus_mode", "dark");
+            document.getElementById("modeToggle").innerHTML = "🌙 DARK";
+        }
+        // redraw chart to adapt background
+        updateDashboard();
+    }
+
     document.querySelectorAll(".asset-btn").forEach(btn => {
         btn.addEventListener("click", () => switchAsset(btn.dataset.asset));
     });
+    document.getElementById("modeToggle").addEventListener("click", toggleMode);
     
+    initMode();
     updateDashboard();
     startCountdown();
     if (intervalId) clearInterval(intervalId);
-    intervalId = setInterval(updateDashboard, 4000);
+    intervalId = setInterval(updateDashboard, 5000);
 </script>
 </body>
-  </html>
+</html>
+```
+
+---
+            
+       
