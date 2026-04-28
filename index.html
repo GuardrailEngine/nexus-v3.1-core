@@ -10,9 +10,8 @@
 <style>
 
 /* ─────────────────────────────────────────────
-   🔥 UI UPGRADE
+   🌙 DARK MODE (DEFAULT)
    ───────────────────────────────────────────── */
-
 :root {
   --bg:#020608;
   --bg2:#060d12;
@@ -33,6 +32,25 @@
   --head:'Orbitron';
 }
 
+/* 🌞 LIGHT MODE */
+body.light {
+  --bg:#f4f7fb;
+  --bg2:#ffffff;
+  --bg3:#e9eef5;
+
+  --green:#00b86b;
+  --green2:#009e5c;
+  --red:#e63946;
+  --yellow:#ffb703;
+  --blue:#3a86ff;
+
+  --text:#0a0f14;
+  --muted:rgba(0,0,0,0.4);
+  --border:rgba(0,0,0,0.1);
+  --glass:rgba(255,255,255,0.6);
+}
+
+/* GLOBAL */
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
@@ -43,12 +61,14 @@ body{
 
   color:var(--text);
   font-family:var(--font);
+  transition:background 0.3s,color 0.3s;
 }
 
 /* HEADER */
 .hdr{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   padding:14px 20px;
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(10px);
@@ -59,6 +79,26 @@ body{
   color:var(--green);
   letter-spacing:4px;
   text-shadow:0 0 15px var(--green);
+}
+
+.hdr-right{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* THEME BUTTON */
+#themeToggle{
+  background:none;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:4px 10px;
+  cursor:pointer;
+  font-size:0.8rem;
+  transition:0.2s;
+}
+#themeToggle:hover{
+  background:rgba(0,255,159,0.1);
 }
 
 /* TABS */
@@ -108,7 +148,6 @@ body{
   50%{text-shadow:0 0 25px currentColor}
 }
 
-/* PRICE */
 .hero-price{
   font-size:1.8rem;
   color:var(--green);
@@ -129,7 +168,10 @@ body{
   cursor:pointer;
 }
 
-.tf-btn.active{color:var(--green);border-color:var(--green)}
+.tf-btn.active{
+  color:var(--green);
+  border-color:var(--green);
+}
 
 /* STATS */
 .stats-row{
@@ -150,7 +192,7 @@ body{
   transform:translateY(-3px);
 }
 
-/* PANELS */
+/* PANEL */
 .panel{
   border:1px solid var(--border);
   padding:14px;
@@ -183,17 +225,24 @@ body{
 
 <body>
 
+<!-- HEADER -->
 <div class="hdr">
   <div class="logo">NEXUS</div>
-  <div id="countdown">—</div>
+
+  <div class="hdr-right">
+    <button id="themeToggle">🌙</button>
+    <div id="countdown">—</div>
+  </div>
 </div>
 
+<!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchAsset('BTCUSDT',this)">BTC</div>
   <div class="tab" onclick="switchAsset('ETHUSDT',this)">ETH</div>
   <div class="tab" onclick="switchAsset('SOLUSDT',this)">SOL</div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
 <div class="signal-hero">
@@ -226,6 +275,7 @@ body{
 
 </div>
 
+<!-- STATUS -->
 <div class="status-bar">
   <span>BINANCE</span>
   <span id="lastUpdate">—</span>
@@ -233,7 +283,30 @@ body{
 
 <script>
 
-/* نفس المنطق — مختصر */
+/* ─────────────────────────
+   THEME SYSTEM
+   ───────────────────────── */
+const toggleBtn = document.getElementById("themeToggle");
+
+const savedTheme = localStorage.getItem("theme");
+
+if (savedTheme === "light") {
+  document.body.classList.add("light");
+  toggleBtn.textContent = "☀️";
+} else {
+  toggleBtn.textContent = "🌙";
+}
+
+toggleBtn.onclick = () => {
+  document.body.classList.toggle("light");
+  const isLight = document.body.classList.contains("light");
+  toggleBtn.textContent = isLight ? "☀️" : "🌙";
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+};
+
+/* ─────────────────────────
+   BASIC LOGIC (MOCK)
+   ───────────────────────── */
 
 let currentAsset="BTCUSDT";
 
@@ -248,8 +321,7 @@ function setTF(tf,el){
   el.classList.add('active');
 }
 
-/* MOCK (احتفظت بالـ structure فقط) */
-
+/* DEMO DATA */
 setInterval(()=>{
   document.getElementById('heroPrice').innerText="$"+(Math.random()*50000).toFixed(0);
   document.getElementById('heroSignal').innerText=["BUY","SELL","NEUTRAL"][Math.floor(Math.random()*3)];
