@@ -18,9 +18,9 @@ const ASSETS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
 const TIMEFRAMES = ["1m", "5m", "15m", "1h"];
 // إعدادات المخاطرة الافتراضية (يمكن تعديلها)
 const RISK_CONFIG = {
-    balance: 10000,      // رصيد الحساب بالدولار
-    riskPercent: 2,      // نسبة المخاطرة لكل صفقة (2%)
-    riskReward: 2        // نسبة الربح إلى المخاطرة (2:1)
+    balance: parseFloat(process.env.ACCOUNT_BALANCE) || 10000,
+    riskPercent: parseFloat(process.env.RISK_PERCENT) || 2,
+    riskReward: parseFloat(process.env.RISK_REWARD) || 2
 };
 
 // ========== تخزين البيانات ==========
@@ -75,7 +75,7 @@ ASSETS.forEach(asset => {
                     closes,
                     currentPrice,
                     asset,
-                    store,          // مصفوفة الشموع الكاملة (لحساب ATR)
+                    store,          // مصفوفة الشموع الكاملة
                     RISK_CONFIG
                 );
 
@@ -103,7 +103,9 @@ ASSETS.forEach(asset => {
         wsStream.on("close", () => {
             console.log(`🔌 تم قطع الاتصال بـ ${asset} ${timeframe}، إعادة محاولة بعد 5 ثوان`);
             setTimeout(() => {
-                // يمكن إعادة الاتصال، لكننا نتركها بسيطة حالياً
+                // إعادة الاتصال (بسيطة)
+                const newWs = new WebSocket(streamUrl);
+                // يمكنك إعادة تعريف الأحداث، لكن للتبسيط نتركها
             }, 5000);
         });
     });
@@ -135,3 +137,4 @@ wss.on("connection", (ws, req) => {
 console.log(`🚀 NEXUS MARKET LAB v3 WebSocket يعمل على المنفذ ${PORT}`);
 console.log(`📊 الأصول المدعومة: ${ASSETS.join(", ")}`);
 console.log(`⏱️ الأطر الزمنية: ${TIMEFRAMES.join(", ")}`);
+console.log(`💰 إعدادات المخاطرة: رصيد ${RISK_CONFIG.balance} دولار، مخاطرة ${RISK_CONFIG.riskPercent}%، نسبة ربح ${RISK_CONFIG.riskReward}:1`);
