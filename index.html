@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS v4.0 – المذيع الإمبراطوري (تحليل حي + صوت)</title>
+    <title>NEXUS v4.0 – المذيع الإمبراطوري (WebSocket + تحليل كمي)</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -270,16 +270,20 @@
 </div>
 
 <script>
-    // ========== WebSocket Client ==========
+    // ========== الإعدادات ==========
+    // 🔧 **هام**: غيّر عنوان WebSocket إلى عنوان الخادم الحقيقي بعد نشره على Render
+    // مثال: const WS_URL = "wss://nexus-market-lab.onrender.com";
+    const WS_URL = "ws://localhost:3000";   // <--- استبدل برابط الخادم الحقيقي
+
     let ws = null;
     let currentAsset = "BTCUSDT";
     let voiceEnabled = true;
     let lastSpokenText = "";
     let historySignals = [];
-    let analysisData = {}; // store latest analysis per asset
+    let analysisData = {}; // لكل أصل وكل إطار زمني
     let currentPrice = 0;
 
-    const WS_URL = "ws://localhost:3000";  // تأكد من تعديله حسب عنوان الخادم (مثلاً wss://domain.com)
+    // عناصر DOM
     const wsStatusDiv = document.getElementById("wsStatus");
     const signalDiv = document.getElementById("signal");
     const priceDiv = document.getElementById("price");
@@ -298,7 +302,7 @@
     const lastUpdateSpan = document.getElementById("lastUpdate");
     const historyListDiv = document.getElementById("historyList");
 
-    // Voice functions
+    // ========== الصوت ==========
     function speakArabic(text) {
         if (!voiceEnabled) return;
         if (!window.speechSynthesis) return;
@@ -329,28 +333,24 @@
         return `توصية لـ ${assetAr}: ${signalAr}. سعر الدخول ${entry}. وقف الخسارة ${sl}. جني الأرباح ${tp}. التحليل: ${reason}`;
     }
 
-    // Update UI with analysis data for current asset and timeframe (default 1h)
+    // تحديث الواجهة بناءً على آخر تحليل للأصل الحالي
     function updateUIForAsset(asset) {
         if (!analysisData[asset]) return;
-        const data = analysisData[asset];
-        // data contains latest analysis per timeframe? We'll store the main timeframe (e.g., "1h")
-        // In our backend, we broadcast per timeframe, we will store the latest for each timeframe.
-        // For simplicity, we'll use the "1h" analysis if exists, else any.
-        let mainAnalysis = data["1h"];
+        // استخدم التحليل للإطار الزمني "1h" كأساس للبطاقة الرئيسية
+        let mainAnalysis = analysisData[asset]["1h"];
         if (!mainAnalysis) {
-            // pick first available
-            const keys = Object.keys(data);
-            if (keys.length) mainAnalysis = data[keys[0]];
+            // إذا لم يوجد 1h، خذ أول إطار متاح
+            const keys = Object.keys(analysisData[asset]);
+            if (keys.length) mainAnalysis = analysisData[asset][keys[0]];
         }
         if (!mainAnalysis) return;
 
-        // Update main UI
+        // تحديث الإشارة والسعر
         signalDiv.innerText = mainAnalysis.signal || "NEUTRAL";
-        signalDiv.style.color = (mainAnalysis.signal === "BUY" || mainAnalysis.signal === "STRONG_BUY") ? "#00ff9f" : 
+        signalDiv.style.color = (mainAnalysis.signal === "BUY" || mainAnalysis.signal === "STRONG_BUY") ? "#00ff9f" :
                                 ((mainAnalysis.signal === "SELL" || mainAnalysis.signal === "STRONG_SELL") ? "#ff2d55" : "#c8ffe8");
         priceDiv.innerText = `$${currentPrice.toFixed(2)}`;
-        // change (not sent via WS from backend, we can fetch separately or ignore)
-        changeDiv.innerHTML = `<span class="up">${mainAnalysis.rsi ? "RSI: " + mainAnalysis.rsi.toFixed(1) : ""}</span>`;
+        changeDiv.innerHTML = `<span class="up">RSI: ${mainAnalysis.rsi?.toFixed(1) || "—"}</span>`;
         
         trendDiv.innerText = mainAnalysis.trend === "UP" ? "صاعد" : (mainAnalysis.trend === "DOWN" ? "هابط" : "محايد");
         const rsiVal = mainAnalysis.rsi || 50;
@@ -360,18 +360,17 @@
         atrDiv.innerText = mainAnalysis.atr ? `$${mainAnalysis.atr.toFixed(2)}` : "—";
         macdDiv.innerText = mainAnalysis.macd ? mainAnalysis.macd.toFixed(2) : "—";
         
-        // Risk management
         recEntrySpan.innerText = mainAnalysis.entry ? `$${mainAnalysis.entry.toFixed(2)}` : "—";
         recSlSpan.innerText = mainAnalysis.stopLoss ? `$${mainAnalysis.stopLoss.toFixed(2)}` : "—";
         recTpSpan.innerText = mainAnalysis.takeProfit ? `$${mainAnalysis.takeProfit.toFixed(2)}` : "—";
-        positionSizeSpan.innerText = mainAnalysis.positionSize ? `${mainAnalysis.positionSize}` : "—";
+        positionSizeSpan.innerText = mainAnalysis.positionSize ? mainAnalysis.positionSize : "—";
         recReasonSpan.innerText = mainAnalysis.reason || "انتظار تحديث";
         
-        // Multi-timeframe grid (display all available timeframes for current asset)
+        // عرض الأطر الزمنية المتعددة
         let mtfHtml = "";
         const timeframesOrder = ["1m","5m","15m","1h"];
         for (let tf of timeframesOrder) {
-            const tfData = data[tf];
+            const tfData = analysisData[asset][tf];
             if (tfData) {
                 let sigColor = "#c8ffe8";
                 if (tfData.signal && tfData.signal.includes("BUY")) sigColor = "#00ff9f";
@@ -388,7 +387,7 @@
         }
         mtfGrid.innerHTML = mtfHtml;
         
-        // Save to history if signal changed
+        // تحديث سجل الإشارات
         if (mainAnalysis.signal !== "NEUTRAL") {
             const last = historySignals[0];
             if (!last || last.sig !== mainAnalysis.signal || (Date.now() - last.time) > 3600000) {
@@ -399,9 +398,9 @@
                     price: currentPrice
                 });
                 if (historySignals.length > 10) historySignals.pop();
-                // Speak if enabled and not repeated recently
-                const fullText = generateArabicRecommendation(asset, mainAnalysis.signal, 
-                    mainAnalysis.entry?.toFixed(2), mainAnalysis.stopLoss?.toFixed(2), 
+                
+                const fullText = generateArabicRecommendation(asset, mainAnalysis.signal,
+                    mainAnalysis.entry?.toFixed(2), mainAnalysis.stopLoss?.toFixed(2),
                     mainAnalysis.takeProfit?.toFixed(2), mainAnalysis.reason);
                 if (fullText !== lastSpokenText) {
                     lastSpokenText = fullText;
@@ -410,7 +409,7 @@
             }
         }
         
-        // Update history list
+        // عرض تاريخ الإشارات
         let historyHtml = historySignals.map(h => `<div class="hist-item">
             <span>${new Date(h.time).toLocaleTimeString()}</span>
             <span>${h.asset}</span>
@@ -421,31 +420,34 @@
         lastUpdateSpan.innerText = new Date().toLocaleTimeString();
     }
 
-    // Process incoming WebSocket message
-    function processMessage(data) {
-        if (data.asset) {
+    // معالجة الرسائل الواردة من WebSocket
+    function processWebSocketMessage(data) {
+        if (data.asset && data.timeframe && data.analysis) {
             currentPrice = data.price || currentPrice;
-            const tf = data.timeframe || "1h";
             if (!analysisData[data.asset]) analysisData[data.asset] = {};
-            // Store analysis for this asset and timeframe
-            analysisData[data.asset][tf] = data.analysis;
+            analysisData[data.asset][data.timeframe] = data.analysis;
             if (data.asset === currentAsset) {
                 updateUIForAsset(currentAsset);
             }
         }
     }
 
+    // WebSocket الاتصال
     function connectWebSocket() {
         ws = new WebSocket(WS_URL);
         ws.onopen = () => {
             wsStatusDiv.innerHTML = "🟢 متصل";
             wsStatusDiv.style.borderColor = "#00ff9f";
-            console.log("WebSocket connected");
+            console.log("WebSocket متصل");
         };
         ws.onmessage = (event) => {
             try {
                 const msg = JSON.parse(event.data);
-                processMessage(msg);
+                if (msg.type === "welcome") {
+                    console.log(msg.message);
+                } else {
+                    processWebSocketMessage(msg);
+                }
             } catch(e) { console.warn(e); }
         };
         ws.onerror = (err) => {
@@ -458,7 +460,7 @@
         };
     }
 
-    // Asset switching
+    // تبديل الأصول
     function switchAsset(asset) {
         currentAsset = asset;
         document.querySelectorAll(".asset-btn").forEach(btn => btn.classList.remove("active"));
@@ -466,7 +468,7 @@
         updateUIForAsset(currentAsset);
     }
 
-    // ========== Theme & Voice ==========
+    // ========== الوضع والسمات ==========
     function initMode() {
         let saved = localStorage.getItem("nexus_mode");
         if (saved === "light") {
@@ -495,13 +497,7 @@
         else { btn.innerHTML = "🔇 كتم"; window.speechSynthesis.cancel(); }
     }
 
-    document.querySelectorAll(".asset-btn").forEach(btn => btn.addEventListener("click", () => switchAsset(btn.dataset.asset)));
-    document.getElementById("modeToggle").addEventListener("click", toggleMode);
-    document.getElementById("voiceToggle").addEventListener("click", toggleVoice);
-    initMode();
-    connectWebSocket();
-
-    // Optional: fetch ticker for 24h change separately (to display price change)
+    // جلب سعر البيتكوين للتحديث بين الحين والآخر (اختياري)
     async function fetchTicker(asset) {
         try {
             const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${asset}`);
@@ -513,9 +509,13 @@
         } catch(e) { console.warn(e); }
     }
 
-    setInterval(() => {
-        if (currentAsset) fetchTicker(currentAsset);
-    }, 10000);
+    // ربط الأحداث
+    document.querySelectorAll(".asset-btn").forEach(btn => btn.addEventListener("click", () => switchAsset(btn.dataset.asset)));
+    document.getElementById("modeToggle").addEventListener("click", toggleMode);
+    document.getElementById("voiceToggle").addEventListener("click", toggleVoice);
+    initMode();
+    connectWebSocket();
+    setInterval(() => fetchTicker(currentAsset), 10000);
     fetchTicker(currentAsset);
 </script>
 </body>
