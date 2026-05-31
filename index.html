@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS v3.5 – المذيع الإمبراطوري (عربي)</title>
+    <title>NEXUS v4.0 – المذيع الإمبراطوري (تحليل حي + صوت)</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -11,7 +11,7 @@
             font-family:'Share Tech Mono',monospace;
             padding:20px;
             transition: background-color 0.3s, color 0.2s;
-            direction: ltr; /* المحتوى الفني يبقى ltr ولكن نص الروبوت عربي */
+            direction: ltr;
         }
         body.dark{
             background:#020608;
@@ -27,12 +27,10 @@
             padding:18px;
             margin-bottom:16px;
             border-radius:4px;
-            transition: all 0.2s;
         }
         body.light .card{
             background:#ffffff;
             border:1px solid #c0d0dd;
-            box-shadow:0 2px 6px rgba(0,0,0,0.05);
         }
         .title{
             font-family:'Orbitron',monospace;
@@ -83,7 +81,6 @@
             border-color:#006b4f;
             background:#d4f0e8;
             color:#006b4f;
-            box-shadow:0 0 4px rgba(0,107,79,0.3);
         }
         .signal-box{
             font-size:1.5rem;
@@ -97,8 +94,6 @@
         .change{font-size:0.8rem;margin-top:5px}
         .up{color:#00ff9f}
         .dn{color:#ff2d55}
-        body.light .up{color:#007a5e}
-        body.light .dn{color:#c22a3e}
         .stats-grid{
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
@@ -116,15 +111,12 @@
             border:1px solid #cbdbe2;
         }
         .stat-label{font-size:0.65rem;margin-bottom:6px}
-        body.dark .stat-label{color:#9bb5b0}
-        body.light .stat-label{color:#5a6e7a}
         .stat-value{font-size:1rem;font-weight:bold}
         .rsi-bar{height:3px;background:#1a2a2a;margin-top:6px}
-        body.light .rsi-bar{background:#dbdfe3}
         .rsi-fill{height:100%;border-radius:2px}
         .mtf-grid{
             display:grid;
-            grid-template-columns:repeat(3,1fr);
+            grid-template-columns:repeat(4,1fr);
             gap:10px;
             margin-bottom:16px;
         }
@@ -164,24 +156,6 @@
             font-size:0.6rem;
             text-align:center;
         }
-        body.dark .status{color:#5f8b85}
-        body.light .status{color:#6c8190}
-        .chart-container{
-            width:100%;
-            overflow-x:auto;
-            margin:15px 0;
-        }
-        canvas{
-            background:#0a1520;
-            border-radius:4px;
-            display:block;
-            margin:0 auto;
-            min-width:600px;
-        }
-        body.light canvas{
-            background:#f4f8fb;
-            box-shadow:0 1px 4px rgba(0,0,0,0.05);
-        }
         .rec-entry{color:#00ff9f;font-weight:bold}
         .rec-sl{color:#ffd60a}
         .rec-tp{color:#00cc7a}
@@ -196,15 +170,9 @@
             cursor:pointer;
             font-family:'Orbitron',monospace;
             font-size:0.7rem;
-            transition:0.2s;
             display:inline-flex;
             align-items:center;
             gap:8px;
-        }
-        body.light .mode-toggle, body.light .voice-toggle{
-            background:#eef3f7;
-            border-color:#90a4b2;
-            color:#1a3a4a;
         }
         .header-right{
             display:flex;
@@ -225,21 +193,13 @@
             background:#eef3f7;
             border-color:#90a4b2;
         }
-        .voice-controls select{
-            background:transparent;
-            border:none;
-            color:inherit;
-            font-family:'Share Tech Mono',monospace;
-            font-size:0.65rem;
-            cursor:pointer;
-        }
-        .tts-timer{
-            background:#0a1520;
-            padding:4px 8px;
-            border-radius:20px;
-            border:1px solid rgba(0,255,159,0.3);
+        .ws-status{
             font-size:0.7rem;
             font-family:'Orbitron',monospace;
+            background:#0a1520;
+            padding:4px 12px;
+            border-radius:20px;
+            border:1px solid #00ff9f;
         }
     </style>
 </head>
@@ -247,8 +207,9 @@
 
 <div class="card">
     <div class="flex-row">
-        <div class="title">⚡ NEXUS v3.5 — المذيع الإمبراطوري (عربي)</div>
+        <div class="title">⚡ NEXUS v4.0 — المذيع الإمبراطوري (WebSocket + تحليل كمي)</div>
         <div class="header-right">
+            <div class="ws-status" id="wsStatus">🔌 جاري الاتصال...</div>
             <div class="voice-controls">
                 <span>🔊</span>
                 <select id="voiceSpeed">
@@ -259,7 +220,6 @@
             </div>
             <div class="voice-toggle" id="voiceToggle">🔊 تكلم</div>
             <div class="mode-toggle" id="modeToggle">🌙 ليلي</div>
-            <div class="tts-timer" id="ttsTimer">🗣️ 30 ث</div>
         </div>
     </div>
     <div class="asset-buttons" id="assetButtons">
@@ -274,36 +234,30 @@
 </div>
 
 <div class="card">
-    <div class="title">📊 المؤشرات الفنية</div>
+    <div class="title">📊 المؤشرات الفنية (من الخادم)</div>
     <div class="stats-grid">
         <div class="stat"><div class="stat-label">الاتجاه</div><div class="stat-value" id="trend">—</div></div>
         <div class="stat"><div class="stat-label">RSI (14)</div><div class="stat-value" id="rsi">—</div><div class="rsi-bar"><div class="rsi-fill" id="rsiFill" style="width:0%"></div></div></div>
         <div class="stat"><div class="stat-label">ATR (14)</div><div class="stat-value" id="atr">—</div></div>
-        <div class="stat"><div class="stat-label">التقلب</div><div class="stat-value" id="vol">—</div></div>
+        <div class="stat"><div class="stat-label">MACD</div><div class="stat-value" id="macd">—</div></div>
     </div>
 </div>
 
 <div class="card">
-    <div class="title">🕯️ رسم الشموع (1 ساعة) + دعم/مقاومة</div>
-    <div class="chart-container">
-        <canvas id="candleCanvas" width="800" height="320"></canvas>
-    </div>
+    <div class="title">🕒 تحليل الأطر الزمنية (1د / 5د / 15د / 1س)</div>
+    <div class="mtf-grid" id="mtfGrid"></div>
+    <div style="text-align:right; font-size:0.7rem">آخر تحديث: <span id="lastUpdate">—</span></div>
 </div>
 
 <div class="card">
-    <div class="title">🎯 التوصية المتكاملة (ذكاء اصطناعي)</div>
+    <div class="title">🎯 التوصية المتكاملة (إدارة مخاطر + تحليل)</div>
     <div class="recommendation-card" id="recCard">
         <div>📈 سعر الدخول: <span id="recEntry" class="rec-entry">—</span></div>
         <div>🛑 وقف الخسارة: <span id="recSl" class="rec-sl">—</span></div>
         <div>🎯 جني الأرباح: <span id="recTp" class="rec-tp">—</span></div>
+        <div>📦 حجم العقد: <span id="positionSize" class="rec-sl">—</span></div>
         <div>💡 التحليل: <span id="recReason">—</span></div>
     </div>
-</div>
-
-<div class="card">
-    <div class="title">🕒 تحليل الأطر الزمنية (1د / 5د / 15د)</div>
-    <div class="mtf-grid" id="mtfGrid"></div>
-    <div style="text-align:right; font-size:0.7rem">تحديث البيانات: <span id="countdownData">5</span> ث</div>
 </div>
 
 <div class="card">
@@ -312,39 +266,59 @@
 </div>
 
 <div class="status">
-    <span>🟢 BINANCE API المباشر</span> &nbsp;|&nbsp; <span id="lastUpdate">—</span> &nbsp;|&nbsp; <span>NEXUS v3.5 – المذيع الإمبراطوري</span>
+    <span>🟢 WebSocket متصل بـ NEXUS MARKET LAB v3</span> &nbsp;|&nbsp; <span id="wsTimer">—</span>
 </div>
 
 <script>
-    // ====================== VOICE BOT (ARABIC) ======================
+    // ========== WebSocket Client ==========
+    let ws = null;
+    let currentAsset = "BTCUSDT";
     let voiceEnabled = true;
     let lastSpokenText = "";
-    let ttsInterval = null;
+    let historySignals = [];
+    let analysisData = {}; // store latest analysis per asset
+    let currentPrice = 0;
 
+    const WS_URL = "ws://localhost:3000";  // تأكد من تعديله حسب عنوان الخادم (مثلاً wss://domain.com)
+    const wsStatusDiv = document.getElementById("wsStatus");
+    const signalDiv = document.getElementById("signal");
+    const priceDiv = document.getElementById("price");
+    const changeDiv = document.getElementById("change");
+    const trendDiv = document.getElementById("trend");
+    const rsiDiv = document.getElementById("rsi");
+    const rsiFill = document.getElementById("rsiFill");
+    const atrDiv = document.getElementById("atr");
+    const macdDiv = document.getElementById("macd");
+    const recEntrySpan = document.getElementById("recEntry");
+    const recSlSpan = document.getElementById("recSl");
+    const recTpSpan = document.getElementById("recTp");
+    const positionSizeSpan = document.getElementById("positionSize");
+    const recReasonSpan = document.getElementById("recReason");
+    const mtfGrid = document.getElementById("mtfGrid");
+    const lastUpdateSpan = document.getElementById("lastUpdate");
+    const historyListDiv = document.getElementById("historyList");
+
+    // Voice functions
     function speakArabic(text) {
         if (!voiceEnabled) return;
-        if (!window.speechSynthesis) {
-            console.warn("التحدث غير مدعوم");
-            return;
-        }
+        if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "ar-SA";
         const speed = parseFloat(document.getElementById("voiceSpeed").value);
         utterance.rate = speed;
         utterance.pitch = 1;
-        utterance.volume = 1;
         window.speechSynthesis.speak(utterance);
     }
 
     function generateArabicRecommendation(asset, signal, entry, sl, tp, reason) {
         let signalAr = "";
-        if (signal === "HIGH_PROB_BUY") signalAr = "شراء قوي";
+        if (signal === "STRONG_BUY") signalAr = "شراء قوي";
         else if (signal === "BUY") signalAr = "شراء";
         else if (signal === "NEUTRAL") signalAr = "محايد";
         else if (signal === "SELL") signalAr = "بيع";
-        else if (signal === "HIGH_PROB_SELL") signalAr = "بيع قوي";
-        else signalAr = "انتظار";
+        else if (signal === "STRONG_SELL") signalAr = "بيع قوي";
+        else signalAr = signal;
         
         let assetAr = "";
         if (asset === "BTCUSDT") assetAr = "بيتكوين";
@@ -355,290 +329,194 @@
         return `توصية لـ ${assetAr}: ${signalAr}. سعر الدخول ${entry}. وقف الخسارة ${sl}. جني الأرباح ${tp}. التحليل: ${reason}`;
     }
 
-    function startTtsTimer() {
-        if (ttsInterval) clearInterval(ttsInterval);
-        let seconds = 30;
-        const timerEl = document.getElementById("ttsTimer");
-        ttsInterval = setInterval(() => {
-            if (!voiceEnabled) {
-                timerEl.innerHTML = "🔇 مكتوم";
-                return;
+    // Update UI with analysis data for current asset and timeframe (default 1h)
+    function updateUIForAsset(asset) {
+        if (!analysisData[asset]) return;
+        const data = analysisData[asset];
+        // data contains latest analysis per timeframe? We'll store the main timeframe (e.g., "1h")
+        // In our backend, we broadcast per timeframe, we will store the latest for each timeframe.
+        // For simplicity, we'll use the "1h" analysis if exists, else any.
+        let mainAnalysis = data["1h"];
+        if (!mainAnalysis) {
+            // pick first available
+            const keys = Object.keys(data);
+            if (keys.length) mainAnalysis = data[keys[0]];
+        }
+        if (!mainAnalysis) return;
+
+        // Update main UI
+        signalDiv.innerText = mainAnalysis.signal || "NEUTRAL";
+        signalDiv.style.color = (mainAnalysis.signal === "BUY" || mainAnalysis.signal === "STRONG_BUY") ? "#00ff9f" : 
+                                ((mainAnalysis.signal === "SELL" || mainAnalysis.signal === "STRONG_SELL") ? "#ff2d55" : "#c8ffe8");
+        priceDiv.innerText = `$${currentPrice.toFixed(2)}`;
+        // change (not sent via WS from backend, we can fetch separately or ignore)
+        changeDiv.innerHTML = `<span class="up">${mainAnalysis.rsi ? "RSI: " + mainAnalysis.rsi.toFixed(1) : ""}</span>`;
+        
+        trendDiv.innerText = mainAnalysis.trend === "UP" ? "صاعد" : (mainAnalysis.trend === "DOWN" ? "هابط" : "محايد");
+        const rsiVal = mainAnalysis.rsi || 50;
+        rsiDiv.innerText = Math.round(rsiVal);
+        rsiFill.style.width = `${rsiVal}%`;
+        rsiFill.style.backgroundColor = rsiVal > 70 ? "#ff2d55" : (rsiVal < 30 ? "#00ff9f" : "#ffd60a");
+        atrDiv.innerText = mainAnalysis.atr ? `$${mainAnalysis.atr.toFixed(2)}` : "—";
+        macdDiv.innerText = mainAnalysis.macd ? mainAnalysis.macd.toFixed(2) : "—";
+        
+        // Risk management
+        recEntrySpan.innerText = mainAnalysis.entry ? `$${mainAnalysis.entry.toFixed(2)}` : "—";
+        recSlSpan.innerText = mainAnalysis.stopLoss ? `$${mainAnalysis.stopLoss.toFixed(2)}` : "—";
+        recTpSpan.innerText = mainAnalysis.takeProfit ? `$${mainAnalysis.takeProfit.toFixed(2)}` : "—";
+        positionSizeSpan.innerText = mainAnalysis.positionSize ? `${mainAnalysis.positionSize}` : "—";
+        recReasonSpan.innerText = mainAnalysis.reason || "انتظار تحديث";
+        
+        // Multi-timeframe grid (display all available timeframes for current asset)
+        let mtfHtml = "";
+        const timeframesOrder = ["1m","5m","15m","1h"];
+        for (let tf of timeframesOrder) {
+            const tfData = data[tf];
+            if (tfData) {
+                let sigColor = "#c8ffe8";
+                if (tfData.signal && tfData.signal.includes("BUY")) sigColor = "#00ff9f";
+                else if (tfData.signal && tfData.signal.includes("SELL")) sigColor = "#ff2d55";
+                mtfHtml += `<div class="mtf-card">
+                    <div style="font-size:0.6rem">${tf}</div>
+                    <div style="font-weight:bold;color:${sigColor}">${tfData.signal || "NEUTRAL"}</div>
+                    <div style="font-size:0.55rem">RSI:${Math.round(tfData.rsi || 50)}</div>
+                    <div style="font-size:0.5rem">SL:${tfData.stopLoss?.toFixed(2)}</div>
+                </div>`;
+            } else {
+                mtfHtml += `<div class="mtf-card">${tf}<br>—</div>`;
             }
-            seconds--;
-            if (seconds <= 0) {
-                seconds = 30;
-                // قراءة التوصية الحالية من الواجهة
-                const asset = currentAsset;
-                const signalEl = document.getElementById("signal");
-                const signal = signalEl ? signalEl.innerText : "NEUTRAL";
-                const entryEl = document.getElementById("recEntry");
-                const entry = entryEl ? entryEl.innerText : "—";
-                const slEl = document.getElementById("recSl");
-                const sl = slEl ? slEl.innerText : "—";
-                const tpEl = document.getElementById("recTp");
-                const tp = tpEl ? tpEl.innerText : "—";
-                const reasonEl = document.getElementById("recReason");
-                const reason = reasonEl ? reasonEl.innerText : "انتظار تأكيد";
-                const fullText = generateArabicRecommendation(asset, signal, entry, sl, tp, reason);
+        }
+        mtfGrid.innerHTML = mtfHtml;
+        
+        // Save to history if signal changed
+        if (mainAnalysis.signal !== "NEUTRAL") {
+            const last = historySignals[0];
+            if (!last || last.sig !== mainAnalysis.signal || (Date.now() - last.time) > 3600000) {
+                historySignals.unshift({
+                    time: Date.now(),
+                    asset: asset,
+                    sig: mainAnalysis.signal,
+                    price: currentPrice
+                });
+                if (historySignals.length > 10) historySignals.pop();
+                // Speak if enabled and not repeated recently
+                const fullText = generateArabicRecommendation(asset, mainAnalysis.signal, 
+                    mainAnalysis.entry?.toFixed(2), mainAnalysis.stopLoss?.toFixed(2), 
+                    mainAnalysis.takeProfit?.toFixed(2), mainAnalysis.reason);
                 if (fullText !== lastSpokenText) {
                     lastSpokenText = fullText;
                     speakArabic(fullText);
-                } else {
-                    speakArabic(fullText); // نكرر كل 30 ثانية حتى لو لم يتغير النص
                 }
             }
-            timerEl.innerHTML = `🗣️ ${seconds} ث`;
-        }, 1000);
+        }
+        
+        // Update history list
+        let historyHtml = historySignals.map(h => `<div class="hist-item">
+            <span>${new Date(h.time).toLocaleTimeString()}</span>
+            <span>${h.asset}</span>
+            <span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span>
+            <span>$${h.price.toFixed(1)}</span>
+        </div>`).join("");
+        historyListDiv.innerHTML = historyHtml || "<div style='text-align:center'>—</div>";
+        lastUpdateSpan.innerText = new Date().toLocaleTimeString();
     }
 
-    // ====================== INDICATORS ======================
-    function calcEMA(prices, period) {
-        if (prices.length < period) return null;
-        const k = 2 / (period + 1);
-        let ema = prices.slice(0, period).reduce((a,b)=>a+b,0)/period;
-        for(let i=period; i<prices.length; i++) ema = prices[i]*k + ema*(1-k);
-        return ema;
-    }
-    function calcRSI(prices, period=14) {
-        if(prices.length<period+1) return 50;
-        let gains=0, losses=0;
-        for(let i=prices.length-period; i<prices.length; i++){
-            let diff=prices[i]-prices[i-1];
-            if(diff>=0) gains+=diff;
-            else losses-=diff;
-        }
-        let avgGain=gains/period, avgLoss=losses/period;
-        if(avgLoss===0) return 100;
-        return 100-(100/(1+avgGain/avgLoss));
-    }
-    function calcATR(high, low, close, period=14){
-        if(high.length<period+1) return null;
-        let tr=[];
-        for(let i=1;i<high.length;i++){
-            let hl=high[i]-low[i];
-            let hc=Math.abs(high[i]-close[i-1]);
-            let lc=Math.abs(low[i]-close[i-1]);
-            tr.push(Math.max(hl,hc,lc));
-        }
-        if(tr.length===0) return null;
-        let atr=tr.slice(0,period).reduce((a,b)=>a+b,0)/period;
-        for(let i=period;i<tr.length;i++) atr=(atr*(period-1)+tr[i])/period;
-        return atr;
-    }
-    function findSupportResistance(high, low, lookback=20){
-        let recentHigh=Math.max(...high.slice(-lookback));
-        let recentLow=Math.min(...low.slice(-lookback));
-        return { resistance: recentHigh, support: recentLow };
-    }
-    function analyzeMarketWithCandles(prices, highs, lows, closes){
-        if(!prices||prices.length<30) return null;
-        let ema9=calcEMA(prices,9), ema21=calcEMA(prices,21), rsi=calcRSI(prices,14);
-        let atr=calcATR(highs,lows,closes,14);
-        let { support, resistance } = findSupportResistance(highs,lows,20);
-        let score=0;
-        if(rsi!==null){
-            if(rsi<=30) score+=35; else if(rsi<=40) score+=15;
-            else if(rsi>=70) score-=35; else if(rsi>=60) score-=15;
-        }
-        if(ema9&&ema21){ if(ema9>ema21) score+=30; else score-=30; }
-        let lastPrice=prices[prices.length-1];
-        if(support && lastPrice<support*1.02) score+=20;
-        if(resistance && lastPrice>resistance*0.98) score-=20;
-        let signal="NEUTRAL";
-        if(score>=60) signal="HIGH_PROB_BUY";
-        else if(score>=25) signal="BUY";
-        else if(score<=-60) signal="HIGH_PROB_SELL";
-        else if(score<=-25) signal="SELL";
-        let trend=(ema9&&ema21)?(ema9>ema21?"BULLISH":"BEARISH"):"NEUTRAL";
-        let volatility=atr?(atr/prices[prices.length-1])*100:null;
-        let entry=null, stopLoss=null, takeProfit=null, reason="";
-        if(signal.includes("BUY")){
-            entry=lastPrice;
-            stopLoss=entry*(1-(atr?atr/entry*1.5:0.02));
-            takeProfit=entry*(1+(atr?atr/entry*2:0.04));
-            reason=`المتوسطات إيجابية (EMA9 > EMA21) ومؤشر القوة النسبية ${Math.round(rsi||50)} (تشبع بيعي). السعر قرب الدعم $${support?.toFixed(2)}.`;
-        }else if(signal.includes("SELL")){
-            entry=lastPrice;
-            stopLoss=entry*(1+(atr?atr/entry*1.5:0.02));
-            takeProfit=entry*(1-(atr?atr/entry*2:0.04));
-            reason=`المتوسطات سلبية (EMA9 < EMA21) ومؤشر القوة النسبية ${Math.round(rsi||50)} (تشبع شرائي). السعر قرب المقاومة $${resistance?.toFixed(2)}.`;
-        }else{
-            entry=lastPrice;
-            stopLoss=entry*0.99;
-            takeProfit=entry*1.01;
-            reason="السوق في حالة تجميع. انتظر كسر المقاومة أو الدعم.";
-        }
-        return { signal, trend, rsi, atr, volatility, support, resistance, entry, stopLoss, takeProfit, reason };
-    }
-
-    // ====================== BINANCE API ======================
-    async function fetchCandles(symbol, interval="1h", limit=80){
-        let url=`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-        let res=await fetch(url);
-        let data=await res.json();
-        if(!Array.isArray(data)) throw new Error("Invalid klines");
-        return data.map(k=>({ open:parseFloat(k[1]), high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]), volume:parseFloat(k[5]) }));
-    }
-    async function fetchTicker(symbol){
-        let res=await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
-        let d=await res.json();
-        return { price:parseFloat(d.lastPrice), change:parseFloat(d.priceChangePercent), volume:parseFloat(d.quoteVolume) };
-    }
-    async function fetchKlinesSimple(symbol, interval="1h", limit=60){
-        let candles=await fetchCandles(symbol, interval, limit);
-        return { prices:candles.map(c=>c.close), highs:candles.map(c=>c.high), lows:candles.map(c=>c.low), closes:candles.map(c=>c.close), candles };
-    }
-
-    // ====================== CHART ======================
-    function drawCandles(candles, support, resistance){
-        let canvas=document.getElementById("candleCanvas");
-        if(!canvas||!candles.length) return;
-        let ctx=canvas.getContext("2d");
-        let w=canvas.width, h=canvas.height;
-        ctx.clearRect(0,0,w,h);
-        let minPrice=Math.min(...candles.map(c=>c.low), support||1e10);
-        let maxPrice=Math.max(...candles.map(c=>c.high), resistance||0);
-        let range=maxPrice-minPrice;
-        let candleWidth=Math.max(2, (w/candles.length)-2);
-        for(let i=0;i<candles.length;i++){
-            let c=candles[i];
-            let x=i*(candleWidth+2);
-            let yOpen=h-((c.open-minPrice)/range)*h;
-            let yClose=h-((c.close-minPrice)/range)*h;
-            let yHigh=h-((c.high-minPrice)/range)*h;
-            let yLow=h-((c.low-minPrice)/range)*h;
-            let isBullish=c.close>=c.open;
-            ctx.fillStyle=isBullish?"#00ff9f":"#ff2d55";
-            ctx.fillRect(x, Math.min(yOpen,yClose), candleWidth, Math.abs(yClose-yOpen)||1);
-            ctx.fillStyle=isBullish?"#00ff9f":"#ff2d55";
-            ctx.fillRect(x+candleWidth/2-1, yHigh, 2, yLow-yHigh);
-        }
-        if(support){
-            let ySup=h-((support-minPrice)/range)*h;
-                        ctx.beginPath(); ctx.moveTo(0,ySup); ctx.lineTo(w,ySup);
-            ctx.strokeStyle="#ffd60a"; ctx.setLineDash([8,6]); ctx.stroke();
-            ctx.fillStyle="#ffd60a"; ctx.font="10px monospace";
-            ctx.fillText(`دعم $${support.toFixed(2)}`,10,ySup-5);
-        }
-        if(resistance){
-            let yRes=h-((resistance-minPrice)/range)*h;
-            ctx.beginPath(); ctx.moveTo(0,yRes); ctx.lineTo(w,yRes);
-            ctx.strokeStyle="#ff2d55"; ctx.setLineDash([8,6]); ctx.stroke();
-            ctx.fillStyle="#ff2d55";
-            ctx.fillText(`مقاومة $${resistance.toFixed(2)}`,10,yRes+15);
-        }
-        ctx.setLineDash([]);
-    }
-
-    // ====================== UI UPDATES ======================
-    let currentAsset="BTCUSDT";
-    let historySignals=[];
-    let intervalId=null;
-
-    async function updateDashboard(){
-        try{
-            let ticker=await fetchTicker(currentAsset);
-            let { prices, highs, lows, closes, candles }=await fetchKlinesSimple(currentAsset,"1h",60);
-            let analysis=analyzeMarketWithCandles(prices,highs,lows,closes);
-            document.getElementById("price").innerText=`$${ticker.price.toFixed(2)}`;
-            document.getElementById("change").innerHTML=`<span class="${ticker.change>=0?"up":"dn"}">${ticker.change>=0?"+":""}${ticker.change.toFixed(2)}%</span>`;
-            let signalEl=document.getElementById("signal");
-            let signalText=analysis?.signal||"NEUTRAL";
-            signalEl.innerText=signalText;
-            signalEl.style.color=signalText.includes("BUY")?"#00ff9f":(signalText.includes("SELL")?"#ff2d55":"#c8ffe8");
-            document.getElementById("trend").innerText=analysis?.trend==="BULLISH"?صائدي:analysis?.trend==="BEARISH"?"هبوطي":"محايد";
-            let rsiVal=analysis?.rsi||50;
-            document.getElementById("rsi").innerText=Math.round(rsiVal);
-            let rsiFill=document.getElementById("rsiFill");
-            rsiFill.style.width=`${rsiVal}%`;
-            rsiFill.style.backgroundColor=rsiVal>70?"#ff2d55":(rsiVal<30?"#00ff9f":"#ffd60a");
-            document.getElementById("atr").innerText=analysis?.atr?`$${analysis.atr.toFixed(2)}`:"—";
-            let volVal=analysis?.volatility||0;
-            document.getElementById("vol").innerHTML=volVal.toFixed(2)+"%";
-            document.getElementById("recEntry").innerText=analysis?.entry?`$${analysis.entry.toFixed(2)}`:"—";
-            document.getElementById("recSl").innerHTML=analysis?.stopLoss?`$${analysis.stopLoss.toFixed(2)}`:"—";
-            document.getElementById("recTp").innerHTML=analysis?.takeProfit?`$${analysis.takeProfit.toFixed(2)}`:"—";
-            document.getElementById("recReason").innerText=analysis?.reason||"انتظار بيانات";
-            let tfs=["1m","5m","15m"];
-            let mtfHtml="";
-            for(let tf of tfs){
-                try{
-                    let tfData=await fetchKlinesSimple(currentAsset,tf,30);
-                    let tfAnalysis=analyzeMarketWithCandles(tfData.prices,tfData.highs,tfData.lows,tfData.closes);
-                    let sigColor="#c8ffe8";
-                    if(tfAnalysis?.signal?.includes("BUY")) sigColor="#00ff9f";
-                    else if(tfAnalysis?.signal?.includes("SELL")) sigColor="#ff2d55";
-                    mtfHtml+=`<div class="mtf-card"><div style="font-size:0.6rem;color:#9bb5b0">${tf}</div><div style="font-weight:bold;color:${sigColor}">${tfAnalysis?.signal||"NEUTRAL"}</div><div style="font-size:0.55rem">RSI:${Math.round(tfAnalysis?.rsi||50)}</div></div>`;
-                }catch(e){ mtfHtml+=`<div class="mtf-card">${tf}<br>خطأ</div>`; }
+    // Process incoming WebSocket message
+    function processMessage(data) {
+        if (data.asset) {
+            currentPrice = data.price || currentPrice;
+            const tf = data.timeframe || "1h";
+            if (!analysisData[data.asset]) analysisData[data.asset] = {};
+            // Store analysis for this asset and timeframe
+            analysisData[data.asset][tf] = data.analysis;
+            if (data.asset === currentAsset) {
+                updateUIForAsset(currentAsset);
             }
-            document.getElementById("mtfGrid").innerHTML=mtfHtml;
-            if(signalText!=="NEUTRAL"){
-                let last=historySignals[0];
-                if(!last||last.sig!==signalText||(Date.now()-last.time)>3600000){
-                    historySignals.unshift({ time:Date.now(), asset:currentAsset, sig:signalText, price:ticker.price });
-                    if(historySignals.length>10) historySignals.pop();
-                }
-            }
-            let historyHtml=historySignals.map(h=>`<div class="hist-item"><span>${new Date(h.time).toLocaleTimeString()}</span><span>${h.asset}</span><span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span><span>$${h.price.toFixed(1)}</span></div>`).join("");
-            document.getElementById("historyList").innerHTML=historyHtml||"<div style='text-align:center'>—</div>";
-            drawCandles(candles, analysis?.support, analysis?.resistance);
-            document.getElementById("lastUpdate").innerHTML=new Date().toLocaleTimeString();
-        }catch(err){ console.error(err); document.getElementById("signal").innerText="خطأ API"; }
+        }
     }
 
-    function startDataTimer(){
-        if(intervalId) clearInterval(intervalId);
-        let cnt=5;
-        const cntEl=document.getElementById("countdownData");
-        setInterval(()=>{ cnt--; if(cnt<0) cnt=5; cntEl.innerText=cnt; },1000);
-        intervalId=setInterval(updateDashboard,5000);
+    function connectWebSocket() {
+        ws = new WebSocket(WS_URL);
+        ws.onopen = () => {
+            wsStatusDiv.innerHTML = "🟢 متصل";
+            wsStatusDiv.style.borderColor = "#00ff9f";
+            console.log("WebSocket connected");
+        };
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                processMessage(msg);
+            } catch(e) { console.warn(e); }
+        };
+        ws.onerror = (err) => {
+            wsStatusDiv.innerHTML = "🔴 خطأ في الاتصال";
+            console.error(err);
+        };
+        ws.onclose = () => {
+            wsStatusDiv.innerHTML = "🟠 تم قطع الاتصال، إعادة محاولة...";
+            setTimeout(connectWebSocket, 3000);
+        };
     }
 
-    function switchAsset(asset){
-        currentAsset=asset;
-        document.querySelectorAll(".asset-btn").forEach(btn=>btn.classList.remove("active"));
+    // Asset switching
+    function switchAsset(asset) {
+        currentAsset = asset;
+        document.querySelectorAll(".asset-btn").forEach(btn => btn.classList.remove("active"));
         document.querySelector(`.asset-btn[data-asset="${asset}"]`).classList.add("active");
-        updateDashboard();
+        updateUIForAsset(currentAsset);
     }
 
-    // ====================== MODES ======================
-    function initMode(){
-        let saved=localStorage.getItem("nexus_mode");
-        if(saved==="light"){
+    // ========== Theme & Voice ==========
+    function initMode() {
+        let saved = localStorage.getItem("nexus_mode");
+        if (saved === "light") {
             document.body.classList.remove("dark"); document.body.classList.add("light");
-            document.getElementById("modeToggle").innerHTML="☀️ نهاري";
-        }else{
+            document.getElementById("modeToggle").innerHTML = "☀️ نهاري";
+        } else {
             document.body.classList.remove("light"); document.body.classList.add("dark");
-            document.getElementById("modeToggle").innerHTML="🌙 ليلي";
+            document.getElementById("modeToggle").innerHTML = "🌙 ليلي";
         }
     }
-    function toggleMode(){
-        if(document.body.classList.contains("dark")){
+    function toggleMode() {
+        if (document.body.classList.contains("dark")) {
             document.body.classList.remove("dark"); document.body.classList.add("light");
-            localStorage.setItem("nexus_mode","light");
-            document.getElementById("modeToggle").innerHTML="☀️ نهاري";
-        }else{
+            localStorage.setItem("nexus_mode", "light");
+            document.getElementById("modeToggle").innerHTML = "☀️ نهاري";
+        } else {
             document.body.classList.remove("light"); document.body.classList.add("dark");
-            localStorage.setItem("nexus_mode","dark");
-            document.getElementById("modeToggle").innerHTML="🌙 ليلي";
+            localStorage.setItem("nexus_mode", "dark");
+            document.getElementById("modeToggle").innerHTML = "🌙 ليلي";
         }
-        updateDashboard();
     }
-    function toggleVoice(){
-        voiceEnabled=!voiceEnabled;
-        let btn=document.getElementById("voiceToggle");
-        if(voiceEnabled){ btn.innerHTML="🔊 تكلم"; speakArabic("تفعيل الصوت"); }
-        else{ btn.innerHTML="🔇 كتم"; window.speechSynthesis.cancel(); }
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        let btn = document.getElementById("voiceToggle");
+        if (voiceEnabled) { btn.innerHTML = "🔊 تكلم"; speakArabic("تفعيل الصوت"); }
+        else { btn.innerHTML = "🔇 كتم"; window.speechSynthesis.cancel(); }
     }
 
-    document.querySelectorAll(".asset-btn").forEach(btn=>btn.addEventListener("click",()=>switchAsset(btn.dataset.asset)));
-    document.getElementById("modeToggle").addEventListener("click",toggleMode);
-    document.getElementById("voiceToggle").addEventListener("click",toggleVoice);
-    
+    document.querySelectorAll(".asset-btn").forEach(btn => btn.addEventListener("click", () => switchAsset(btn.dataset.asset)));
+    document.getElementById("modeToggle").addEventListener("click", toggleMode);
+    document.getElementById("voiceToggle").addEventListener("click", toggleVoice);
     initMode();
-    startDataTimer();
-    startTtsTimer();
-    updateDashboard();
+    connectWebSocket();
+
+    // Optional: fetch ticker for 24h change separately (to display price change)
+    async function fetchTicker(asset) {
+        try {
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${asset}`);
+            const data = await res.json();
+            const change = parseFloat(data.priceChangePercent);
+            changeDiv.innerHTML = `<span class="${change>=0?"up":"dn"}">${change>=0?"+":""}${change.toFixed(2)}%</span>`;
+            currentPrice = parseFloat(data.lastPrice);
+            priceDiv.innerText = `$${currentPrice.toFixed(2)}`;
+        } catch(e) { console.warn(e); }
+    }
+
+    setInterval(() => {
+        if (currentAsset) fetchTicker(currentAsset);
+    }, 10000);
+    fetchTicker(currentAsset);
 </script>
 </body>
 </html>
