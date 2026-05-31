@@ -1,187 +1,285 @@
 // ============================================================
-//  NEXUS MARKET LAB v2 — engine/analyzer.js
-//  المؤشرات: EMA, RSI, Bollinger Bands, Momentum, Volatility
+//  NEXUS MARKET LAB v3 — engine/analyzer.js
+//  المؤشرات: EMA, RSI, MACD, Bollinger Bands, ATR, الدعم/المقاومة
+//  إدارة المخاطر: Stop Loss, Take Profit, حجم العقد
 // ============================================================
 
 /**
  * حساب المتوسط المتحرك الأسي (EMA)
- * @param {number[]} prices - مصفوفة الأسعار
- * @param {number} period - الفترة الزمنية
  */
 function calcEMA(prices, period) {
-  if (prices.length < period) return null;
-
-  const k = 2 / (period + 1);
-  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
-
-  for (let i = period; i < prices.length; i++) {
-    ema = prices[i] * k + ema * (1 - k);
-  }
-
-  return ema;
+    if (prices.length < period) return null;
+    const k = 2 / (period + 1);
+    let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+    for (let i = period; i < prices.length; i++) {
+        ema = prices[i] * k + ema * (1 - k);
+    }
+    return ema;
 }
 
 /**
  * حساب مؤشر القوة النسبية (RSI)
- * @param {number[]} prices - مصفوفة الأسعار
- * @param {number} period - الفترة (افتراضي 14)
  */
 function calcRSI(prices, period = 14) {
-  if (prices.length < period + 1) return null;
+    if (prices.length < period + 1) return null;
+    let gains = 0, losses = 0;
+    for (let i = prices.length - period; i < prices.length; i++) {
+        const diff = prices[i] - prices[i - 1];
+        if (diff >= 0) gains += diff;
+        else losses -= diff;
+    }
+    let avgGain = gains / period;
+    let avgLoss = losses / period;
+    if (avgLoss === 0) return 100;
+    const rs = avgGain / avgLoss;
+    return 100 - 100 / (1 + rs);
+}
 
-  const changes = [];
-  for (let i = 1; i < prices.length; i++) {
-    changes.push(prices[i] - prices[i - 1]);
-  }
+/**
+ * حساب MACD (Moving Average Convergence Divergence)
+ * @returns {Object} { macd, signal, histogram }
+ */
+function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+    if (prices.length < slowPeriod + signalPeriod) return null;
+    const emaFast = calcEMA(prices, fastPeriod);
+    const emaSlow = calcEMA(prices, slowPeriod);
+    if (emaFast === null || emaSlow === null) return null;
+    const macdLine = emaFast - emaSlow;
+    // نحتاج إلى مخزن تاريخي لقيم MACD لحساب خط الإشارة – هنا نستخدم طريقة مبسطة:
+    // نأخذ متوسط آخر signalPeriod من قيم MACD (محاكاة)
+    const macdValues = [];
+    for (let i = prices.length - signalPeriod; i < prices.length; i++) {
+        const f = calcEMA(prices.slice(0, i+1), fastPeriod);
+        const s = calcEMA(prices.slice(0, i+1), slowPeriod);
+        if (f !== null && s !== null) macdValues.push(f - s);
+    }
+    const signalLine = macdValues.length ? macdValues.reduce((a,b)=>a+b,0)/macdValues.length : macdLine;
+    const histogram = macdLine - signalLine;
+    return { macd: macdLine, signal: signalLine, histogram };
+}
 
-  const recent = changes.slice(-period);
-  const gains = recent.filter(c => c > 0).reduce((a, b) => a + b, 0) / period;
-  const losses = Math.abs(recent.filter(c => c < 0).reduce((a, b) => a + b, 0)) / period;
-
-  if (losses === 0) return 100;
-
-  const rs = gains / losses;
-  return 100 - 100 / (1 + rs);
+/**
+ * حساب متوسط المدى الحقيقي (ATR) – يتطلب بيانات الشموع (High, Low, Close)
+ * إذا لم تتوفر، يمكن استخدامه لاحقاً. سنبني دالة تعمل على مصفوفة من الشموع.
+ * هنا سنفترض وجود مصفوفة كاملة من { high, low, close }.
+ */
+function calcATR(candles, period = 14) {
+    if (!candles || candles.length < period + 1) return null;
+    let tr = [];
+    for (let i = 1; i < candles.length; i++) {
+        const high = candles[i].high;
+        const low = candles[i].low;
+        const prevClose = candles[i-1].close;
+        const hl = high - low;
+        const hc = Math.abs(high - prevClose);
+        const lc = Math.abs(low - prevClose);
+        tr.push(Math.max(hl, hc, lc));
+    }
+    if (tr.length === 0) return null;
+    let atr = tr.slice(0, period).reduce((a,b)=>a+b,0) / period;
+    for (let i = period; i < tr.length; i++) {
+        atr = (atr * (period - 1) + tr[i]) / period;
+    }
+    return atr;
 }
 
 /**
  * حساب Bollinger Bands
- * @param {number[]} prices - مصفوفة الأسعار
- * @param {number} period - الفترة (افتراضي 20)
- * @param {number} stdDev - معامل الانحراف المعياري (افتراضي 2)
  */
 function calcBollingerBands(prices, period = 20, stdDev = 2) {
-  if (prices.length < period) return null;
-
-  const slice = prices.slice(-period);
-  const sma = slice.reduce((a, b) => a + b, 0) / period;
-  const variance = slice.reduce((sum, p) => sum + Math.pow(p - sma, 2), 0) / period;
-  const std = Math.sqrt(variance);
-
-  return {
-    upper: sma + stdDev * std,
-    middle: sma,
-    lower: sma - stdDev * std,
-    std
-  };
+    if (prices.length < period) return null;
+    const slice = prices.slice(-period);
+    const middle = slice.reduce((a,b)=>a+b,0) / period;
+    const variance = slice.reduce((sum, p) => sum + Math.pow(p - middle, 2), 0) / period;
+    const std = Math.sqrt(variance);
+    return { upper: middle + stdDev * std, middle, lower: middle - stdDev * std };
 }
 
 /**
- * حساب الزخم (Momentum)
- * @param {number[]} prices - مصفوفة الأسعار
- * @param {number} period - الفترة (افتراضي 10)
+ * تحديد مستويات الدعم والمقاومة الديناميكية بناءً على القمم والقيعان المحلية
+ * يعيد كائن { support, resistance }
  */
-function calcMomentum(prices, period = 10) {
-  if (prices.length < period + 1) return null;
-  const current = prices[prices.length - 1];
-  const past = prices[prices.length - 1 - period];
-  return ((current - past) / past) * 100;
+function findSupportResistance(prices, lookback = 20) {
+    if (prices.length < lookback) return { support: null, resistance: null };
+    const slice = prices.slice(-lookback);
+    const resistance = Math.max(...slice);
+    const support = Math.min(...slice);
+    // يمكن تحسين الخوارزمية لاستخدام القمم/القيعان المتكررة، لكن هذه كافية للتطبيق الأولي
+    return { support, resistance };
 }
 
 /**
- * حساب التقلب (Volatility) بناءً على الانحراف المعياري
- * @param {number[]} prices - مصفوفة الأسعار
- * @param {number} period - الفترة (افتراضي 20)
+ * حساب حجم العقد بناءً على نسبة المخاطرة
+ * @param {number} entryPrice - سعر الدخول
+ * @param {number} stopLossPrice - سعر وقف الخسارة
+ * @param {number} accountBalance - رصيد الحساب (دولار)
+ * @param {number} riskPercent - نسبة المخاطرة (مثلاً 2%)
+ * @returns {number} حجم العقد (بالوحدات الأساسية)
  */
-function calcVolatility(prices, period = 20) {
-  if (prices.length < period) return null;
-
-  const slice = prices.slice(-period);
-  const mean = slice.reduce((a, b) => a + b, 0) / period;
-  const variance = slice.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / period;
-  return Math.sqrt(variance) / mean; // معامل الاختلاف (نسبي)
+function computePositionSize(entryPrice, stopLossPrice, accountBalance = 10000, riskPercent = 2) {
+    const riskAmount = accountBalance * (riskPercent / 100);
+    const riskPerUnit = Math.abs(entryPrice - stopLossPrice);
+    if (riskPerUnit === 0) return 0;
+    return riskAmount / riskPerUnit;
 }
 
 /**
- * الدالة الرئيسية للتحليل — تُستدعى من server.js
- * @param {number[]} prices - مصفوفة الأسعار المتراكمة
+ * حساب Stop Loss بناءً على ATR
  * @param {number} currentPrice - السعر الحالي
- * @param {string} asset - اسم العملة
+ * @param {number} atr - قيمة ATR
+ * @param {string} direction - "long" أو "short"
+ * @param {number} multiplier - مضاعف ATR (افتراضي 2)
  */
-function analyze(prices, currentPrice, asset) {
-  // --- حساب المؤشرات ---
-  const ema9  = calcEMA(prices, 9);
-  const ema21 = calcEMA(prices, 21);
-  const ema50 = calcEMA(prices, 50);
-  const rsi   = calcRSI(prices, 14);
-  const bb    = calcBollingerBands(prices, 20, 2);
-  const mom   = calcMomentum(prices, 10);
-  const vol   = calcVolatility(prices, 20);
+function computeStopLoss(currentPrice, atr, direction = "long", multiplier = 2) {
+    if (direction === "long") return currentPrice - (multiplier * atr);
+    else return currentPrice + (multiplier * atr);
+}
 
-  // --- تحديد الاتجاه (Trend) ---
-  let trend = "NEUTRAL";
-  if (ema9 && ema21 && ema50) {
-    if (ema9 > ema21 && ema21 > ema50) {
-      trend = "↑ BULLISH";
-    } else if (ema9 < ema21 && ema21 < ema50) {
-      trend = "↓ BEARISH";
-    } else if (ema9 > ema21) {
-      trend = "↗ WEAK BULL";
-    } else {
-      trend = "↘ WEAK BEAR";
+/**
+ * حساب Take Profit بناءً على نسبة مخاطرة/ربح
+ * @param {number} entryPrice - سعر الدخول
+ * @param {number} stopLoss - سعر وقف الخسارة
+ * @param {number} riskRewardRatio - نسبة الربح إلى المخاطرة (مثلاً 2)
+ * @param {string} direction
+ */
+function computeTakeProfit(entryPrice, stopLoss, riskRewardRatio = 2, direction = "long") {
+    const risk = Math.abs(entryPrice - stopLoss);
+    if (direction === "long") return entryPrice + (risk * riskRewardRatio);
+    else return entryPrice - (risk * riskRewardRatio);
+}
+
+/**
+ * الدالة الرئيسية للتحليل المتكامل
+ * @param {number[]} prices - مصفوفة أسعار الإغلاق (للمؤشرات السعرية)
+ * @param {number} currentPrice - السعر الحالي
+ * @param {string} asset - اسم العملة (مثل BTCUSDT)
+ * @param {Object[]} candles - (اختياري) مصفوفة شموع كاملة { high, low, close } لحساب ATR
+ * @param {Object} riskConfig - إعدادات المخاطرة (balance, riskPercent, riskReward)
+ * @returns {Object} تحليل كامل للتوصيات وإدارة المخاطر
+ */
+function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
+    // إعدادات افتراضية للمخاطرة
+    const accountBalance = riskConfig.balance || 10000;
+    const riskPercent = riskConfig.riskPercent || 2;
+    const riskRewardRatio = riskConfig.riskReward || 2;
+
+    // --- حساب المؤشرات الأساسية ---
+    const ema9 = calcEMA(prices, 9);
+    const ema21 = calcEMA(prices, 21);
+    const ema50 = calcEMA(prices, 50);
+    const rsi = calcRSI(prices, 14);
+    const macdObj = calcMACD(prices);
+    const bb = calcBollingerBands(prices, 20, 2);
+    const { support, resistance } = findSupportResistance(prices, 20);
+
+    // حساب ATR (إذا توفرت بيانات الشموع)
+    let atr = null;
+    if (candles && candles.length >= 15) {
+        atr = calcATR(candles, 14);
     }
-  }
 
-  // --- تحديد الإشارة (Signal) ---
-  let signal = "NEUTRAL";
-  let signalScore = 0;
+    // --- تحديد الاتجاه العام ---
+    let trend = "NEUTRAL";
+    if (ema9 && ema21 && ema50) {
+        if (ema9 > ema21 && ema21 > ema50) trend = "UP";
+        else if (ema9 < ema21 && ema21 < ema50) trend = "DOWN";
+        else if (ema9 > ema21) trend = "WEAK_UP";
+        else trend = "WEAK_DOWN";
+    }
 
-  // RSI
-  if (rsi !== null) {
-    if (rsi < 30) signalScore += 2;       // ذعر بيع → فرصة شراء
-    else if (rsi < 45) signalScore += 1;
-    else if (rsi > 70) signalScore -= 2;  // ذعر شراء → فرصة بيع
-    else if (rsi > 55) signalScore -= 1;
-  }
+    // --- حساب نقاط القوة (Score) للإشارة ---
+    let score = 0;
 
-  // EMA crossover
-  if (ema9 && ema21) {
-    if (ema9 > ema21) signalScore += 1;
-    else signalScore -= 1;
-  }
+    // RSI
+    if (rsi !== null) {
+        if (rsi < 30) score += 2;      // منطقة ذعر بيع
+        else if (rsi < 45) score += 1;
+        else if (rsi > 70) score -= 2; // منطقة ذعر شراء
+        else if (rsi > 55) score -= 1;
+    }
 
-  // Bollinger Bands
-  if (bb) {
-    if (currentPrice < bb.lower) signalScore += 2;  // تحت الحد السفلي → شراء
-    else if (currentPrice > bb.upper) signalScore -= 2; // فوق الحد العلوي → بيع
-  }
+    // تقاطع EMAs
+    if (ema9 && ema21) {
+        if (ema9 > ema21) score += 1;
+        else score -= 1;
+    }
 
-  // Momentum
-  if (mom !== null) {
-    if (mom > 0.5) signalScore += 1;
-    else if (mom < -0.5) signalScore -= 1;
-  }
+    // Bollinger Bands
+    if (bb) {
+        if (currentPrice < bb.lower) score += 2;
+        else if (currentPrice > bb.upper) score -= 2;
+    }
 
-  // تحديد الإشارة النهائية
-  if (signalScore >= 4) signal = "HIGH_PROB_BUY";
-  else if (signalScore >= 2) signal = "BUY";
-  else if (signalScore <= -4) signal = "HIGH_PROB_SELL";
-  else if (signalScore <= -2) signal = "SELL";
-  else if (vol !== null && vol > 0.02) signal = "RISKY_MARKET";
-  else signal = "NEUTRAL";
+    // MACD
+    if (macdObj) {
+        if (macdObj.macd > 0) score += 1;
+        else score -= 1;
+        if (macdObj.histogram > 0) score += 0.5;
+        else score -= 0.5;
+    }
 
-  // --- تنسيق الزخم ---
-  const momentumFormatted = mom !== null
-    ? (mom >= 0 ? `+${mom.toFixed(3)}%` : `${mom.toFixed(3)}%`)
-    : "N/A";
+    // الدعم والمقاومة
+    if (support && currentPrice < support * 1.02) score += 1;
+    if (resistance && currentPrice > resistance * 0.98) score -= 1;
 
-  // --- الإخراج ---
-  return {
-    trend,
-    signal,
-    momentum: momentumFormatted,
-    volatility: vol !== null ? vol.toFixed(6) : "0",
-    rsi: rsi !== null ? rsi.toFixed(1) : "N/A",
-    ema9:  ema9  !== null ? ema9.toFixed(4)  : "N/A",
-    ema21: ema21 !== null ? ema21.toFixed(4) : "N/A",
-    ema50: ema50 !== null ? ema50.toFixed(4) : "N/A",
-    bb: bb ? {
-      upper:  bb.upper.toFixed(4),
-      middle: bb.middle.toFixed(4),
-      lower:  bb.lower.toFixed(4)
-    } : null,
-    score: signalScore
-  };
+    // --- الإشارة النهائية ---
+    let signal = "NEUTRAL";
+    if (score >= 4) signal = "STRONG_BUY";
+    else if (score >= 2) signal = "BUY";
+    else if (score <= -4) signal = "STRONG_SELL";
+    else if (score <= -2) signal = "SELL";
+
+    // --- حساب إدارة المخاطر (Stop Loss, Take Profit, Position Size) ---
+    let stopLoss = null, takeProfit = null, positionSize = null;
+    let direction = "long";
+    if (signal.includes("BUY")) direction = "long";
+    else if (signal.includes("SELL")) direction = "short";
+
+    if (atr && atr > 0) {
+        stopLoss = computeStopLoss(currentPrice, atr, direction, 2);
+        takeProfit = computeTakeProfit(currentPrice, stopLoss, riskRewardRatio, direction);
+        positionSize = computePositionSize(currentPrice, stopLoss, accountBalance, riskPercent);
+    } else {
+        // بديل مبسط بدون ATR: استخدام نسبة مئوية ثابتة (2% للوقف، 4% للهدف)
+        const stopPercent = direction === "long" ? 0.98 : 1.02;
+        const takePercent = direction === "long" ? 1.04 : 0.96;
+        stopLoss = currentPrice * stopPercent;
+        takeProfit = currentPrice * takePercent;
+        positionSize = computePositionSize(currentPrice, stopLoss, accountBalance, riskPercent);
+    }
+
+    // سبب منطقي للتوصية
+    let reason = "";
+    if (signal.includes("BUY")) {
+        reason = `مؤشرات إيجابية: RSI ${rsi?.toFixed(1)}، EMAs صاعدة، ${bb && currentPrice < bb.lower ? 'السعر تحت Bollinger Lower' : ''} ${macdObj && macdObj.macd > 0 ? 'MACD إيجابي' : ''}`;
+    } else if (signal.includes("SELL")) {
+        reason = `مؤشرات سلبية: RSI ${rsi?.toFixed(1)}، EMAs هابطة، ${bb && currentPrice > bb.upper ? 'السعر فوق Bollinger Upper' : ''} ${macdObj && macdObj.macd < 0 ? 'MACD سلبي' : ''}`;
+    } else {
+        reason = `السوق في حالة تجميع. الدعم $${support?.toFixed(2)}، المقاومة $${resistance?.toFixed(2)}. انتظر كسر واضح.`;
+    }
+
+    // --- الإخراج المتوافق مع WebSocket ---
+    return {
+        asset,
+        price: currentPrice,
+        signal,
+        trend,
+        rsi: rsi !== null ? rsi : 50,
+        atr: atr !== null ? atr : 0,
+        macd: macdObj ? macdObj.macd : 0,
+        macdSignal: macdObj ? macdObj.signal : 0,
+        macdHistogram: macdObj ? macdObj.histogram : 0,
+        bbUpper: bb ? bb.upper : null,
+        bbLower: bb ? bb.lower : null,
+        support,
+        resistance,
+        score,
+        entry: currentPrice,
+        stopLoss,
+        takeProfit,
+        positionSize: positionSize ? positionSize.toFixed(4) : "0",
+        reason
+    };
 }
 
 module.exports = { analyze };
