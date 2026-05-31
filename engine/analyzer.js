@@ -1,7 +1,13 @@
 // ============================================================
 //  NEXUS MARKET LAB v3 — engine/analyzer.js
+//  المؤشرات: EMA, RSI, MACD, Bollinger Bands, ATR, الدعم/المقاومة
+//  إدارة المخاطر: Stop Loss, Take Profit, حجم العقد
+//  تم التعديل: تقليل الحد الأدنى للشموع لحساب ATR إلى 10 (بدلاً من 15)
 // ============================================================
 
+/**
+ * حساب المتوسط المتحرك الأسي (EMA)
+ */
 function calcEMA(prices, period) {
     if (prices.length < period) return null;
     const k = 2 / (period + 1);
@@ -12,6 +18,9 @@ function calcEMA(prices, period) {
     return ema;
 }
 
+/**
+ * حساب مؤشر القوة النسبية (RSI)
+ */
 function calcRSI(prices, period = 14) {
     if (prices.length < period + 1) return null;
     let gains = 0, losses = 0;
@@ -27,6 +36,9 @@ function calcRSI(prices, period = 14) {
     return 100 - 100 / (1 + rs);
 }
 
+/**
+ * حساب MACD
+ */
 function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
     if (prices.length < slowPeriod + signalPeriod) return null;
     const emaFast = calcEMA(prices, fastPeriod);
@@ -44,6 +56,9 @@ function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
     return { macd: macdLine, signal: signalLine, histogram };
 }
 
+/**
+ * حساب ATR (يتطلب شموع كاملة)
+ */
 function calcATR(candles, period = 14) {
     if (!candles || candles.length < period + 1) return null;
     const tr = [];
@@ -64,6 +79,9 @@ function calcATR(candles, period = 14) {
     return atr;
 }
 
+/**
+ * حساب Bollinger Bands
+ */
 function calcBollingerBands(prices, period = 20, stdDev = 2) {
     if (prices.length < period) return null;
     const slice = prices.slice(-period);
@@ -73,6 +91,9 @@ function calcBollingerBands(prices, period = 20, stdDev = 2) {
     return { upper: middle + stdDev * std, middle, lower: middle - stdDev * std };
 }
 
+/**
+ * الدعم والمقاومة
+ */
 function findSupportResistance(prices, lookback = 20) {
     if (prices.length < lookback) return { support: null, resistance: null };
     const slice = prices.slice(-lookback);
@@ -81,6 +102,9 @@ function findSupportResistance(prices, lookback = 20) {
     return { support, resistance };
 }
 
+/**
+ * حجم العقد
+ */
 function computePositionSize(entryPrice, stopLossPrice, accountBalance = 10000, riskPercent = 2) {
     const riskAmount = accountBalance * (riskPercent / 100);
     const riskPerUnit = Math.abs(entryPrice - stopLossPrice);
@@ -88,17 +112,26 @@ function computePositionSize(entryPrice, stopLossPrice, accountBalance = 10000, 
     return riskAmount / riskPerUnit;
 }
 
+/**
+ * Stop Loss
+ */
 function computeStopLoss(currentPrice, atr, direction = "long", multiplier = 2) {
     if (direction === "long") return currentPrice - (multiplier * atr);
     else return currentPrice + (multiplier * atr);
 }
 
+/**
+ * Take Profit
+ */
 function computeTakeProfit(entryPrice, stopLoss, riskRewardRatio = 2, direction = "long") {
     const risk = Math.abs(entryPrice - stopLoss);
     if (direction === "long") return entryPrice + (risk * riskRewardRatio);
     else return entryPrice - (risk * riskRewardRatio);
 }
 
+/**
+ * الدالة الرئيسية للتحليل
+ */
 function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
     const accountBalance = riskConfig.balance || 10000;
     const riskPercent = riskConfig.riskPercent || 2;
@@ -113,7 +146,8 @@ function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
     const { support, resistance } = findSupportResistance(prices, 20);
     
     let atr = null;
-    if (candles && candles.length >= 15) {
+    // ⭐ التعديل الرئيسي: خفض الحد الأدنى من 15 إلى 10
+    if (candles && candles.length >= 10) {
         atr = calcATR(candles, 14);
     }
 
