@@ -59,7 +59,7 @@
       padding: 5px 12px;
       border-radius: 40px;
     }
-    select, button {
+    select, button, input {
       background: #0f1f2c;
       border: 1px solid #2a5a6a;
       color: #e8f4f8;
@@ -119,10 +119,6 @@
       background: #030a12;
       border-radius: 12px;
     }
-    .audio-toggle {
-      background: #0f2a2a;
-      border-color: #2a7a6a;
-    }
     footer {
       margin-top: 30px;
       text-align: center;
@@ -166,7 +162,7 @@
     </div>
     <div class="control-group">
       <span>💰 رصيد الحساب ($)</span>
-      <input type="number" id="balanceInput" value="10000" step="500" style="width:100px; background:#0f1f2c; border:1px solid #2a5a6a; color:white; border-radius:20px; padding:6px;">
+      <input type="number" id="balanceInput" value="10000" step="500" style="width:100px;">
     </div>
     <div class="control-group">
       <span>⚡ المخاطرة (%)</span>
@@ -191,6 +187,6 @@
   </footer>
 </div>
 
-<script src="index.js"></script>
+<script type="module" src="index.js"></script>
 </body>
 </html>
