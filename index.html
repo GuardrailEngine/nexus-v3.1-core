@@ -1,522 +1,196 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS v4.0 – المذيع الإمبراطوري (WebSocket + تحليل كمي)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{
-            font-family:'Share Tech Mono',monospace;
-            padding:20px;
-            transition: background-color 0.3s, color 0.2s;
-            direction: ltr;
-        }
-        body.dark{
-            background:#020608;
-            color:#c8ffe8;
-        }
-        body.light{
-            background:#e8f0f5;
-            color:#1a2a3a;
-        }
-        .card{
-            border:1px solid rgba(0,255,159,0.2);
-            background:#060d12;
-            padding:18px;
-            margin-bottom:16px;
-            border-radius:4px;
-        }
-        body.light .card{
-            background:#ffffff;
-            border:1px solid #c0d0dd;
-        }
-        .title{
-            font-family:'Orbitron',monospace;
-            font-size:0.7rem;
-            letter-spacing:3px;
-            color:#00ff9f;
-            margin-bottom:12px;
-            text-transform:uppercase;
-        }
-        body.light .title{
-            color:#006b4f;
-        }
-        .flex-row{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:10px;
-        }
-        .asset-buttons{
-            display:flex;
-            gap:12px;
-            margin-bottom:20px;
-            flex-wrap:wrap;
-        }
-        .asset-btn{
-            background:#0a1520;
-            border:1px solid rgba(0,255,159,0.3);
-            padding:10px 20px;
-            font-family:'Orbitron',monospace;
-            font-weight:bold;
-            cursor:pointer;
-            transition:0.2s;
-            color:#c8ffe8;
-        }
-        body.light .asset-btn{
-            background:#eef3f7;
-            border:1px solid #90a4b2;
-            color:#1a3a4a;
-        }
-        .asset-btn.active{
-            border-color:#00ff9f;
-            background:rgba(0,255,159,0.1);
-            color:#00ff9f;
-            box-shadow:0 0 12px rgba(0,255,159,0.2);
-        }
-        body.light .asset-btn.active{
-            border-color:#006b4f;
-            background:#d4f0e8;
-            color:#006b4f;
-        }
-        .signal-box{
-            font-size:1.5rem;
-            font-weight:bold;
-            font-family:'Orbitron',monospace;
-            letter-spacing:2px;
-        }
-        .price{font-size:1.8rem;font-weight:bold}
-        body.dark .price{color:#00ff9f}
-        body.light .price{color:#006b4f}
-        .change{font-size:0.8rem;margin-top:5px}
-        .up{color:#00ff9f}
-        .dn{color:#ff2d55}
-        .stats-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-            gap:12px;
-            margin:20px 0;
-        }
-        .stat{
-            background:#0a1520;
-            padding:12px;
-            text-align:center;
-            border:1px solid rgba(0,255,159,0.15);
-        }
-        body.light .stat{
-            background:#f7fafc;
-            border:1px solid #cbdbe2;
-        }
-        .stat-label{font-size:0.65rem;margin-bottom:6px}
-        .stat-value{font-size:1rem;font-weight:bold}
-        .rsi-bar{height:3px;background:#1a2a2a;margin-top:6px}
-        .rsi-fill{height:100%;border-radius:2px}
-        .mtf-grid{
-            display:grid;
-            grid-template-columns:repeat(4,1fr);
-            gap:10px;
-            margin-bottom:16px;
-        }
-        .mtf-card{
-            background:#0a1520;
-            padding:12px;
-            text-align:center;
-            border:1px solid rgba(0,255,159,0.2);
-        }
-        body.light .mtf-card{
-            background:#f0f5f8;
-            border:1px solid #cbdae2;
-        }
-        .recommendation-card{
-            background:#0a1520;
-            padding:15px;
-            margin-top:15px;
-            border-left:4px solid #00ff9f;
-        }
-        body.light .recommendation-card{
-            background:#f7fafc;
-            border-left-color:#007a5e;
-        }
-        .history-list{
-            max-height:180px;
-            overflow-y:auto;
-            font-size:0.7rem;
-        }
-        .hist-item{
-            display:flex;
-            justify-content:space-between;
-            padding:6px 0;
-            border-bottom:1px solid rgba(0,255,159,0.1);
-        }
-        .status{
-            margin-top:20px;
-            font-size:0.6rem;
-            text-align:center;
-        }
-        .rec-entry{color:#00ff9f;font-weight:bold}
-        .rec-sl{color:#ffd60a}
-        .rec-tp{color:#00cc7a}
-        body.light .rec-entry{color:#007a5e}
-        body.light .rec-sl{color:#bc7a00}
-        body.light .rec-tp{color:#0f6e52}
-        .mode-toggle, .voice-toggle{
-            background:#0a1520;
-            border:1px solid rgba(0,255,159,0.3);
-            padding:5px 12px;
-            border-radius:20px;
-            cursor:pointer;
-            font-family:'Orbitron',monospace;
-            font-size:0.7rem;
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-        }
-        .header-right{
-            display:flex;
-            align-items:center;
-            gap:15px;
-            flex-wrap:wrap;
-        }
-        .voice-controls{
-            display:flex;
-            align-items:center;
-            gap:6px;
-            background:#0a1520;
-            padding:4px 8px;
-            border-radius:20px;
-            border:1px solid rgba(0,255,159,0.3);
-        }
-        body.light .voice-controls{
-            background:#eef3f7;
-            border-color:#90a4b2;
-        }
-        .ws-status{
-            font-size:0.7rem;
-            font-family:'Orbitron',monospace;
-            background:#0a1520;
-            padding:4px 12px;
-            border-radius:20px;
-            border:1px solid #00ff9f;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>NEXUS v3.5 — المنبع الإمبراطوري</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #050b14;
+      font-family: 'Inter', sans-serif;
+      color: #e8f4f8;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1a3440;
+    }
+    .title h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #fff, #00e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .badge {
+      font-family: monospace;
+      background: #0a2a38;
+      padding: 4px 12px;
+      border-radius: 24px;
+      font-size: 0.75rem;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      background: #0a1620;
+      padding: 15px;
+      border-radius: 16px;
+      border: 1px solid #1a3440;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f1f2c;
+      padding: 5px 12px;
+      border-radius: 40px;
+    }
+    select, button {
+      background: #0f1f2c;
+      border: 1px solid #2a5a6a;
+      color: #e8f4f8;
+      padding: 6px 12px;
+      border-radius: 24px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1a4a5a;
+      border-color: #00e0ff;
+    }
+    .metric-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #0a1620;
+      border: 1px solid #1a3440;
+      border-radius: 16px;
+      padding: 12px 16px;
+    }
+    .card-label {
+      font-size: 0.7rem;
+      color: #6a8a9a;
+      letter-spacing: 1px;
+    }
+    .card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .signal {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    .signal.BUY { color: #00e676; }
+    .signal.SELL { color: #ff3d5a; }
+    .signal.NEUTRAL { color: #ffaa00; }
+    .reason {
+      font-size: 0.8rem;
+      color: #9ab0c0;
+      margin-top: 8px;
+    }
+    .candles-container {
+      background: #0a1620;
+      border: 1px solid #1a3440;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      background: #030a12;
+      border-radius: 12px;
+    }
+    .audio-toggle {
+      background: #0f2a2a;
+      border-color: #2a7a6a;
+    }
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #4a6a7a;
+      border-top: 1px solid #1a3440;
+      padding-top: 16px;
+    }
+    @media (max-width: 700px) {
+      .metric-panel { grid-template-columns: repeat(2,1fr); }
+      .card-value { font-size: 1.2rem; }
+    }
+  </style>
 </head>
-<body class="dark">
+<body>
+<div class="container">
+  <div class="header">
+    <div class="title"><h1>⧉ NEXUS v3.5 — المنبع الإمبراطوري</h1></div>
+    <div class="badge">Binance · 1h candles · AI Analytics</div>
+  </div>
 
-<div class="card">
-    <div class="flex-row">
-        <div class="title">⚡ NEXUS v4.0 — المذيع الإمبراطوري (WebSocket + تحليل كمي)</div>
-        <div class="header-right">
-            <div class="ws-status" id="wsStatus">🔌 جاري الاتصال...</div>
-            <div class="voice-controls">
-                <span>🔊</span>
-                <select id="voiceSpeed">
-                    <option value="0.8">بطيء</option>
-                    <option value="1" selected>طبيعي</option>
-                    <option value="1.3">سريع</option>
-                </select>
-            </div>
-            <div class="voice-toggle" id="voiceToggle">🔊 تكلم</div>
-            <div class="mode-toggle" id="modeToggle">🌙 ليلي</div>
-        </div>
+  <div class="controls">
+    <div class="control-group">
+      <span>📊 الزوج</span>
+      <select id="symbolSelect">
+        <option value="BTCUSDT">BTC/USDT</option>
+        <option value="ETHUSDT">ETH/USDT</option>
+        <option value="BNBUSDT">BNB/USDT</option>
+        <option value="SOLUSDT">SOL/USDT</option>
+        <option value="XRPUSDT">XRP/USDT</option>
+      </select>
     </div>
-    <div class="asset-buttons" id="assetButtons">
-        <button class="asset-btn active" data-asset="BTCUSDT">₿ BTC</button>
-        <button class="asset-btn" data-asset="ETHUSDT">Ξ ETH</button>
-        <button class="asset-btn" data-asset="SOLUSDT">◎ SOL</button>
+    <div class="control-group">
+      <span>⏱️ الفاصل</span>
+      <select id="intervalSelect">
+        <option value="15m">15 دقيقة</option>
+        <option value="1h" selected>1 ساعة</option>
+        <option value="4h">4 ساعات</option>
+        <option value="1d">يومي</option>
+      </select>
     </div>
-    <div class="flex-row">
-        <div><div class="title">الإشارة الحية</div><div class="signal-box" id="signal">—</div></div>
-        <div style="text-align:right"><div class="price" id="price">$—</div><div class="change" id="change">— %</div></div>
+    <div class="control-group">
+      <span>💰 رصيد الحساب ($)</span>
+      <input type="number" id="balanceInput" value="10000" step="500" style="width:100px; background:#0f1f2c; border:1px solid #2a5a6a; color:white; border-radius:20px; padding:6px;">
     </div>
-</div>
-
-<div class="card">
-    <div class="title">📊 المؤشرات الفنية (من الخادم)</div>
-    <div class="stats-grid">
-        <div class="stat"><div class="stat-label">الاتجاه</div><div class="stat-value" id="trend">—</div></div>
-        <div class="stat"><div class="stat-label">RSI (14)</div><div class="stat-value" id="rsi">—</div><div class="rsi-bar"><div class="rsi-fill" id="rsiFill" style="width:0%"></div></div></div>
-        <div class="stat"><div class="stat-label">ATR (14)</div><div class="stat-value" id="atr">—</div></div>
-        <div class="stat"><div class="stat-label">MACD</div><div class="stat-value" id="macd">—</div></div>
+    <div class="control-group">
+      <span>⚡ المخاطرة (%)</span>
+      <input type="number" id="riskInput" value="2" step="0.5" style="width:70px;">
     </div>
-</div>
-
-<div class="card">
-    <div class="title">🕒 تحليل الأطر الزمنية (1د / 5د / 15د / 1س)</div>
-    <div class="mtf-grid" id="mtfGrid"></div>
-    <div style="text-align:right; font-size:0.7rem">آخر تحديث: <span id="lastUpdate">—</span></div>
-</div>
-
-<div class="card">
-    <div class="title">🎯 التوصية المتكاملة (إدارة مخاطر + تحليل)</div>
-    <div class="recommendation-card" id="recCard">
-        <div>📈 سعر الدخول: <span id="recEntry" class="rec-entry">—</span></div>
-        <div>🛑 وقف الخسارة: <span id="recSl" class="rec-sl">—</span></div>
-        <div>🎯 جني الأرباح: <span id="recTp" class="rec-tp">—</span></div>
-        <div>📦 حجم العقد: <span id="positionSize" class="rec-sl">—</span></div>
-        <div>💡 التحليل: <span id="recReason">—</span></div>
+    <div class="control-group">
+      <button id="refreshBtn">🔄 تحديث البيانات</button>
+      <button id="audioToggleBtn" class="audio-toggle">🔊 تشغيل الصوت</button>
     </div>
+  </div>
+
+  <div class="metric-panel" id="metricsPanel">
+    <!-- سيتم تعبئتها بواسطة JS -->
+  </div>
+
+  <div class="candles-container">
+    <canvas id="candleCanvas" width="800" height="400" style="width:100%; height:auto; max-height:400px"></canvas>
+  </div>
+
+  <footer>
+    NEXUS v3.5 — محرك تحليل فوري | بيانات Binance | توصيات آلية مع إدارة المخاطر
+  </footer>
 </div>
 
-<div class="card">
-    <div class="title">📜 سجل الإشارات السابقة</div>
-    <div class="history-list" id="historyList"><div style="text-align:center">—</div></div>
-</div>
-
-<div class="status">
-    <span>🟢 WebSocket متصل بـ NEXUS MARKET LAB v3</span> &nbsp;|&nbsp; <span id="wsTimer">—</span>
-</div>
-
-<script>
-    // ========== الإعدادات ==========
-    // 🔧 **هام**: غيّر عنوان WebSocket إلى عنوان الخادم الحقيقي بعد نشره على Render
-    // مثال: const WS_URL = "wss://nexus-market-lab.onrender.com";
-    const WS_URL = "ws://localhost:3000";   // <--- استبدل برابط الخادم الحقيقي
-
-    let ws = null;
-    let currentAsset = "BTCUSDT";
-    let voiceEnabled = true;
-    let lastSpokenText = "";
-    let historySignals = [];
-    let analysisData = {}; // لكل أصل وكل إطار زمني
-    let currentPrice = 0;
-
-    // عناصر DOM
-    const wsStatusDiv = document.getElementById("wsStatus");
-    const signalDiv = document.getElementById("signal");
-    const priceDiv = document.getElementById("price");
-    const changeDiv = document.getElementById("change");
-    const trendDiv = document.getElementById("trend");
-    const rsiDiv = document.getElementById("rsi");
-    const rsiFill = document.getElementById("rsiFill");
-    const atrDiv = document.getElementById("atr");
-    const macdDiv = document.getElementById("macd");
-    const recEntrySpan = document.getElementById("recEntry");
-    const recSlSpan = document.getElementById("recSl");
-    const recTpSpan = document.getElementById("recTp");
-    const positionSizeSpan = document.getElementById("positionSize");
-    const recReasonSpan = document.getElementById("recReason");
-    const mtfGrid = document.getElementById("mtfGrid");
-    const lastUpdateSpan = document.getElementById("lastUpdate");
-    const historyListDiv = document.getElementById("historyList");
-
-    // ========== الصوت ==========
-    function speakArabic(text) {
-        if (!voiceEnabled) return;
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "ar-SA";
-        const speed = parseFloat(document.getElementById("voiceSpeed").value);
-        utterance.rate = speed;
-        utterance.pitch = 1;
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function generateArabicRecommendation(asset, signal, entry, sl, tp, reason) {
-        let signalAr = "";
-        if (signal === "STRONG_BUY") signalAr = "شراء قوي";
-        else if (signal === "BUY") signalAr = "شراء";
-        else if (signal === "NEUTRAL") signalAr = "محايد";
-        else if (signal === "SELL") signalAr = "بيع";
-        else if (signal === "STRONG_SELL") signalAr = "بيع قوي";
-        else signalAr = signal;
-        
-        let assetAr = "";
-        if (asset === "BTCUSDT") assetAr = "بيتكوين";
-        else if (asset === "ETHUSDT") assetAr = "إيثيريوم";
-        else if (asset === "SOLUSDT") assetAr = "سولانا";
-        else assetAr = asset;
-        
-        return `توصية لـ ${assetAr}: ${signalAr}. سعر الدخول ${entry}. وقف الخسارة ${sl}. جني الأرباح ${tp}. التحليل: ${reason}`;
-    }
-
-    // تحديث الواجهة بناءً على آخر تحليل للأصل الحالي
-    function updateUIForAsset(asset) {
-        if (!analysisData[asset]) return;
-        // استخدم التحليل للإطار الزمني "1h" كأساس للبطاقة الرئيسية
-        let mainAnalysis = analysisData[asset]["1h"];
-        if (!mainAnalysis) {
-            // إذا لم يوجد 1h، خذ أول إطار متاح
-            const keys = Object.keys(analysisData[asset]);
-            if (keys.length) mainAnalysis = analysisData[asset][keys[0]];
-        }
-        if (!mainAnalysis) return;
-
-        // تحديث الإشارة والسعر
-        signalDiv.innerText = mainAnalysis.signal || "NEUTRAL";
-        signalDiv.style.color = (mainAnalysis.signal === "BUY" || mainAnalysis.signal === "STRONG_BUY") ? "#00ff9f" :
-                                ((mainAnalysis.signal === "SELL" || mainAnalysis.signal === "STRONG_SELL") ? "#ff2d55" : "#c8ffe8");
-        priceDiv.innerText = `$${currentPrice.toFixed(2)}`;
-        changeDiv.innerHTML = `<span class="up">RSI: ${mainAnalysis.rsi?.toFixed(1) || "—"}</span>`;
-        
-        trendDiv.innerText = mainAnalysis.trend === "UP" ? "صاعد" : (mainAnalysis.trend === "DOWN" ? "هابط" : "محايد");
-        const rsiVal = mainAnalysis.rsi || 50;
-        rsiDiv.innerText = Math.round(rsiVal);
-        rsiFill.style.width = `${rsiVal}%`;
-        rsiFill.style.backgroundColor = rsiVal > 70 ? "#ff2d55" : (rsiVal < 30 ? "#00ff9f" : "#ffd60a");
-        atrDiv.innerText = mainAnalysis.atr ? `$${mainAnalysis.atr.toFixed(2)}` : "—";
-        macdDiv.innerText = mainAnalysis.macd ? mainAnalysis.macd.toFixed(2) : "—";
-        
-        recEntrySpan.innerText = mainAnalysis.entry ? `$${mainAnalysis.entry.toFixed(2)}` : "—";
-        recSlSpan.innerText = mainAnalysis.stopLoss ? `$${mainAnalysis.stopLoss.toFixed(2)}` : "—";
-        recTpSpan.innerText = mainAnalysis.takeProfit ? `$${mainAnalysis.takeProfit.toFixed(2)}` : "—";
-        positionSizeSpan.innerText = mainAnalysis.positionSize ? mainAnalysis.positionSize : "—";
-        recReasonSpan.innerText = mainAnalysis.reason || "انتظار تحديث";
-        
-        // عرض الأطر الزمنية المتعددة
-        let mtfHtml = "";
-        const timeframesOrder = ["1m","5m","15m","1h"];
-        for (let tf of timeframesOrder) {
-            const tfData = analysisData[asset][tf];
-            if (tfData) {
-                let sigColor = "#c8ffe8";
-                if (tfData.signal && tfData.signal.includes("BUY")) sigColor = "#00ff9f";
-                else if (tfData.signal && tfData.signal.includes("SELL")) sigColor = "#ff2d55";
-                mtfHtml += `<div class="mtf-card">
-                    <div style="font-size:0.6rem">${tf}</div>
-                    <div style="font-weight:bold;color:${sigColor}">${tfData.signal || "NEUTRAL"}</div>
-                    <div style="font-size:0.55rem">RSI:${Math.round(tfData.rsi || 50)}</div>
-                    <div style="font-size:0.5rem">SL:${tfData.stopLoss?.toFixed(2)}</div>
-                </div>`;
-            } else {
-                mtfHtml += `<div class="mtf-card">${tf}<br>—</div>`;
-            }
-        }
-        mtfGrid.innerHTML = mtfHtml;
-        
-        // تحديث سجل الإشارات
-        if (mainAnalysis.signal !== "NEUTRAL") {
-            const last = historySignals[0];
-            if (!last || last.sig !== mainAnalysis.signal || (Date.now() - last.time) > 3600000) {
-                historySignals.unshift({
-                    time: Date.now(),
-                    asset: asset,
-                    sig: mainAnalysis.signal,
-                    price: currentPrice
-                });
-                if (historySignals.length > 10) historySignals.pop();
-                
-                const fullText = generateArabicRecommendation(asset, mainAnalysis.signal,
-                    mainAnalysis.entry?.toFixed(2), mainAnalysis.stopLoss?.toFixed(2),
-                    mainAnalysis.takeProfit?.toFixed(2), mainAnalysis.reason);
-                if (fullText !== lastSpokenText) {
-                    lastSpokenText = fullText;
-                    speakArabic(fullText);
-                }
-            }
-        }
-        
-        // عرض تاريخ الإشارات
-        let historyHtml = historySignals.map(h => `<div class="hist-item">
-            <span>${new Date(h.time).toLocaleTimeString()}</span>
-            <span>${h.asset}</span>
-            <span style="color:${h.sig.includes("BUY")?"#00ff9f":h.sig.includes("SELL")?"#ff2d55":"#c8ffe8"}">${h.sig}</span>
-            <span>$${h.price.toFixed(1)}</span>
-        </div>`).join("");
-        historyListDiv.innerHTML = historyHtml || "<div style='text-align:center'>—</div>";
-        lastUpdateSpan.innerText = new Date().toLocaleTimeString();
-    }
-
-    // معالجة الرسائل الواردة من WebSocket
-    function processWebSocketMessage(data) {
-        if (data.asset && data.timeframe && data.analysis) {
-            currentPrice = data.price || currentPrice;
-            if (!analysisData[data.asset]) analysisData[data.asset] = {};
-            analysisData[data.asset][data.timeframe] = data.analysis;
-            if (data.asset === currentAsset) {
-                updateUIForAsset(currentAsset);
-            }
-        }
-    }
-
-    // WebSocket الاتصال
-    function connectWebSocket() {
-        ws = new WebSocket(WS_URL);
-        ws.onopen = () => {
-            wsStatusDiv.innerHTML = "🟢 متصل";
-            wsStatusDiv.style.borderColor = "#00ff9f";
-            console.log("WebSocket متصل");
-        };
-        ws.onmessage = (event) => {
-            try {
-                const msg = JSON.parse(event.data);
-                if (msg.type === "welcome") {
-                    console.log(msg.message);
-                } else {
-                    processWebSocketMessage(msg);
-                }
-            } catch(e) { console.warn(e); }
-        };
-        ws.onerror = (err) => {
-            wsStatusDiv.innerHTML = "🔴 خطأ في الاتصال";
-            console.error(err);
-        };
-        ws.onclose = () => {
-            wsStatusDiv.innerHTML = "🟠 تم قطع الاتصال، إعادة محاولة...";
-            setTimeout(connectWebSocket, 3000);
-        };
-    }
-
-    // تبديل الأصول
-    function switchAsset(asset) {
-        currentAsset = asset;
-        document.querySelectorAll(".asset-btn").forEach(btn => btn.classList.remove("active"));
-        document.querySelector(`.asset-btn[data-asset="${asset}"]`).classList.add("active");
-        updateUIForAsset(currentAsset);
-    }
-
-    // ========== الوضع والسمات ==========
-    function initMode() {
-        let saved = localStorage.getItem("nexus_mode");
-        if (saved === "light") {
-            document.body.classList.remove("dark"); document.body.classList.add("light");
-            document.getElementById("modeToggle").innerHTML = "☀️ نهاري";
-        } else {
-            document.body.classList.remove("light"); document.body.classList.add("dark");
-            document.getElementById("modeToggle").innerHTML = "🌙 ليلي";
-        }
-    }
-    function toggleMode() {
-        if (document.body.classList.contains("dark")) {
-            document.body.classList.remove("dark"); document.body.classList.add("light");
-            localStorage.setItem("nexus_mode", "light");
-            document.getElementById("modeToggle").innerHTML = "☀️ نهاري";
-        } else {
-            document.body.classList.remove("light"); document.body.classList.add("dark");
-            localStorage.setItem("nexus_mode", "dark");
-            document.getElementById("modeToggle").innerHTML = "🌙 ليلي";
-        }
-    }
-    function toggleVoice() {
-        voiceEnabled = !voiceEnabled;
-        let btn = document.getElementById("voiceToggle");
-        if (voiceEnabled) { btn.innerHTML = "🔊 تكلم"; speakArabic("تفعيل الصوت"); }
-        else { btn.innerHTML = "🔇 كتم"; window.speechSynthesis.cancel(); }
-    }
-
-    // جلب سعر البيتكوين للتحديث بين الحين والآخر (اختياري)
-    async function fetchTicker(asset) {
-        try {
-            const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${asset}`);
-            const data = await res.json();
-            const change = parseFloat(data.priceChangePercent);
-            changeDiv.innerHTML = `<span class="${change>=0?"up":"dn"}">${change>=0?"+":""}${change.toFixed(2)}%</span>`;
-            currentPrice = parseFloat(data.lastPrice);
-            priceDiv.innerText = `$${currentPrice.toFixed(2)}`;
-        } catch(e) { console.warn(e); }
-    }
-
-    // ربط الأحداث
-    document.querySelectorAll(".asset-btn").forEach(btn => btn.addEventListener("click", () => switchAsset(btn.dataset.asset)));
-    document.getElementById("modeToggle").addEventListener("click", toggleMode);
-    document.getElementById("voiceToggle").addEventListener("click", toggleVoice);
-    initMode();
-    connectWebSocket();
-    setInterval(() => fetchTicker(currentAsset), 10000);
-    fetchTicker(currentAsset);
-</script>
+<script src="index.js"></script>
 </body>
 </html>
