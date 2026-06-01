@@ -1,5 +1,5 @@
-// NEXUS v3.5 — Frontend Controller
-const { analyze } = require('./engine/analyzer.js');
+// NEXUS v3.5 — Frontend Controller (ES Module version)
+import { analyze } from './engine/analyzer.js';
 
 let currentCandles = [];
 let currentPrice = 0;
@@ -112,7 +112,6 @@ async function runAnalysis() {
 
 function displayAnalysis(analysis) {
   const signalClass = analysis.signal.includes('BUY') ? 'BUY' : (analysis.signal.includes('SELL') ? 'SELL' : 'NEUTRAL');
-  const signalColor = signalClass === 'BUY' ? '#00e676' : (signalClass === 'SELL' ? '#ff3d5a' : '#ffaa00');
   const html = `
     <div class="card">
       <div class="card-label">السعر الحالي</div>
@@ -167,7 +166,7 @@ function startAudioLoop() {
     if (audioEnabled && lastAnalysis && lastAnalysis.signal !== 'NEUTRAL') {
       speakRecommendation(lastAnalysis);
     }
-  }, 30000); // كل 30 ثانية
+  }, 30000);
 }
 
 function toggleAudio() {
