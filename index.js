@@ -1,119 +1,194 @@
-// ============================================================
-//  NEXUS MARKET LAB v3 — نسخة محسّنة للخطة المجانية
-//  استهلاك أقل للذاكرة والمعالج، يعمل على Render Free Tier
-// ============================================================
+// NEXUS v3.5 — Frontend Controller
+const { analyze } = require('./engine/analyzer.js');
 
-const WebSocket = require("ws");
-const axios = require("axios");
-require("dotenv").config();
+let currentCandles = [];
+let currentPrice = 0;
+let lastAnalysis = null;
+let audioEnabled = false;
+let audioInterval = null;
+let symbol = 'BTCUSDT';
+let interval = '1h';
+let balance = 10000;
+let riskPercent = 2;
 
-const { analyze } = require("./engine/analyzer");
+// عناصر DOM
+const symbolSelect = document.getElementById('symbolSelect');
+const intervalSelect = document.getElementById('intervalSelect');
+const balanceInput = document.getElementById('balanceInput');
+const riskInput = document.getElementById('riskInput');
+const refreshBtn = document.getElementById('refreshBtn');
+const audioToggleBtn = document.getElementById('audioToggleBtn');
+const metricsPanel = document.getElementById('metricsPanel');
+const candleCanvas = document.getElementById('candleCanvas');
 
-// ========== إعدادات منخفضة الاستهلاك ==========
-const PORT = process.env.PORT || 3000;
-const ASSETS = ["BTCUSDT", "ETHUSDT"];  // قللنا الأصول (أزلنا SOL مؤقتاً)
-const TIMEFRAMES = ["15m", "1h"];       // قللنا الأطر الزمنية
-const UPDATE_INTERVAL = 120000;          // تحديث كل دقيقتين (بدلاً من دقيقة)
-const MAX_CANDLES = 100;                 // نحتفظ بآخر 100 شمعة فقط
+// تحديث المتغيرات من واجهة المستخدم
+function updateSettings() {
+  symbol = symbolSelect.value;
+  interval = intervalSelect.value;
+  balance = parseFloat(balanceInput.value);
+  riskPercent = parseFloat(riskInput.value);
+}
 
-const RISK_CONFIG = {
-    balance: 10000,
-    riskPercent: 2,
-    riskReward: 2
-};
+// جلب بيانات الشموع من Binance
+async function fetchCandles() {
+  updateSettings();
+  const limit = 100;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Binance error');
+    const candles = data.map(k => ({
+      time: k[0],
+      open: parseFloat(k[1]),
+      high: parseFloat(k[2]),
+      low: parseFloat(k[3]),
+      close: parseFloat(k[4]),
+      volume: parseFloat(k[5])
+    }));
+    currentCandles = candles;
+    currentPrice = candles[candles.length-1].close;
+    drawCandles();
+    runAnalysis();
+  } catch (err) {
+    console.error(err);
+    metricsPanel.innerHTML = `<div class="card">❌ فشل جلب البيانات: ${err.message}</div>`;
+  }
+}
 
-// تخزين الشموع
-let candlesStore = {};
-ASSETS.forEach(asset => {
-    candlesStore[asset] = {};
-    TIMEFRAMES.forEach(tf => {
-        candlesStore[asset][tf] = [];
-    });
-});
+// رسم الشموع (بسيط باستخدام Canvas)
+function drawCandles() {
+  if (!currentCandles.length) return;
+  const ctx = candleCanvas.getContext('2d');
+  const w = candleCanvas.clientWidth;
+  const h = candleCanvas.clientHeight;
+  candleCanvas.width = w;
+  candleCanvas.height = h;
+  const count = currentCandles.length;
+  const candleWidth = w / count * 0.8;
+  const spacing = w / count * 0.2;
+  const allPrices = currentCandles.flatMap(c => [c.high, c.low]);
+  const maxPrice = Math.max(...allPrices);
+  const minPrice = Math.min(...allPrices);
+  const priceRange = maxPrice - minPrice;
+  const yScale = (price) => h - ((price - minPrice) / priceRange) * h;
 
-// WebSocket server للعملاء
-const wss = new WebSocket.Server({ port: PORT });
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#030a12';
+  ctx.fillRect(0,0,w,h);
+  for (let i=0; i<count; i++) {
+    const c = currentCandles[i];
+    const x = i * (candleWidth + spacing);
+    const isGreen = c.close >= c.open;
+    ctx.fillStyle = isGreen ? '#00e676' : '#ff3d5a';
+    const openY = yScale(c.open);
+    const closeY = yScale(c.close);
+    const highY = yScale(c.high);
+    const lowY = yScale(c.low);
+    const bodyTop = Math.min(openY, closeY);
+    const bodyHeight = Math.abs(closeY - openY);
+    ctx.fillRect(x, bodyTop, candleWidth, bodyHeight || 1);
+    ctx.strokeStyle = '#9ab0c0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + candleWidth/2, highY);
+    ctx.lineTo(x + candleWidth/2, lowY);
+    ctx.stroke();
+  }
+}
 
-// دالة جلب الشموع مع إعادة محاولة تلقائية
-async function fetchCandles(symbol, interval, retries = 2) {
-    try {
-        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${MAX_CANDLES}`;
-        const response = await axios.get(url, { timeout: 10000 });
-        return response.data.map(k => ({
-            timestamp: k[0],
-            open: parseFloat(k[1]),
-            high: parseFloat(k[2]),
-            low: parseFloat(k[3]),
-            close: parseFloat(k[4]),
-            volume: parseFloat(k[5])
-        }));
-    } catch (err) {
-        if (retries > 0) {
-            console.log(`⚠️ إعادة محاولة جلب ${symbol} ${interval}...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            return fetchCandles(symbol, interval, retries - 1);
-        }
-        console.error(`❌ فشل جلب ${symbol} ${interval}:`, err.message);
-        return [];
+// تشغيل التحليل وعرض النتائج
+async function runAnalysis() {
+  if (!currentCandles.length) return;
+  const prices = currentCandles.map(c => c.close);
+  const riskConfig = { balance, riskPercent, riskReward: 2 };
+  const analysis = analyze(prices, currentPrice, symbol, currentCandles, riskConfig);
+  lastAnalysis = analysis;
+  displayAnalysis(analysis);
+  if (audioEnabled && analysis.signal !== 'NEUTRAL') {
+    speakRecommendation(analysis);
+  }
+}
+
+function displayAnalysis(analysis) {
+  const signalClass = analysis.signal.includes('BUY') ? 'BUY' : (analysis.signal.includes('SELL') ? 'SELL' : 'NEUTRAL');
+  const signalColor = signalClass === 'BUY' ? '#00e676' : (signalClass === 'SELL' ? '#ff3d5a' : '#ffaa00');
+  const html = `
+    <div class="card">
+      <div class="card-label">السعر الحالي</div>
+      <div class="card-value">$${analysis.price.toFixed(2)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">التوصية</div>
+      <div class="card-value signal ${signalClass}">${analysis.signal}</div>
+      <div class="reason">${analysis.reason.substring(0,100)}...</div>
+    </div>
+    <div class="card">
+      <div class="card-label">الاتجاه</div>
+      <div class="card-value">${analysis.trend}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">RSI (14)</div>
+      <div class="card-value">${analysis.rsi.toFixed(1)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">ATR</div>
+      <div class="card-value">$${analysis.atr.toFixed(2)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">وقف الخسارة</div>
+      <div class="card-value">${analysis.stopLoss ? '$'+analysis.stopLoss.toFixed(2) : '-'}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">جني الأرباح</div>
+      <div class="card-value">${analysis.takeProfit ? '$'+analysis.takeProfit.toFixed(2) : '-'}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">حجم العقد</div>
+      <div class="card-value">${analysis.positionSize}</div>
+    </div>
+  `;
+  metricsPanel.innerHTML = html;
+}
+
+function speakRecommendation(analysis) {
+  if (!audioEnabled) return;
+  const msg = `توصية ${analysis.signal} لزوج ${analysis.asset} السعر ${analysis.price} دولار. وقف الخسارة ${analysis.stopLoss?.toFixed(2)} وجني الأرباح ${analysis.takeProfit?.toFixed(2)}. السبب: ${analysis.reason.substring(0,150)}`;
+  const utterance = new SpeechSynthesisUtterance(msg);
+  utterance.lang = 'ar-SA';
+  utterance.rate = 0.9;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+}
+
+function startAudioLoop() {
+  if (audioInterval) clearInterval(audioInterval);
+  audioInterval = setInterval(() => {
+    if (audioEnabled && lastAnalysis && lastAnalysis.signal !== 'NEUTRAL') {
+      speakRecommendation(lastAnalysis);
     }
+  }, 30000); // كل 30 ثانية
 }
 
-// تحديث وتحليل وبث
-async function updateAndBroadcast() {
-    for (const asset of ASSETS) {
-        for (const tf of TIMEFRAMES) {
-            const candles = await fetchCandles(asset, tf);
-            if (candles.length >= 30) {  // نحتاج 30 شمعة كحد أدنى (بدلاً من 50)
-                candlesStore[asset][tf] = candles;
-                const closes = candles.map(c => c.close);
-                const currentPrice = candles[candles.length - 1].close;
-                const analysis = analyze(closes, currentPrice, asset, candles, RISK_CONFIG);
-                const enriched = { ...analysis, timeframe: tf, timestamp: new Date().toISOString() };
-                broadcast({
-                    asset,
-                    timeframe: tf,
-                    price: currentPrice,
-                    analysis: enriched
-                });
-            }
-        }
-    }
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  audioToggleBtn.textContent = audioEnabled ? "🔊 إيقاف الصوت" : "🔇 تشغيل الصوت";
+  if (audioEnabled && !audioInterval) startAudioLoop();
+  else if (!audioEnabled && audioInterval) {
+    clearInterval(audioInterval);
+    audioInterval = null;
+  }
+  if (audioEnabled && lastAnalysis && lastAnalysis.signal !== 'NEUTRAL') speakRecommendation(lastAnalysis);
 }
 
-// البث للعملاء المتصلين
-function broadcast(data) {
-    const message = JSON.stringify(data);
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
-}
+// أحداث
+refreshBtn.addEventListener('click', () => fetchCandles());
+audioToggleBtn.addEventListener('click', toggleAudio);
+symbolSelect.addEventListener('change', () => fetchCandles());
+intervalSelect.addEventListener('change', () => fetchCandles());
+balanceInput.addEventListener('change', () => { updateSettings(); if(currentCandles.length) runAnalysis(); });
+riskInput.addEventListener('change', () => { updateSettings(); if(currentCandles.length) runAnalysis(); });
 
-// جدولة التحديثات (لن تتراكم الطلبات إذا استغرق الجلب وقتاً أطول)
-let isUpdating = false;
-async function scheduledUpdate() {
-    if (isUpdating) return;
-    isUpdating = true;
-    try {
-        await updateAndBroadcast();
-    } catch (err) {
-        console.error("خطأ في التحديث المجدول:", err.message);
-    } finally {
-        isUpdating = false;
-    }
-}
-
-// بدء التحديث الدوري
-setInterval(scheduledUpdate, UPDATE_INTERVAL);
-scheduledUpdate(); // أول تحديث فور البدء
-
-// WebSocket connection
-wss.on("connection", (ws, req) => {
-    console.log(`🔗 عميل جديد متصل: ${req.socket.remoteAddress}`);
-    ws.send(JSON.stringify({ type: "welcome", message: "NEXUS MARKET LAB (Free Tier Optimized)" }));
-});
-
-console.log(`🚀 NEXUS MARKET LAB v3 (محسن) يعمل على المنفذ ${PORT}`);
-console.log(`📊 الأصول: ${ASSETS.join(", ")} | الأطر: ${TIMEFRAMES.join(", ")}`);
-console.log(`⏱️ تحديث كل ${UPDATE_INTERVAL/1000} ثانية`);
+// بدء التشغيل
+fetchCandles();
+startAudioLoop();
