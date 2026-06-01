@@ -1,5 +1,5 @@
 // engine/analyzer.js
-// NEXUS v3.5 — Market analysis engine
+// NEXUS v3.5 — Market analysis engine (ES Module)
 
 function calcEMA(prices, period) {
   if (prices.length < period) return null;
@@ -96,7 +96,7 @@ function computeTakeProfit(entryPrice, stopLoss, riskRewardRatio = 2, direction 
   else return entryPrice - (risk * riskRewardRatio);
 }
 
-function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
+export function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
   const accountBalance = riskConfig.balance || 10000;
   const riskPercent = riskConfig.riskPercent || 2;
   const riskRewardRatio = riskConfig.riskReward || 2;
@@ -196,6 +196,4 @@ function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
     positionSize: positionSize ? positionSize.toFixed(4) : "0",
     reason
   };
-}
-
-module.exports = { analyze };
+      }
