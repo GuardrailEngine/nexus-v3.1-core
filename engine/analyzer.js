@@ -1,5 +1,5 @@
 // engine/analyzer.js
-// NEXUS v3.5 — Market analysis engine (ES Module)
+// NEXUS v3.5 PRO — Market analysis engine (ES Module)
 
 function calcEMA(prices, period) {
   if (prices.length < period) return null;
@@ -196,4 +196,4 @@ export function analyze(prices, currentPrice, asset, candles = null, riskConfig 
     positionSize: positionSize ? positionSize.toFixed(4) : "0",
     reason
   };
-      }
+    }
