@@ -1,18 +1,11 @@
 {
-  "name": "nexus-market-lab",
-  "version": "3.0.0",
-  "description": "WebSocket server for real-time market analysis with advanced indicators and risk management",
-  "main": "server.js",
+  "name": "nexus-v3.5-market",
+  "version": "3.5.0",
+  "description": "NEXUS Market Analysis - Binance trading signals",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
-  "dependencies": {
-    "ws": "^8.16.0",
-    "axios": "^1.6.2",
-    "sqlite3": "^5.1.6",
-    "dotenv": "^16.3.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "dependencies": {},
+  "license": "MIT"
 }
