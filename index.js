@@ -122,12 +122,212 @@ function detectEMACrossover(prices, fast = 9, slow = 21) {
   return emaFast > emaSlow ? "EMA9 فوق EMA21" : "EMA9 تحت EMA21";
 }
 
-// ================== التحليل المتقدم ==================
+// ================== التحليل المتقدم - النسخة المحسنة (v4.2) ==================
 function advancedAnalysis(prices, currentPrice, asset, candles = null, riskConfig = {}) {
   const accountBalance = riskConfig.balance || 100;
   const riskPercent = riskConfig.riskPercent || 2;
   const riskRewardRatio = riskConfig.riskReward || 2;
 
+  // حساب المؤشرات الأساسية
+  const rsi = calcRSI(prices, 14);
+  const macd = calcMACD(prices);
+  const bb = calcBollingerBands(prices, 20, 2);
+  const stochRSI = calcStochasticRSI(prices, 14, 14);
+  const ema9 = calcEMA(prices, 9);
+  const ema21 = calcEMA(prices, 21);
+  const ema50 = calcEMA(prices, 50);
+  const { support, resistance } = findSupportResistance(prices, 20);
+  
+  // ATR من الشموع (إن وجد)
+  let atr = null;
+  let atrPercent = null;
+  if (candles && candles.length >= 14) {
+    atr = calcATR(candles, 14);
+    if (atr && currentPrice) atrPercent = (atr / currentPrice) * 100;
+  }
+  
+  // حجم التداول
+  let volumeRatio = null;
+  if (candles && candles.length >= 20) {
+    const volumes = candles.map(c => c.volume);
+    const volumeSMA = calcSMA(volumes, 20);
+    const lastVolume = volumes[volumes.length - 1];
+    if (volumeSMA && lastVolume) volumeRatio = lastVolume / volumeSMA;
+  }
+
+  // ------ نظام التسجيل المحسن (يأخذ في الاعتبار القرب من الدعم/المقاومة) ------
+  let score = 0;
+  let details = [];
+
+  // RSI
+  if (rsi !== null) {
+    if (rsi < 30) { score += 3; details.push("RSI شديد البيع"); }
+    else if (rsi < 40) { score += 1; details.push("RSI بيع خفيف"); }
+    else if (rsi > 70) { score -= 3; details.push("RSI شديد الشراء"); }
+    else if (rsi > 60) { score -= 1; details.push("RSI شراء خفيف"); }
+  }
+
+  // MACD
+  if (macd) {
+    if (macd.macd > 0 && macd.histogram > 0) { score += 2; details.push("MACD إيجابي وقوي"); }
+    else if (macd.macd > 0) { score += 1; details.push("MACD إيجابي"); }
+    else if (macd.macd < 0 && macd.histogram < 0) { score -= 2; details.push("MACD سلبي وقوي"); }
+    else if (macd.macd < 0) { score -= 1; details.push("MACD سلبي"); }
+  }
+
+  // Bollinger Bands
+  if (bb) {
+    if (currentPrice < bb.lower) { score += 2; details.push("السعر تحت Bollinger Lower"); }
+    else if (currentPrice > bb.upper) { score -= 2; details.push("السعر فوق Bollinger Upper"); }
+    else if (currentPrice < bb.lower + (bb.upper - bb.lower) * 0.2) { score += 1; details.push("قرب من Bollinger Lower"); }
+    else if (currentPrice > bb.upper - (bb.upper - bb.lower) * 0.2) { score -= 1; details.push("قرب من Bollinger Upper"); }
+  }
+
+  // EMAs
+  if (ema9 && ema21 && ema50) {
+    if (ema9 > ema21 && ema21 > ema50) { score += 2; details.push("ترتيب EMAs صاعد"); }
+    else if (ema9 < ema21 && ema21 < ema50) { score -= 2; details.push("ترتيب EMAs هابط"); }
+    else if (ema9 > ema21) { score += 1; details.push("EMA9 فوق EMA21"); }
+    else if (ema9 < ema21) { score -= 1; details.push("EMA9 تحت EMA21"); }
+  }
+
+  // Stochastic RSI
+  if (stochRSI !== null) {
+    if (stochRSI < 20) { score += 2; details.push("StochRSI ذروة بيع"); }
+    else if (stochRSI > 80) { score -= 2; details.push("StochRSI ذروة شراء"); }
+    else if (stochRSI < 30) { score += 1; details.push("StochRSI منخفض"); }
+    else if (stochRSI > 70) { score -= 1; details.push("StochRSI مرتفع"); }
+  }
+
+  // ------ فلترة الدعم والمقاومة (تمنع الإشارات الخاطئة) ------
+  let nearSupport = false;
+  let nearResistance = false;
+  if (support && currentPrice < support * 1.01) {
+    nearSupport = true;
+    score += 1;          // قرب الدعم يعطي إشارة إيجابية (ارتداد محتمل)
+    details.push("قرب مستوى دعم");
+  }
+  if (resistance && currentPrice > resistance * 0.99) {
+    nearResistance = true;
+    score -= 1;          // قرب المقاومة يعطي إشارة سلبية
+    details.push("قرب مستوى مقاومة");
+  }
+
+  // ------ تأثير الحجم ------
+  if (volumeRatio !== null) {
+    if (volumeRatio > 1.5) {
+      if (score > 0) score += 1; else if (score < 0) score -= 1;
+      details.push(`حجم مرتفع (${Math.round((volumeRatio-1)*100)}%)`);
+    } else if (volumeRatio < 0.6) {
+      if (score > 0) score -= 0.5; else if (score < 0) score += 0.5;
+      details.push("حجم منخفض");
+    }
+  }
+
+  // ------ تأثير التقلب (ATR%) ------
+  if (atrPercent !== null && atrPercent > 3) {
+    // إذا كان التقلب عالياً جداً > 3% نخفض الثقة
+    if (score > 0) score -= 0.5;
+    else if (score < 0) score += 0.5;
+    details.push(`تقلب عالي (ATR ${atrPercent.toFixed(1)}%)`);
+  }
+
+  // ------ تحديد الإشارة النهائية مع مراعاة القرب من الدعم/المقاومة ------
+  let signal = "NEUTRAL";
+  if (!nearResistance && !nearSupport) {
+    // الوضع العادي
+    if (score >= 4) signal = "STRONG_BUY";
+    else if (score >= 2) signal = "BUY";
+    else if (score <= -4) signal = "STRONG_SELL";
+    else if (score <= -2) signal = "SELL";
+  } else if (nearSupport && score >= 1) {
+    // قرب دعم مع ميل شرائي -> تقوية
+    if (score >= 3) signal = "STRONG_BUY";
+    else if (score >= 1) signal = "BUY";
+  } else if (nearResistance && score <= -1) {
+    // قرب مقاومة مع ميل بيعي -> تقوية
+    if (score <= -3) signal = "STRONG_SELL";
+    else if (score <= -1) signal = "SELL";
+  } else {
+    // إذا كان قرب دعم لكن الإشارة سلبية -> محايد (تجنب إشارة بيع قرب الدعم)
+    if (nearSupport && score < 0) signal = "NEUTRAL";
+    if (nearResistance && score > 0) signal = "NEUTRAL";
+  }
+
+  // اتجاه السوق
+  let trend = "NEUTRAL";
+  if (ema9 && ema21 && ema50) {
+    if (ema9 > ema21 && ema21 > ema50) trend = "UP";
+    else if (ema9 < ema21 && ema21 < ema50) trend = "DOWN";
+    else if (ema9 > ema21) trend = "WEAK_UP";
+    else trend = "WEAK_DOWN";
+  }
+
+  // ------ وقف الخسارة وجني الأرباح باستخدام ATR ------
+  let stopLoss = null, takeProfit = null, positionSize = null;
+  const direction = signal.includes("BUY") ? "long" : (signal.includes("SELL") ? "short" : "neutral");
+  if (direction !== "neutral" && atr && atr > 0) {
+    stopLoss = computeStopLoss(currentPrice, atr, direction, 2);
+    takeProfit = computeTakeProfit(currentPrice, stopLoss, riskRewardRatio, direction);
+    positionSize = computePositionSize(currentPrice, stopLoss, accountBalance, riskPercent);
+  } else if (direction !== "neutral") {
+    // إذا لم يتوفر ATR نستخدم نسب مئوية ثابتة
+    const stopPercent = direction === "long" ? 0.98 : 1.02;
+    const takePercent = direction === "long" ? 1.04 : 0.96;
+    stopLoss = currentPrice * stopPercent;
+    takeProfit = currentPrice * takePercent;
+    positionSize = computePositionSize(currentPrice, stopLoss, accountBalance, riskPercent);
+  }
+
+  // ------ سبب التوصية المحسن ------
+  let reason = "";
+  if (signal.includes("BUY")) {
+    reason = `مؤشرات إيجابية: RSI ${rsi?.toFixed(1)} (منطقة بيعية), `;
+    if (stochRSI !== null) reason += `StochRSI ${stochRSI.toFixed(0)}, `;
+    reason += `وتقاطع EMAs صاعد.`;
+    if (nearSupport) reason += ` السعر قرب دعم (${support?.toFixed(2)}).`;
+    if (volumeRatio !== null && volumeRatio > 1.2) reason += ` حجم تداول مرتفع.`;
+  } else if (signal.includes("SELL")) {
+    reason = `مؤشرات سلبية: RSI ${rsi?.toFixed(1)} (منطقة شرائية), `;
+    if (stochRSI !== null) reason += `StochRSI ${stochRSI.toFixed(0)}, `;
+    reason += `وتقاطع EMAs هابط.`;
+    if (nearResistance) reason += ` السعر قرب مقاومة (${resistance?.toFixed(2)}).`;
+    if (volumeRatio !== null && volumeRatio > 1.2) reason += ` حجم تداول مرتفع.`;
+  } else {
+    reason = `السوق في حالة تجميع. RSI ${rsi?.toFixed(1)}، انتظر كسر واضح`;
+    if (support && resistance) reason += ` بين الدعم ${support?.toFixed(2)} والمقاومة ${resistance?.toFixed(2)}.`;
+  }
+  if (atrPercent !== null && atrPercent > 2) reason += ` تقلب عالي (${atrPercent.toFixed(1)}%)، إدارة المخاطرة ضرورية.`;
+
+  const emaCross = detectEMACrossover(prices, 9, 21);
+
+  return {
+    asset,
+    price: currentPrice,
+    signal,
+    trend,
+    rsi: rsi !== null ? rsi : 50,
+    atr: atr !== null ? atr : 0,
+    macd: macd ? macd.macd : 0,
+    macdSignal: macd ? macd.signal : 0,
+    macdHistogram: macd ? macd.histogram : 0,
+    bbUpper: bb ? bb.upper : null,
+    bbLower: bb ? bb.lower : null,
+    stochRSI,
+    support,
+    resistance,
+    score,
+    stopLoss,
+    takeProfit,
+    positionSize: positionSize ? positionSize.toFixed(4) : "0",
+    reason,
+    emaCross,
+    ema9,
+    ema21,
+    volumeRatio,
+    atrPercent
+  };
+}
   // حساب المؤشرات
   const rsi = calcRSI(prices, 14);
   const macd = calcMACD(prices);
