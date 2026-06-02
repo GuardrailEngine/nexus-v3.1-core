@@ -1,11 +1,14 @@
 {
-  "name": "nexus-v3.5-market",
-  "version": "3.5.0",
-  "description": "NEXUS Market Analysis - Binance trading signals",
-  "main": "index.js",
+  "name": "nexus-pro",
+  "version": "4.0.0",
+  "description": "Binance market analysis proxy",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
-  "dependencies": {},
-  "license": "MIT"
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  }
 }
