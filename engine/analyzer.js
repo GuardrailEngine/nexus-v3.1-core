@@ -1,7 +1,7 @@
 // engine/analyzer.js
-// NEXUS v3.5 PRO — Market analysis engine (ES Module)
+// NEXUS PRO v4.0 — Market analysis engine (ES Module)
 
-function calcEMA(prices, period) {
+export function calcEMA(prices, period) {
   if (prices.length < period) return null;
   const k = 2 / (period + 1);
   let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
@@ -11,7 +11,7 @@ function calcEMA(prices, period) {
   return ema;
 }
 
-function calcRSI(prices, period = 14) {
+export function calcRSI(prices, period = 14) {
   if (prices.length < period + 1) return null;
   let gains = 0, losses = 0;
   for (let i = prices.length - period; i < prices.length; i++) {
@@ -26,7 +26,7 @@ function calcRSI(prices, period = 14) {
   return 100 - 100 / (1 + rs);
 }
 
-function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+export function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
   if (prices.length < slowPeriod + signalPeriod) return null;
   const emaFast = calcEMA(prices, fastPeriod);
   const emaSlow = calcEMA(prices, slowPeriod);
@@ -43,7 +43,7 @@ function calcMACD(prices, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
   return { macd: macdLine, signal: signalLine, histogram };
 }
 
-function calcATR(candles, period = 14) {
+export function calcATR(candles, period = 14) {
   if (!candles || candles.length < period + 1) return null;
   const tr = [];
   for (let i = 1; i < candles.length; i++) {
@@ -63,7 +63,7 @@ function calcATR(candles, period = 14) {
   return atr;
 }
 
-function calcBollingerBands(prices, period = 20, stdDev = 2) {
+export function calcBollingerBands(prices, period = 20, stdDev = 2) {
   if (prices.length < period) return null;
   const slice = prices.slice(-period);
   const middle = slice.reduce((a, b) => a + b, 0) / period;
@@ -72,28 +72,40 @@ function calcBollingerBands(prices, period = 20, stdDev = 2) {
   return { upper: middle + stdDev * std, middle, lower: middle - stdDev * std };
 }
 
-function findSupportResistance(prices, lookback = 20) {
+export function findSupportResistance(prices, lookback = 20) {
   if (prices.length < lookback) return { support: null, resistance: null };
   const slice = prices.slice(-lookback);
   return { support: Math.min(...slice), resistance: Math.max(...slice) };
 }
 
-function computePositionSize(entryPrice, stopLossPrice, accountBalance = 10000, riskPercent = 2) {
+export function computePositionSize(entryPrice, stopLossPrice, accountBalance = 10000, riskPercent = 2) {
   const riskAmount = accountBalance * (riskPercent / 100);
   const riskPerUnit = Math.abs(entryPrice - stopLossPrice);
   if (riskPerUnit === 0) return 0;
   return riskAmount / riskPerUnit;
 }
 
-function computeStopLoss(currentPrice, atr, direction = "long", multiplier = 2) {
+export function computeStopLoss(currentPrice, atr, direction = "long", multiplier = 2) {
   if (direction === "long") return currentPrice - (multiplier * atr);
   else return currentPrice + (multiplier * atr);
 }
 
-function computeTakeProfit(entryPrice, stopLoss, riskRewardRatio = 2, direction = "long") {
+export function computeTakeProfit(entryPrice, stopLoss, riskRewardRatio = 2, direction = "long") {
   const risk = Math.abs(entryPrice - stopLoss);
   if (direction === "long") return entryPrice + (risk * riskRewardRatio);
   else return entryPrice - (risk * riskRewardRatio);
+}
+
+export function detectEMACrossover(prices, fast = 9, slow = 21) {
+  const emaFast = calcEMA(prices, fast);
+  const emaSlow = calcEMA(prices, slow);
+  if (emaFast === null || emaSlow === null) return null;
+  const prevFast = calcEMA(prices.slice(0, -1), fast);
+  const prevSlow = calcEMA(prices.slice(0, -1), slow);
+  if (prevFast === null || prevSlow === null) return null;
+  if (emaFast > emaSlow && prevFast <= prevSlow) return "BUY_SIGNAL (Golden Cross)";
+  if (emaFast < emaSlow && prevFast >= prevSlow) return "SELL_SIGNAL (Death Cross)";
+  return emaFast > emaSlow ? "ABOVE" : "BELOW";
 }
 
 export function analyze(prices, currentPrice, asset, candles = null, riskConfig = {}) {
@@ -108,6 +120,7 @@ export function analyze(prices, currentPrice, asset, candles = null, riskConfig 
   const macdObj = calcMACD(prices);
   const bb = calcBollingerBands(prices, 20, 2);
   const { support, resistance } = findSupportResistance(prices, 20);
+  const emaCross = detectEMACrossover(prices, 9, 21);
 
   let atr = null;
   if (candles && candles.length >= 10) {
@@ -194,6 +207,7 @@ export function analyze(prices, currentPrice, asset, candles = null, riskConfig 
     stopLoss,
     takeProfit,
     positionSize: positionSize ? positionSize.toFixed(4) : "0",
-    reason
+    reason,
+    emaCross
   };
-    }
+                        }
